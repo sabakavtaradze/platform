@@ -1,0 +1,62 @@
+<div class="body-main-container">
+
+    <div class="welcome-main-container">
+        <div class="logo-main-container">
+            <img class="logo" src="../../../../assets/images/logo.png" alt="">
+        </div>
+
+        <div class="welcome-text">
+            <h3 *ngIf="email && !showManualEmailInput">Verification for: {{ email }}</h3>
+            <h3 *ngIf="showManualEmailInput">Please enter the code and your email.</h3>
+        </div>
+    </div>
+    
+    <div class="signup-main-container">
+        <div class="signup-title">
+            Verify Your Account
+        </div>
+
+        <div class="signup-or-container">
+            <p><span>or</span></p>
+        </div>
+
+        <mat-form-field class="form-field" *ngIf="showManualEmailInput">
+            <mat-label>Your Email (Required)</mat-label>
+            <input matInput [(ngModel)]="manualEmail" type="email" required>
+        </mat-form-field>
+        
+        <mat-form-field class="form-field">
+            <mat-label>Email verification Code</mat-label>
+            <input matInput [(ngModel)]="code" required>
+        </mat-form-field>
+
+        <div class="signup-account-container">
+            <button (click)="handleVerification()" class="signup-account">
+                Verify
+            </button>
+
+            <button (click)="resendCode()" 
+                    class="signup-account resend-button" 
+                    style="margin-top: 10px;"
+                    *ngIf="UserID || email">
+                Resend Code
+            </button>
+            
+            <div class="signup-account-rules-container">
+                <div class="signup-account-rules">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="login-main-container">
+        <a [routerLink]="['/auth/login']" class="signin">
+            Forgot Password?
+        </a>
+        <div class="login-title">
+            Already have account? <a [routerLink]="['/auth/login']">
+                Log In
+            </a>
+        </div>
+    </div>
+</div>

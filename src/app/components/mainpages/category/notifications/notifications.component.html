@@ -1,0 +1,10 @@
+<div class="scrollable-content" style="height: 100vh; overflow-y: auto; padding-top: 5rem;" (scroll)="onScroll($event.target)">
+<div class="container">
+
+<div class="followers-list" *ngFor="let follower of followers">
+    <app-notificationslist [follower]="follower"></app-notificationslist>
+
+</div>
+</div>
+
+</div>

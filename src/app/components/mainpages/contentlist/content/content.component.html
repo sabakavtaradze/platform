@@ -1,0 +1,130 @@
+<div class="content-main-container" *ngIf="content">
+    <div class="content-detail-main-container">
+        <div class="content-info-main-container">
+            <div [routerLink]="['/profile/'+postOwner]" class="user-container">
+
+
+                <div class="content-info-detail-picture-container">
+                    <img (error)="handleImageError()"
+                        *ngIf="profilePicture !==undefined"
+                        class="content-info-detail-picture"
+                        [src]="profilePicture"
+                        alt="">
+                </div>
+                <div class="content-info-detail">
+                    <div class="content-info-name">{{content.postOwner.userFirstName}}  {{content.postOwner.userLastName}}</div>
+                    <div class="content-info-date">{{content.createdAt | messageTime}} </div>
+                </div>
+            </div>
+            <div class="content-info-follow">
+                <!-- <button class="user-follow">
+                    Follow
+                </button> -->
+            </div>
+        </div>
+        <div class="content-more-main-container">
+            <div *ngIf="postOwner" class="chatroom-menu-container">
+                <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                    <button (click)="editPost()" mat-menu-item>
+                        <i style="padding-right: 0.5rem;" class="bi bi-envelope-x"></i>
+                        <span>Edit post</span>
+                    </button>
+                    <button (click)="deletePost()" mat-menu-item>
+                        <i style="padding-right: 0.5rem;" class="bi bi-trash3"></i>
+                        <span>Delete Post</span>
+                    </button>
+                </mat-menu>
+            </div>
+            <!-- <button class="more"><mat-icon>more_horiz</mat-icon></button> -->
+        </div>
+    </div>
+    <div class="content-description-main-container">
+        <div class="content-description" [class.hideText]="textHidden">
+           
+            {{content.postText}}
+        </div>
+        <div *ngIf="content.postText.length > 128" class="seeMore-main-container">
+            <div class="seeMore-container" *ngIf="textHidden" (click)="textSeemore()">
+                <div class="seeMore">See More</div>
+            </div>
+            <div class="seeMore-container" *ngIf="!textHidden" (click)="textSeemore()">
+                <div class="seeMore">See Less</div>
+            </div>
+        </div>
+
+    </div>
+    <div class="content-container container-fluid">
+        <div class="image-main-container row" *ngIf="content.postImages.length > 0">
+            <div class="image-container " [class.col-4]="content.postImages.length > 2" [class.col-6]="content.postImages.length === 2"
+                *ngFor="let image of content.postImages">
+                <div class="row">
+                    <!-- (click)="openImageDialog(image)" -->
+                    <img class="image col-12" (click)="openImageDialog(image)" [src]="image" alt="">
+                </div>
+
+            </div>
+        </div>
+        <!-- <video class="video" controls>
+             <source src="../../../../../assets/videos/video.mp4" type="video/mp4"> -->
+        <!-- </video> -->
+        <!-- <iframe width="100%" height="auto" [src]="safeurl" title="YouTube video player"
+         frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe> -->
+        <!-- <div class="contend-reviews">
+            <mat-icon>thumb_up</mat-icon>
+            <div class="content-reviews-numbers">
+                550
+            </div>
+        </div> -->
+        <div class="content-options-container">
+            <div class="content-options">
+
+                <div class="content-options-list-container">
+                    <!-- <button class="content-options-list content-option-like">
+                        <i class="bi bi-hand-thumbs-up"></i>
+                        <div class="content-options-list-numbers">{{content.like}}</div>
+                    </button> -->
+                    <!-- <button class="content-options-list content-option-dislike">
+                        <i class="bi bi-hand-thumbs-down"></i>
+                        <div class="content-options-list-numbers">{{content.dislike}}</div>
+                    </button> -->
+                    <button class="content-options-list ">
+                        <button (click)="likePost()" [disabled]="accessLike" *ngIf="!alreadyLiked"> <i
+                                class="bi bi-balloon-heart"></i> </button>
+                        <button (click)="removeLikePost()" [disabled]="accessLike" *ngIf="alreadyLiked"> <i
+                                class="liked bi bi-balloon-heart-fill"></i> </button>
+                        <div *ngIf="contentLikes > 0" class="content-options-list-numbers">{{contentLikes}}</div>
+                    </button>
+
+                </div>
+
+                <div class="content-options-list-container">
+                    <button (click)="openComments()" class="content-options-list">
+                        <i class="bi bi-chat-text"></i>
+                        <div class="content-options-list-numbers">{{content.comment}}</div>
+
+                    </button>
+                </div>
+
+                <div class="content-options-list-container">
+                    <button class="content-options-list">
+                        <mat-icon>share</mat-icon>
+                        <div class="content-options-list-numbers">{{content.share}}</div>
+
+                    </button>
+                </div>
+                <!-- <div class="content-options-list-container">
+                    <button class="content-options-list">
+                        <mat-icon>edit</mat-icon>
+                        <div class="content-options-list-numbers">{{content.edit}}</div>
+                    </button>
+                </div> -->
+            </div>
+        </div>
+    </div>
+    <div *ngIf="loading" class="loading-main-container">
+        <mat-spinner></mat-spinner>
+    </div>
+</div>

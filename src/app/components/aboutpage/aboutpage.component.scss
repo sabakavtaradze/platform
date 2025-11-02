@@ -1,0 +1,16 @@
+.about-main-container{
+    border-top: 1px solid gray;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    .about-container{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        a{
+            color: gray;
+            font-size: 0.9rem;
+        }
+    }
+}

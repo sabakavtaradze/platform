@@ -1,0 +1,57 @@
+<div class="container name-header">
+
+    <div *ngIf="currentUser" class="userName">{{currentUser.family_name}}</div>
+</div>
+
+<!-- <input name="textInput" class="text-input" type="text">
+<label igxLabel for="textInput">Full Name</label> -->
+<div class="create-content-main-container">
+
+    <form [formGroup]="contentForm" class="createcontent-form">
+        <mat-form-field class="text-area">
+            <mat-label>Write text</mat-label>
+            <textarea matInput cdkTextareaAutosize #autosize="cdkTextareaAutosize"
+                formControlName="text"
+                cdkAutosizeMaxRows="5"
+                 cdkAutosizeMinRows="1" ></textarea>
+        </mat-form-field>
+    </form>
+    <div *ngIf="imageprews && imageprews.length > 0" class="selectedImage container">
+        <div class="selectedimg row">
+            <div [class.col-4]="imageprews.length > 2" [class.col-6]="imageprews.length === 2"
+                [class.col-12]="imageprews.length === 1" *ngFor="let image of imageprews" class="img-container">
+                <img  class="col-12"  [src]="image">
+                <div (click)="removeImg(image)" class="close-container">
+                    <i class="bi bi-x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="options-main-container">
+    <div class="options-container">
+        <div class="image-main-container">
+            <button class="image-container" (click)="fileInput.click()">
+                <div class="image">
+                    <input type="file" multiple #fileInput style="display: none;" (change)="onFileSelected($event)" />
+                    <!-- <button > -->
+
+                    <i class="bi bi-images"></i>
+                    <!-- </button> -->
+                </div>
+                <div class="image-text">add Photo</div>
+            </button>
+        </div>
+    </div>
+    <div class="actions-main-container">
+        <div class="actions">
+
+            <div class="mat-button-container"><button class="matt-button" mat-raised-button color="accent"
+                    (click)="onNoClick()">cancel</button></div>
+            <!-- [mat-dialog-close]="currentUser" -->
+            <div class="mat-button-container"><button class="done matt-button" mat-raised-button (click)="Done()"
+                    [disabled]="isDisabled">Post</button></div>
+        </div>
+    </div>
+</div>

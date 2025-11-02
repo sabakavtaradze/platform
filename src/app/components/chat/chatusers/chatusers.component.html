@@ -1,0 +1,9 @@
+<app-chatheader [ChatName]="ChatName" [headerBackName]="headerBackName"></app-chatheader>
+<div class="container">
+    <!-- <button [routerLink]="['/chat']">chatroom</button> -->
+    <!-- (click)="createChat(chat)" -->
+    <div (click)="createChat(chat)"  class="chat-list-container" *ngFor="let chat of chats">
+        <app-chatuserslist [item]="chat"></app-chatuserslist>
+    </div>
+
+</div>

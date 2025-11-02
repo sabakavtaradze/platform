@@ -1,0 +1,68 @@
+<div class="body-main-container">
+
+    <div class="welcome-main-container">
+        <div class="logo-main-container">
+            <img class="logo" src="../../../../assets/images/logo.png" alt="">
+        </div>
+
+        <div class="welcome-text">
+            </div>
+    </div>
+
+    <div class="signup-main-container">
+        <div class="signup-title">
+            Sign in to Wbless
+        </div>
+        
+        <div class="signup-list-container">
+            </div>
+
+        <div class="signup-or-container">
+            <p><span>or</span></p>
+        </div>
+        
+        <form class="login-form-container" [formGroup]="loginForm" (ngSubmit)="signIn(loginForm.value.email, loginForm.value.password)">
+
+            <mat-form-field class="form-field">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email">
+            </mat-form-field>
+
+            <mat-form-field class="form-field">
+                <mat-label>Password</mat-label>
+                <input type="password" matInput formControlName="password">
+            </mat-form-field>
+
+            <div *ngIf="authFalse" class="auth-incorrect">Email is incorrect</div>
+            <div *ngIf="usernotfound" class="auth-incorrect">Password is incorrect</div>
+
+            <button type="submit" [disabled]="loading || loginForm.invalid" class="signup-account">
+                Next
+            </button>
+        </form>
+
+        <div class="signup-account-container">
+            <div class="signup-account-rules-container">
+                <div class="signup-account-rules">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-main-container">
+        
+        <a [routerLink]="['/auth/forgot-password']" class="signin">
+            Forgot Password?
+        </a>
+        
+        <div class="login-title">
+            Don't Have an account? <a [routerLink]="['/auth/register']">
+                Sign Up
+            </a>
+        </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-main-container">
+        <mat-spinner></mat-spinner>
+    </div>
+</div>

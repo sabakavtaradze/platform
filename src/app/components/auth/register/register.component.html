@@ -1,0 +1,102 @@
+<div class="body-main-container">
+
+    <div class="welcome-main-container">
+        <div class="logo-main-container">
+            <img class="logo" src="../../../../assets/images/logo.png" alt="">
+        </div>
+
+        <div class="welcome-text">
+
+        </div>
+    </div>
+    <div class="signup-main-container">
+        <div class="signup-title">
+            Sign in to Wbless
+        </div>
+        <div class="signup-list-container">
+            <!-- <button class="signup-list">
+                <img class="signup-list-logos" src="../../../../assets/images/google.png" alt="">
+                <div class="signup-list-title"> Sign In With Google</div>
+            </button>
+            <button class="signup-list">
+                <img class="signup-list-logos" src="../../../../assets/images/apple.png" alt="">
+                <div class="signup-list-title"> Sign In With Apple</div>
+            </button> -->
+        </div>
+        <div class="signup-or-container">
+            <p><span>or</span></p>
+        </div>
+        <form #formid [formGroup]="form" (ngSubmit)="signup(form)">
+            <div class="register-input-container">
+
+                <mat-form-field class="form-field">
+                    <mat-label>First name</mat-label>
+                    <input matInput formControlName="firstName">
+                </mat-form-field>
+
+                <mat-form-field class="form-field">
+                    <mat-label>Last name</mat-label>
+                    <input matInput formControlName="lastName">
+                </mat-form-field>
+
+                <mat-form-field class="form-field">
+                    <mat-label>Choose a date</mat-label>
+                    <input matInput [matDatepicker]="picker"  [min]="minDate" [max]="maxDate" formControlName="date">
+                    <mat-hint>MM/DD/YYYY</mat-hint>
+                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field class="form-field">
+                    <mat-label>Email</mat-label>
+                    <input matInput formControlName="email">
+                </mat-form-field>
+                <div class="error"
+                    *ngIf="errorEmail">An account with the given email already exists.</div>
+                <mat-form-field class="form-field">
+                    <mat-label>Password</mat-label>
+                    <input matInput type="password" formControlName="password"required pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[\#\?\!\@\$\%\^\&\*\-]).{8,}$">
+                </mat-form-field>
+                <div class="error"
+                    *ngIf="form.get('password')!.hasError('pattern') && form.get('password')!.touched">Password
+                    must be 6 length contain uppercase and symbol.</div>
+                <mat-form-field class="form-field">
+                    <mat-label>Repeat password</mat-label>
+                    <input matInput type="password" formControlName="repeatPassword">
+                </mat-form-field>
+            </div>
+            <div class="signup-account-container">
+                <div class="privacy-container" >
+                    <mat-checkbox class="example-margin" formControlName="acceptTerms"> </mat-checkbox> 
+                    Accept&nbsp;
+                    <a [routerLink]="['/about/privacy']" > Privacy Policy  &nbsp;</a> 
+                    and
+                    <a [routerLink]="['/about/termsandconditions']" >&nbsp;Terms & Conditions</a> 
+                </div>
+                <div style="color: red; font-size: 0.6rem; padding-left:0.7rem" class="error"
+                    *ngIf="form.get('acceptTerms')!.hasError('required') && form.get('acceptTerms')!.touched">You must accept Terms & conditions for registering </div>
+                <button type="submit"  class="signup-account">
+                    Next
+                </button>
+                <div class="signup-account-rules-container">
+                    <div class="signup-account-rules">
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </div>
+    <div class="login-main-container">
+
+        <a  class="signin">
+            Forgot Password?
+        </a>
+        <div class="login-title">
+            Already have account? <a [routerLink]="['/auth/login']">
+                Log In
+            </a>
+        </div>
+    </div>
+    <div *ngIf="loading" class="loading-main-container">
+        <mat-spinner></mat-spinner>
+    </div>
+</div>

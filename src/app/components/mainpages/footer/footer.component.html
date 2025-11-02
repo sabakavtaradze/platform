@@ -1,0 +1,51 @@
+<div class="footer-main-container">
+    <!-- <div class="add-content-main-container">
+        <div class="add-content-container">
+            <div class="add-content-list-container">Post</div>
+            <div class="add-content-list-container">Photo</div>
+
+        </div>
+    </div> -->
+    <!-- <div class="footer-container"> -->
+    <!-- <div class="logo-container">
+            <img src="../../../../assets/images/logo.png" alt="">
+        </div> -->
+    <!-- <div class="searchbar-main-container">
+            <mat-form-field class="example-full-width">
+                <mat-label>SEARCH</mat-label>
+                <input matInput>
+            </mat-form-field>
+        </div> -->
+    <!-- <div class="messages-main-container">
+            <i [routerLink]="['/chat']" class="bi bi-chat-text-fill"></i>
+        </div> -->
+
+    <!-- </div> -->
+    <div class="footer-library-main-container">
+        <div class="footer-library-container">
+            <a class="footer-library-list" (click)="showHeader()" [routerLink]="['']" ><i class="bi" [class.bi-house]="activePage !== 'feed'" [class.bi-house-fill]="activePage === 'feed'" [class.pactive]="activePage === 'feed'"></i></a>
+            <a class="footer-library-list" (click)="showHeader()" [routerLink]="['/library']"><i class="bi " [class.bi-search]="activePage !== 'library'" [class.bi-search-heart]="activePage === 'library'" [class.pactive]="activePage === 'library'"></i></a>
+            <!-- <a class="footer-library-list" [routerLink]="['/videos']"><i class="bi bi-film"></i></a> -->
+            <a class="footer-library-list" (click)="createPost()"><mat-icon>add_circle_outline</mat-icon></a>
+
+            <!-- <i class="bi bi-plus-circle"></i> -->
+            <!-- <a class="footer-library-list" [routerLink]="['/vote']"><i class="bi bi-trophy"></i></a> -->
+
+            <a class="footer-library-list notifications-container" (click)="notificationsseen()" [routerLink]="['/notifications']">
+                <i class="bi " [class.bi-bell]="activePage !== 'notifications'" [class.bi-bell-fill]="activePage === 'notifications'" [class.pactive]="activePage === 'notifications'"></i>
+                <div *ngIf="notoficationAlert" class="exclamation-container">
+                    <i  class="bi bi-exclamation-lg"></i>
+
+                </div>
+            </a>
+            <div class="menu-main-container">
+                <!-- <app-menu></app-menu> -->
+                <a *ngIf="currentUser" class="footer-library-list profileLink" (click)="showHeader()" [routerLink]="['/profile/' + this.currentUser  ]" [class.profileActive]="activePage === 'profile'">
+                <img (error)="handleImageError()"  *ngIf="currentUser !== undefined && profilePicture !==undefined && profilePicture !== null && profilePicture.length > 0" class="content-info-detail-picture" [src]="profilePicture" alt="">
+                    <mat-icon>menu</mat-icon></a>
+
+            </div>
+
+        </div>
+    </div>
+</div>

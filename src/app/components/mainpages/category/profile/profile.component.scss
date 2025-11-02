@@ -1,0 +1,266 @@
+.main-container {
+    background-color: white;
+    position: relative;
+
+    .profile-header-main-container {
+        position: absolute;
+        top: 0;
+        z-index: 1;
+        width: 100%;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        padding-top: 1rem;
+
+        .profile-header-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+
+            .profile-header-list {
+                button:active {
+                    background-color: #cdcdcd;
+                }
+
+                button {
+                    background-color: #f8ecee;
+                    border: none;
+                    padding: 1rem;
+                    border-radius: 30rem;
+                    width: 3rem;
+                    height: 3rem;
+                    display: flex;
+                    align-items: center;
+                    color: #25396f;
+                    place-content: center;
+
+                    i {
+                        font-size: 1.2rem;
+                    }
+                }
+            }
+        }
+    }
+
+    .profile-main-contianer {
+        position: relative;
+
+        .cover-main-container {
+            position: relative;
+            min-height: 10rem;
+
+            .cover {
+                width: 100%;
+                max-height: 15rem;
+                object-fit: cover;
+            }
+
+            .edit-option {
+                position: absolute;
+                bottom: -1rem;
+                right: 1rem;
+
+                button {
+                    background-color: white;
+                    border: 0;
+                    border-radius: 20rem;
+
+                    i {
+                        font-size: 1.3rem;
+                        color: #25396f;
+                        // #25396f;
+                    }
+                }
+            }
+        }
+
+        .profile-picture-main-container {
+            display: flex;
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+            .profile-picture-container {
+                border-radius: 30rem;
+                border: 0.2rem dashed gray;
+                padding: 0.1rem;
+                position: relative;
+
+                .profile-picture {
+                    width: 7rem;
+                    // background-image: url("https://i.pinimg.com/564x/5c/5b/d2/5c5bd2e3bfe425bb6afea5737f4d9c65.jpg");
+                    height: 7rem;
+                    background-position: center;
+                    background-size: cover;
+                    background-repeat: no-repeat;
+                    border-radius: 30rem;
+                }
+
+                .edit-option {
+                    position: absolute;
+                    bottom: 0;
+                    right: 0;
+
+                    button {
+                        border: 0;
+                        background-color: transparent;
+
+                        i {
+                            font-size: 1.3rem;
+                            color: orange;
+                            // #25396f;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .profile-body-main-container {
+        .stats-main-container {
+            display: flex;
+            justify-content: center;
+
+            .stats-container {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                padding-top: 0.4rem;
+                width: 80%;
+
+                .followers-container {
+                    text-align: center;
+
+                    .followers-number {
+                        font-weight: bold;
+                        font-size: 1.2rem;
+                        margin-bottom: -0.4rem;
+                    }
+
+                    .followers-text {
+                        font-size: 0.9rem;
+                        color: dimgray
+                    }
+                }
+
+                .following-container {
+                    text-align: center;
+
+                    .following-number {
+                        font-weight: bold;
+                        font-size: 1.2rem;
+                        margin-bottom: -0.4rem;
+                    }
+
+                    .following-text {
+                        font-size: 0.9rem;
+                        color: dimgray
+                    }
+                }
+            }
+        }
+
+        .profile-info-main-container {
+            padding-top: 1rem;
+
+            .profile-name-main-container {
+                text-align: center;
+
+                .profile-name-container {
+                    font-weight: bold;
+                    font-size: 1.1rem;
+                }
+            }
+
+            .profile-status-main-container {
+                .profile-status-container {
+                    display: flex;
+                    justify-content: center;
+
+                    .profile-status {
+                        width: 60%;
+                        display: flex;
+                        text-align-last: center;
+                        color: gray;
+                        place-content: center;
+                    }
+                }
+            }
+        }
+
+        .directives-main-container {
+            padding-top: 1rem;
+
+            .directives-container {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+
+                .directives-list {
+                    button {
+                        border: 0;
+                        background-color: transparent;
+                        border-radius: 2rem;
+                        font-size: 1.1rem;
+                        padding: 0.5rem;
+                        width: 8rem;
+                        // padding-left: 1.3rem;
+                        // padding-right: 1.3rem;
+                    }
+                    .follow:active{
+                        background-color: #8459cb;
+                    }
+                    .follow {
+                        background-color: #a974ff;
+                        color: white;
+                    }
+                    .following:active{
+                        background-color: rgb(149 122 187 / 52%);
+                    }
+                    .following {
+                        background-color: rgb(213 182 255 / 52%);
+                        border: 0.1rem solid #b6cdff;
+                        color: #25396f;
+                    }
+
+                    .message {
+                        border: 0.1rem solid #cfcfcf;
+                        color: #25396f;
+
+
+                    }
+                }
+
+            }
+        }
+
+        .content-main-container {
+            padding-bottom: 5rem;
+            padding-top: 1rem;
+            padding-left: 2rem;
+            padding-right: 2rem;
+
+            .content-container {
+
+                .image-container {
+                    padding: 0.2rem;
+
+                    img {
+                        border-radius: 0.3rem;
+                        width: 100%;
+                    }
+                }
+            }
+
+            .content-description-main-container {
+                display: flex;
+                flex-direction: row;
+                .content-description {
+                    color: #25396f;
+                    font-weight: bold;
+                    padding-left: 0.4rem;
+                    padding-right: 0.4rem;
+                }
+            }
+        }
+    }
+}

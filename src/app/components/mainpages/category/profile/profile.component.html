@@ -1,0 +1,103 @@
+<div *ngIf="profileUser" class="main-container">
+    <div  class="profile-header-main-container">
+        <div class="profile-header-container">
+            <div class="profile-header-list">
+                <button [routerLink]="['']"><i class="bi bi-arrow-90deg-left"></i> </button>
+            </div>
+            <div class="profile-header-list">
+                <button [routerLink]="['/chat']"><i class="bi bi-envelope"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="profile-main-contianer">
+        <div class="cover-main-container">
+            
+            <div class="edit-option" *ngIf="profileOwner">
+                <input type="file" multiple  #fileInput style="display: none;" (change)="onFileSelected($event,true)" />
+                <button (click)="fileInput.click()">
+                    <!-- <i class="bi bi-gear"></i> -->
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+            </div>
+            <img *ngIf="cover" class="cover" [src]="cover" alt="">
+        </div>
+        <div class="profile-picture-main-container">
+            <div class="profile-picture-container">
+                <div  class="profile-picture"  [style.background-image]="'url(' + profilePicture + ')'"></div>
+                <div class="edit-option" *ngIf="profileOwner">
+                    <input type="file" multiple  #fileInput style="display: none;" (change)="onFileSelected($event,false)" />
+
+                    <button (click)="fileInput.click()">
+                        <!-- <i class="bi bi-gear"></i> -->
+                        <i class="bi bi-gear-fill"></i>
+                    <!-- <i class="bi bi-pencil-square"></i> -->
+
+                    </button>
+                </div>
+
+
+                <!-- <img class="profile-picture" src="https://i.pinimg.com/564x/5c/5b/d2/5c5bd2e3bfe425bb6afea5737f4d9c65.jpg" alt=""> -->
+            </div>
+
+        </div>
+    </div>
+    <div class="profile-body-main-container">
+        <div class="stats-main-container">
+            <div class="stats-container">
+                <div class="followers-container">
+                    <div class="followers-number">{{friendCount}}</div>
+                    <div class="followers-text">followers</div>
+                </div>
+                <div class="following-container">
+                    <div class="following-number">15.5k</div>
+                    <div class="following-text">followers</div>
+                </div>
+            </div>
+        </div>
+        <div class="profile-info-main-container">
+            <div class="profile-name-main-container">
+                <div class="profile-name-container">
+                    {{profileUser.name}}
+                </div>
+            </div>
+            <div class="profile-status-main-container">
+                <div class="profile-status-container">
+                    <div *ngIf="profileUser.status" class="profile-status">
+                        {{profileUser.status}}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="directives-main-container">
+            <div *ngIf="!profileOwner" class="directives-container">
+                <div class="directives-list">
+                    <button class="follow" *ngIf="!userIsFollowing" [disabled]="process" (click)="addFriend(profileUser)">Follow</button>
+                    <button class="following" *ngIf="userIsFollowing" [disabled]="process" (click)="removeFriend()">Following</button>
+                    
+                </div>
+                <div class="directives-list">
+                    <button class="message" (click)="createChat(profileUser)">Message</button>
+                </div>
+            </div>
+        </div>
+   
+        <div class="content-main-container container">
+            <div class="content-description-main-container">
+                <div class="content-description">
+                    Photos
+                </div>
+                <div class="content-description">
+                    Posts
+                </div>
+            </div>
+            <div class="content-container row" *ngIf="profileImages">
+            
+                <div  class="col-4 image-container" *ngFor="let image of profileImages">
+                    <img (click)="openImageDialog(image)" [src]="s3BucketUrl + image.images[0]" alt="">
+                </div>
+                
+            </div>  
+        </div>
+    </div>
+</div>

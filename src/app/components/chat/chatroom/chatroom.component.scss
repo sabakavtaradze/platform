@@ -1,0 +1,122 @@
+.body-container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    .header {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        // display: flex;
+    }
+
+    .main-container {
+        position: relative;
+        // min-height: 87%;
+        display: flex;
+        flex-direction: column;
+
+        .chat-area-container {
+            // display: flex;
+            // min-height: -webkit-fill-available;
+            flex: 1;
+            position: sticky;
+        }
+
+        .chat-area-main-container {
+            // max-height: 35rem;
+            overflow-y: scroll;
+            flex: 1;
+            display: flex;
+            flex-direction: column-reverse;
+            height: 86vh;
+            padding-bottom: 2rem;
+        }
+
+
+
+
+
+        .message-main-container {
+            position: sticky;
+            bottom: 0;
+            width: 100%;
+            background-color: white;
+
+            .message-container {
+                display: flex;
+                flex-direction: row;
+                padding-left: 1rem;
+                padding-right: 1rem;
+
+                .attach-container {
+                    width: 5rem;
+                    display: flex;
+                    align-items: center;
+                    button {
+                        width: 3rem;
+                        height: 3rem;
+                        display: flex;
+                        justify-content: center;
+                        background-color: #a974ff;
+                        border-radius: 2rem;
+                        border: none;
+                        align-items: center;
+
+                        i {
+                            font-size:  1.4rem;
+                            color: white;
+                        }
+                    }
+
+                }
+
+                form {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    // background-color: white;
+                    align-items: center;
+                    width: 100%;
+                    .text-area{
+                        width: 100%;
+                        ::ng-deep{
+                            .mdc-text-field--filled.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-floating-label, .mdc-text-field--filled.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-floating-label--float-above{
+                                color: gray;
+                            }
+                            .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple::before{
+                                border-bottom-color: #8f8f8f;
+                            }
+                            .mat-mdc-form-field-subscript-wrapper{
+                                display: none;
+                            }
+                        }
+                    }
+                    .sendMessage-container {
+                        button:active {
+                            background-color: rgb(0 163 247 / 51%);
+                        }
+
+                        button {
+                            border: none;
+                            background-color: transparent;
+                            width: 3rem;
+                            height: 3rem;
+                            display: flex;
+                            justify-content: center;
+                            background-color: #58b9ff;
+                            border-radius: 3rem;
+                            align-items: center;
+
+                            i {
+                                background-color: transparent;
+                                color: white;
+                                font-size: 1.4rem;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

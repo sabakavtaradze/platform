@@ -1,0 +1,20 @@
+.menu-main-container {
+    height: auto;
+    .menu-container {
+        position: relative;
+
+        .menu-picture {
+            width: 2rem;
+            border-radius: 20rem;
+        }
+
+        .menu-arrow {
+            width: 1rem;
+            background: #ffffff;
+            border-radius: 5rem;
+            position: absolute;
+            right: 0;
+            bottom: 0.2rem;
+        }
+    }
+}

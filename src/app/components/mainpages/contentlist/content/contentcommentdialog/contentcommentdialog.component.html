@@ -1,0 +1,61 @@
+<div class="comments-main-container">
+    <div class="comments-header-main-container">
+        Comments
+    </div>
+    <div class="comments-container">
+
+        <div class="comments" *ngFor="let comment of comments">
+
+            <app-contentcommentdialogcomment [comment]="comment"></app-contentcommentdialogcomment>
+        </div>
+    </div>
+
+</div>
+
+
+
+<div class="message-main-container">
+    <div class="message-container">
+        <div class="create-main-container">
+            <div class="create-container">
+
+                <div class="attach-container">
+                    <!-- multiple -->
+                    <input type="file" #fileInput style="display: none;" (change)="onFileSelected($event)" />
+                    <button (click)="fileInput.click()">
+
+                        <i class="bi bi-file-earmark-image"></i>
+
+                    </button>
+                </div>
+                <form [formGroup]="contentForm" class="comment-form">
+                    <mat-form-field class="text-area">
+                        <mat-label>Write text</mat-label>
+                        <textarea matInput cdkTextareaAutosize #autosize="cdkTextareaAutosize"
+                            formControlName="text"
+                            cdkAutosizeMaxRows="5"
+                             cdkAutosizeMinRows="1" ></textarea>
+                    </mat-form-field>
+                </form>
+            </div>
+
+            <div *ngIf="imageprew && imageprew.length > 0" class="selectedImage container">
+                <div class="selectedimg row">
+                    <div class="image-container">
+                        <img class="col-12" [src]="imageprew">
+                        <div (click)="removeImg()" class="close-container">
+                            <i class="bi bi-x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sendMessage-container">
+            <button (click)="Done()" [disabled]="isDisabled" type="submit" class="signup-account">
+                <i class="bi bi-send"></i>
+            </button>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,20 @@
+<div class="main-container">
+
+    <div class="image-container">
+
+    <img [src]="profilePicture" alt="">
+</div>
+
+    <div class="user-texts-container">
+
+        <div class="user-texts">
+
+            <div class="name" *ngIf="profileUser !== undefined">{{profileUser.name}}</div>
+            <div class="followed">Followed you</div>
+        </div>
+
+            <div class="time">{{follower.createdAt | messageTime}}</div>
+
+    </div>
+
+</div>

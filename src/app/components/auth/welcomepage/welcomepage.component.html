@@ -1,0 +1,49 @@
+<div class="body-main-container">
+
+    <div class="welcome-main-container">
+        <div class="logo-main-container">
+            <img class="logo" src="../../../../assets/images/logo.png" alt="">
+        </div>
+
+        <div class="welcome-text">
+            Welcome To <br>
+            Wbless
+        </div>
+    </div>
+    <div class="signup-main-container">
+        <div class="signup-title">
+            Join today.
+        </div>
+        <div class="signup-list-container">
+            <!-- <button class="signup-list">
+                <img class="signup-list-logos" src="../../../../assets/images/google.png" alt="">
+                <div class="signup-list-title"> Sign Up With Google</div>
+            </button>
+            <button class="signup-list">
+                <img class="signup-list-logos" src="../../../../assets/images/apple.png" alt="">
+                <div class="signup-list-title"> Sign Up With Apple</div>
+            </button> -->
+        </div>
+        <div class="signup-or-container">
+            <p><span>or</span></p>
+        </div>
+        <div class="signup-account-container">
+            <button class="signup-account" [routerLink]="['/auth/register']">
+                Create account
+            </button>
+            <div class="signup-account-rules-container">
+                <div class="signup-account-rules">
+                    By signing up you agree to the Terms of Service and Privacy Policy, including Cookie use.
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="login-main-container">
+        <div class="login-title">
+            Already have an account?
+        </div>
+        <a [routerLink]="['/auth/login']" class="signin">
+            Sign In
+          </a>
+    </div>
+</div>

@@ -1,0 +1,40 @@
+<div class="header-main-container">
+    <div class="back-container">
+        <button>
+            <i [routerLink]="[headerBackName]" class="bi bi-arrow-left"></i>
+
+        </button>
+
+    </div>
+    <div *ngIf="ChatName" class="chatname-container">
+        {{ChatName}}
+    </div>
+    <div class="left-side">
+
+ 
+        <div *ngIf="HeaderNames" class="names-container">
+            {{HeaderNames}}
+        </div>
+        <div *ngIf="chatroomMenu" class="chatroom-menu-container">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu  #menu="matMenu">
+                <button (click)="deleteMessage()" mat-menu-item>
+                    <i style="padding-right: 0.5rem;" class="bi bi-envelope-x"></i>
+                  <span>Delete Messages</span>
+                </button>
+                <button (click)="deleteChat()" mat-menu-item>
+                    <i style="padding-right: 0.5rem;" class="bi bi-trash3"></i>
+                  <span>Delete Chat</span>
+                </button>
+              </mat-menu>
+        </div>
+        <div *ngIf="chatroom" class="users">
+            <button [routerLink]="['/chat/users']">
+                <i class="bi bi-send-plus"></i>
+
+            </button>
+        </div>
+    </div>
+</div>

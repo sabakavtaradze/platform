@@ -1,0 +1,43 @@
+<mat-card class="example-card">
+  <mat-card-header>
+    <div mat-card-avatar class="example-header-image">
+        <img [src]="item.profileImg" alt="">
+    </div>
+    <mat-card-title>{{item.name}}</mat-card-title>
+    <mat-card-subtitle>{{item.profession}}
+    </mat-card-subtitle>
+  </mat-card-header>
+  <img mat-card-image [src]="item.img" alt="Photo of a Shiba Inu">
+  <mat-card-content>
+    <!-- <p>
+      The Shiba Inu is the smallest of the six original and distinct spitz breeds of dog from Japan.
+      A small, agile dog that copes very well with mountainous terrain, the Shiba Inu was originally
+      bred for hunting.
+    </p> -->
+    <div class="reviewstars">
+        <div class="reviewstars-list">
+          <ng-template #t let-fill="fill">
+            <i class="bi-star-fill">
+              <i *ngIf="fill > 0" class="bi-star-fill filled" [style.width.%]="fill"></i>
+            </i>
+          </ng-template>
+          <ngb-rating
+            [(rate)]="item.stars"
+            [starTemplate]="t"
+            [readonly]="true"
+            [max]="5"
+            [ariaValueText]="ariaValueText"
+          ></ngb-rating>
+          <!-- <ngb-rating [(rate)]="currentRate" [starTemplate]="heart" [readonly]="true" [max]="5"></ngb-rating> -->
+        </div>
+</div>
+    <div class="followers-container">
+      <div class="followers">Followers:&nbsp; </div>
+       <div class="followers-number">{{ item.followers}}</div>
+    </div>
+  </mat-card-content>
+  <!-- <mat-card-actions>
+    <button mat-button>LIKE</button>
+    <button mat-button>SHARE</button>
+  </mat-card-actions> -->
+</mat-card>

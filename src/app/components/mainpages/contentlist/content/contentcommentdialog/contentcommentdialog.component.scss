@@ -1,0 +1,111 @@
+.comments-main-container {
+    min-height: 10rem;
+    height: 28rem;
+    overflow-y: auto;
+
+    .comments-header-main-container {
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+        padding: 1rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+
+
+    }
+
+    .comments-container {
+        padding-left: 0.5rem;
+        padding-right: 0.4rem;
+    }
+}
+
+// comment
+.message-main-container {
+    display: flex;
+    flex-direction: column;
+
+    .message-container {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-around;
+        align-items: center;
+        padding-bottom: 0.25rem;
+
+        .create-main-container {
+            .create-container {
+                display: flex;
+                flex-direction: row;
+
+                .attach-container {
+                    button {
+                        background-color: transparent;
+                        border: none;
+
+                        i {
+                            font-size: 1.7rem;
+                            color: rgb(0, 163, 247)
+                        }
+                    }
+                }
+
+                .comment-form {
+                    .text-area{
+                        max-height: 5rem;
+                        width: 100%;
+                    }
+                }
+
+
+
+            }
+
+            .selectedImage {
+
+                .selectedimg {
+                    padding-left: 1.5rem;
+
+                    img {
+                        width: 2.5rem;
+                        width: 100%;
+                    }
+                }
+            }.image-container {
+                position: relative;
+    
+                .close-container {
+                    position: absolute;
+                    top: 0.2rem;
+                    right: 0.2rem;
+                    font-size: 1.5rem;
+                    color: white;
+                    background-color: #cbcbcb87;
+                    border-radius: 40rem;
+                    width: 2rem;
+                    height: 2rem;
+                    display: flex;
+                    place-content: center;
+                    align-items: center;
+                }
+    
+                i {
+                    color: #25396f;
+                }
+            }
+        }
+
+        .sendMessage-container {
+            button {
+                background-color: transparent;
+                border: none;
+
+                i {
+                    font-size: 1.7rem;
+                    color: rgb(0, 163, 247)
+                }
+            }
+        }
+    }
+
+
+
+}

@@ -1,0 +1,27 @@
+<div class="comment-main-container" *ngIf="comment" >
+    <div class="cont">
+
+    <div class="d-flex">
+
+    <img (error)="handleImageError()"
+        *ngIf="comment.author"
+        class="user-image"
+        [src]="profilepicture" alt="">
+
+    <div class="comment-container">
+        <!-- <div class="user-info"> -->
+        <div *ngIf="comment.author" class="name">{{comment.userFirstName}} {{comment.userLastName}}</div>
+        <!-- </div> -->
+
+        <p class="text">{{comment.commentText}}</p>
+
+        <div class="image-container" *ngIf="comment.commentImageUrl && comment.commentImageUrl.length > 0">
+            <img [src]="comment.commentImageUrl" alt="">
+        </div>
+    </div>
+</div>
+
+    <div class="createdAt">{{comment.createdAt | messageTime}}</div>
+</div>
+
+</div>

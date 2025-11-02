@@ -1,0 +1,20 @@
+<div class="scrollable-content" style="height: 100vh; overflow-y: auto;" (scroll)="onScroll($event.target)">
+    <!-- height: 15rem; overflow-y: auto; -->
+<!-- <button (click)="createpost()">post</button> -->
+<!-- <button (click)="seeposts()">see posts</button> -->
+<button style="margin-top: 5rem;" (click)="signOut()">sign out</button>
+<!-- <button (click)="userAuth()">check user</button> -->
+
+<!-- <button (click)="checkUser()">check user</button> -->
+<!-- <app-dialogpicker></app-dialogpicker> -->
+
+<!-- <app-createcontent></app-createcontent> -->
+<div class="content-list-container">
+
+<div *ngFor="let post of listPosts" class="content-list">
+
+<app-content [postId]="post.postID" (onDeletePost)="removePostFromList($event)"></app-content>
+
+</div>
+</div>
+</div>

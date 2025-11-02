@@ -1,0 +1,62 @@
+.comment-main-container {
+    .cont{
+        display: flex;
+        flex-direction: column;
+        width: fit-content;
+        align-items: flex-end;
+    
+    padding: 0.5rem;
+    // display: flex;
+    // flex-direction: row;
+    .user-image {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 20rem;
+        object-fit: cover;
+    }
+
+    .comment-container {
+        
+        display: flex;
+        flex-direction: column;
+        background-color: #a3a4c7a8;
+        border-radius: 0.6rem;
+        width: fit-content;
+        padding: 0.5rem;
+        line-height: 1;
+
+        // padding-left: 0.5rem;
+        // padding-right: 0.5rem;
+        // .user-info{
+        //     display: flex;
+        //     flex-direction: row;
+
+        .name {
+            font-weight: bold;
+            margin: 0
+        }
+    // }
+
+        .text {
+            line-break: anywhere;
+            margin-bottom: 0;
+
+        }
+
+        .image-container {
+            img {
+                width: 10rem;
+            }
+        }
+    }
+
+    .createdAt {
+
+        font-size: 0.6rem;
+        font-weight: bolder;
+
+
+    }
+}
+
+}

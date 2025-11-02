@@ -1,0 +1,23 @@
+<div class="main-container">
+    <div class="image-container">
+        <img (error)="handleImageError()"
+            *ngIf="item !== undefined && profilepicture !==undefined && profilepicture !== null && profilepicture.length > 0"
+            class="content-info-detail-picture"
+            [src]="'https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/' +profilepicture" alt="">
+
+        <!-- <img [src]="profilepicture" alt=""> -->
+    </div>
+    <div class="content-container">
+        <div class="content">
+            <div class="name">{{usersFiltered }}</div>
+            <div class="sender">
+                <p *ngIf="lastSenderName">{{lastSenderName}}:&nbsp;</p>
+                <p *ngIf="item.chatroom.LastMessage?.text">{{item.chatroom.LastMessage?.text}}</p>
+                <p *ngIf="item.chatroom.LastMessage !== null && item.chatroom.LastMessage !== undefined && item.chatroom.LastMessage?.images !== undefined && item.chatroom.LastMessage?.images !== null 
+        && item.chatroom.LastMessage?.text === null 
+        ">send image</p>
+            </div>
+        </div>
+        <div class="time" *ngIf="item !== undefined">{{item.chatroom.LastMessage?.updatedAt | messageTime}}</div>
+    </div>
+</div>

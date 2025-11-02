@@ -1,0 +1,84 @@
+.body {
+    position: relative;
+
+    .main-container {
+        padding: 1.5rem;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        mat-tree-node {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .profession-category-container {
+            display: inline-flex;
+            flex-wrap: wrap;
+            margin-left: -0.5rem;
+            margin-right: -0.5rem;
+            ::ng-deep {
+                .mat-mdc-raised-button {
+                    border-radius: 1.5rem;
+                }
+
+                .mat-mdc-outlined-button {
+                    border-radius: 1.5rem;
+                    
+                }
+            }
+
+            .profession-category-list {
+                display: flex;
+                margin: 0.25rem;
+            }
+
+
+        }
+        .age-size-main-container {
+            width: 100%;
+            .example-name-title{
+            text-align-last: center;
+            color: gray;
+
+        }
+            .example-label-container{
+                display: flex;
+                font-weight: bold;
+            }
+        }
+
+        .followers-size-main-container {
+            width: 100%;
+            .example-name-title{
+            text-align-last: center;
+            color: gray;
+
+        }
+            .example-label-container{
+                display: flex;
+                font-weight: bold;
+            }
+        }
+
+        ::ng-deep {
+            .mat-mdc-slider.mat-primary {
+                width: 90%;
+            }
+        }
+
+        .mat-slider {
+            width: 100%;
+        }
+    }
+
+    .action {
+        bottom: 0;
+        position: sticky;
+        background-color: white;
+        border-top: 0.01rem solid #c5c5c5;
+        justify-content: end;
+    }
+}

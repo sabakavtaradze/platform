@@ -1,0 +1,128 @@
+.content-main-container {
+    background-color: white;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+
+    .content-detail-main-container {
+        display: flex;
+        flex-direction: row;
+        padding-top: 1rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        justify-content: space-between;
+
+        .content-info-main-container {
+            display: flex;
+            flex-direction: row;
+
+            .content-info-detail-picture-container {
+                .content-info-detail-picture {
+                    width: 3rem;
+                    border-radius: 20rem;
+                }
+            }
+
+            .content-info-detail {
+                padding-left: 0.5rem;
+
+                // padding-right: 0.5rem;
+                .content-info-name {
+                    font-size: 1.2rem;
+                }
+
+                .content-info-date {
+                    font-size: 0.8rem;
+                    color: gray;
+                }
+            }
+        }
+
+        .content-info-follow {
+            .user-follow {
+                background-color: transparent;
+                border: none;
+                color: #0064d1;
+                font-weight: bold;
+                font-size: 0.7rem;
+            }
+        }
+
+        .content-more-main-container {
+            .more {
+                background-color: transparent;
+                border: none;
+            }
+        }
+    }
+    .content-description-main-container{
+        .content-description{
+            padding: 0.5rem;
+            
+        }
+    }
+    .content-container {
+        .video {
+            width: 100%;
+
+        }
+    }
+
+    .contend-reviews {
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+        mat-icon{
+            font-size: 1.5rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            color: rgb(13 131 255);
+        }
+        .content-reviews-numbers{
+
+        }
+    }
+
+    .content-options-container {
+        .content-options {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            padding: 0.5rem;
+            .content-options-list-container{
+                display: flex;
+                flex-direction: row;
+                
+            .content-options-list {
+                border: none;
+                background-color: rgb(240 242 245);
+                width: 4rem;
+                height: 2rem;
+                border-radius: 3rem;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                mat-icon{
+                    font-size: 1rem;
+                    width: 1rem;
+                    height: 1rem;
+                }
+                .content-options-list-numbers{
+                    padding-left: 0.5rem;
+                    font-size: 0.6rem;
+                }
+            }
+            .content-option-like{
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 0;
+                border-right:0.02rem solid #d3d3d3;
+            }
+            .content-option-dislike{
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+                border-left:0.02rem solid #d3d3d3;
+            }
+        }
+    }
+}
+}

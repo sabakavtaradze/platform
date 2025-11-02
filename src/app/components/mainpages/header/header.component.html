@@ -1,0 +1,59 @@
+<div class="header-main-container">
+    <div class="header-container">
+        <div [routerLink]="['']" class="logo-container">
+            <img src="../../../../assets/images/logo.png" alt="">
+        </div>
+        <div class="searchbar-main-container">
+            <div class="input-wrapper">
+                <input type="text" class="animated-input" placeholder="Search people" (ngModelChange)="search($event)" [(ngModel)]="input">
+              </div>
+            <!-- <mat-form-field class="example-full-width">
+                <mat-label>SEARCH</mat-label>
+                <input (ngModelChange)="search($event)" [(ngModel)]="input" matInput>
+            </mat-form-field> -->
+        </div>
+      
+      
+        <div *ngIf="!searchBoolean" class="messages-main-container">
+            <i  [routerLink]="['/chat']" class="bi bi-envelope"></i>
+            <div *ngIf="messagesAlert" class="exclamation-container">
+                <i  class="bi bi-exclamation-lg"></i>
+
+            </div>
+        </div>
+        <div *ngIf="searchBoolean"  class="messages-main-container">
+            <i (click)="cancelSearch()" class="bi bi-x-lg close"></i>
+        </div>
+    
+    </div>
+
+
+    <div *ngIf="users && users.length > 0 && users.length < 20 && searchBoolean" class="search-users-main-container">
+        <div class="search-users-container container">
+            <div  class="users-main-container">
+                <div  *ngFor="let user of users" class="users-container">
+                    <!-- <a></a> -->
+                    <div [routerLink]="['/profile/'+ user.id]" (click)="searchClick()" class="user">
+                        <!-- <div (error)="handleImageError()"  *ngIf="user.profilepicture && user.profilepicture.length > 0" class="user-image" [style.background-image]="'url(https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/' + user.profilepicture + ')'"></div> -->
+                        <img (error)="handleImageError()"  *ngIf="user.profilepicture && user.profilepicture.length > 0"  [src]="'https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/' +user.profilepicture" alt="">
+                        <div class="user-name">{{user.name}}</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- <div class="header-library-main-container">
+        <div class="header-library-container">
+            <a class="header-library-list" [routerLink]="['']"><mat-icon>home</mat-icon></a>
+            <a class="header-library-list" [routerLink]="['/library']"><mat-icon>search</mat-icon></a>
+            <a class="header-library-list" [routerLink]="['/videos']"><mat-icon>movie</mat-icon></a>
+            <a class="header-library-list" [routerLink]="['/notifications']"><mat-icon>notifications</mat-icon></a>
+            <a class="header-library-list" [routerLink]="['/vote']"><mat-icon>how_to_vote</mat-icon></a>
+            <div class="menu-main-container">
+                <a class="header-library-list profileLink" [routerLink]="['/profile']"><img [src]="profilepic"alt=""> <mat-icon>menu</mat-icon></a>
+                
+            </div>
+        </div>
+    </div> -->
+</div>

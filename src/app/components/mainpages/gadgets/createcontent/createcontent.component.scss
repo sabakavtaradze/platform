@@ -1,0 +1,49 @@
+.content-main-container {
+    display: flex;
+    background-color: white;
+    margin-top: 0.5rem;
+    justify-content: center;
+
+    .content-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+
+        .content-list {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            align-self: center;
+            display: flex;
+
+            .profile-pic {
+                border-radius: 20rem;
+                width: 3rem;
+            }
+
+            .image {
+
+                color: #1f8bea;
+                font-size: 2rem;
+                height: 2rem;
+                width: 2rem;
+                // font-size: 3rem;
+                
+            }
+        }
+
+        .input-container {
+            ::ng-deep {
+                .mat-mdc-form-field-subscript-wrapper {
+                    display: none;
+                }
+
+                .mat-mdc-text-field-wrapper {
+                    border-radius: 1.5rem;
+                }
+
+            }
+        }
+    }
+}

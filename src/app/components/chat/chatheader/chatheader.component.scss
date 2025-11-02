@@ -1,0 +1,77 @@
+.header-main-container {
+    box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
+    height: 4rem;
+    background-color: white;
+    // padding-left: 2rem;
+    // padding-right: 2rem;
+    display: flex;
+    justify-content: space-between;
+
+    .back-container {
+        display: flex;
+        align-items: center;
+
+        button {
+            border: none;
+            background-color: transparent;
+
+            i {
+                font-size: 3rem;
+            }
+
+            i:active {
+                color: blanchedalmond;
+            }
+        }
+
+    }
+
+    .chatname-container {
+        //  padding-right: 2rem;
+        display: flex;
+        align-items: center;
+        font-size: 1.5rem;
+    }
+
+    .left-side {
+        display: flex;
+
+        // .chatname-container{
+        //     padding-right: 2rem;
+        // }
+        .names-container {
+            align-self: center;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .users {
+            align-self: center;
+
+            button {
+                background-color: transparent;
+                border: none;
+
+                i {
+                    font-size: 2rem;
+                }
+
+                i:active {
+                    color: blanchedalmond;
+                }
+            }
+        }
+
+        .chatroom-menu-container {
+            display: flex;
+            align-items: center;
+            button{
+
+            i {
+                padding-right: 0.3rem;
+            }
+        }
+
+        }
+    }
+}
