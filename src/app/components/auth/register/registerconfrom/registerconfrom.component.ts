@@ -54,119 +54,63 @@ export class RegisterconfromComponent implements OnInit {
    * Unifies the logic for resending the verification code.
    * Calls sendCodeByID if UserID is valid, otherwise calls sendCodeByEmail if email is present.
    */
-  resendCode() {
-    this.loading = true;
-    let resend$: Observable<RegistrationResponse> = EMPTY;
+ resendCode() {
+  this.loading = true;
 
-    const userIdNumber = parseInt(this.UserID, 10);
-    const hasValidId = !isNaN(userIdNumber) && userIdNumber > 0;
-    const emailToUse = this.manualEmail || this.email;
-    const hasEmail = !!emailToUse;
+  const emailToUse = (this.manualEmail || this.email).trim().toLowerCase();
+  if (!emailToUse) {
+    this.loading = false;
+    alert("Enter your email manually.");
+    this.showManualEmailInput = true;
+    return;
+  }
 
-    // 🔑 FIX: PRIORITIZE EMAIL. If email is available, use it, regardless of ID status.
-    if (hasEmail) {
-        console.log(`Resending code using Email: ${emailToUse}`);
-        resend$ = this.authService.sendCodeByEmail(emailToUse);
-
-    // 🔑 FALLBACK: If NO email is available, check for a valid User ID.
-    } else if (hasValidId) {
-        console.log(`Email missing. Resending code using UserID: ${userIdNumber}`);
-        resend$ = this.authService.sendCodeByID(userIdNumber); 
-        
-    // 🛑 FAILURE: If neither email nor ID is available.
-    } else {
-        this.loading = false;
-        console.error("Cannot resend code. Missing User ID and Email data.");
-        alert("Cannot resend code. Please enter your email manually.");
-        this.showManualEmailInput = true;
-        return;
+  this.authService.sendCodeByEmail(emailToUse).subscribe({
+    next: (response) => {
+      this.loading = false;
+      if (response.isSuccess) alert("Code sent.");
+      else alert(response.errorMessage || 'Failed to send code.');
+    },
+    error: (err: HttpErrorResponse) => {
+      this.loading = false;
+      alert(this.errorService.extractMessage(err));
     }
-
-    resend$.subscribe({
-      next: (response: RegistrationResponse) => {
-        this.loading = false;
-        if (response.isSuccess) {
-            alert('Verification code sent/resent successfully.');
-            this.showManualEmailInput = false; 
-        } else {
-            console.error('Server reported failure:', response.errorMessage);
-            alert(`Error resending code: ${response.errorMessage || 'Failed to resend code.'}`);
-        }
-      },
-      error: (err: HttpErrorResponse) => {
-        this.loading = false;
-        console.error("HTTP Error sending verification code:", err);
-        // Assuming this.errorService is a property on the component
-        alert(`A network error occurred: ${this.errorService.extractMessage(err)}`); 
-      }
-    });
+  });
 }
   /**
    * 🔑 NEW UNIFIED METHOD: Determines whether to call verifyByID or verifyByEmail.
    */
-  handleVerification() {
-    this.loading = true;
-    let verify$: Observable<RegistrationResponse> = EMPTY;
+ handleVerification() {
+  this.loading = true;
 
-    const emailToUse = this.manualEmail || this.email;
-    const userIdNumber = parseInt(this.UserID, 10);
-    const codeToUse = this.code;
-    
-    const hasValidId = !isNaN(userIdNumber) && userIdNumber > 0;
-    const hasEmail = !!emailToUse;
-    
-    if (!codeToUse) {
-        this.loading = false;
-        alert('Please enter the verification code.');
-        return;
-    }
+  const emailToUse = (this.manualEmail || this.email).trim().toLowerCase();
+  const codeToUse = this.code.trim();
 
-    const verificationData = {
-        userID: userIdNumber, 
-        email: emailToUse,
-        code: codeToUse 
-    };
-
-    // 1. 🔑 NEW PRIORITY: Check for and prioritize verification by Email
-    if (hasEmail) {
-        console.log("Verifying by Email (Priority)...");
-        verify$ = this.authService.verifyByEmail(verificationData);
-    
-    // 2. Fallback to verification by User ID if Email is missing
-    } else if (hasValidId) {
-        console.log("Verifying by User ID (Fallback)...");
-        verify$ = this.authService.verifyByID(verificationData); 
-    
-    } else {
-        this.loading = false;
-        alert('Cannot verify. Missing User ID and Email data.');
-        return;
-    }
-
-
-    verify$.subscribe({
-        next: (response: RegistrationResponse) => {
-            this.loading = false;
-            if (response.isSuccess) {
-                if (response.token) {
-                    this.authService.setAuthToken(response.token);
-                    alert('Account verified and logged in successfully!');
-                    this.handleSuccessfulVerification(); 
-                } else {
-                    alert('Account verified. Please log in manually.');
-                    this.handleSuccessfulVerification(true); 
-                }
-            } else {
-                alert(`Verification failed: ${response.errorMessage || 'Invalid code.'}`);
-            }
-        },
-        error: (err: HttpErrorResponse) => {
-            this.loading = false;
-            console.error('API Verification error:', err);
-            alert(`Verification failed: ${this.errorService.extractMessage(err)}`);
-        }
-    });
+  if (!codeToUse) {
+    this.loading = false;
+    alert('Please enter the verification code.');
+    return;
   }
+
+  const dto = { email: emailToUse, code: codeToUse };
+
+  this.authService.verifyByEmail(dto).subscribe({
+    next: (response) => {
+      this.loading = false;
+      if (response.isSuccess) {
+        alert("Account verified successfully!");
+        this.handleSuccessfulVerification(false);
+      } else {
+        alert(response.errorMessage || 'Invalid code');
+      }
+    },
+    error: (err: HttpErrorResponse) => {
+      this.loading = false;
+      alert(this.errorService.extractMessage(err));
+    }
+  });
+}
+
   /**
    * Handles cleanup and navigation after successful verification/login.
    */
@@ -179,7 +123,7 @@ export class RegisterconfromComponent implements OnInit {
     if (forceLogin || !this.authService.getAuthToken()) {
         this.router.navigate(['/auth/login']); 
     } else {
-        this.router.navigate(['/main']); 
+        this.router.navigate(['']); 
     }
   }
 }

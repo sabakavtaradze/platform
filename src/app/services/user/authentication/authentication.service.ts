@@ -59,8 +59,8 @@ interface SendCodeByEmailDTO {
 }
 
 interface VerificationDTO {
-  userID: number;
-  email: string;
+  userID?: number;   // optional
+  email?: string;    // optional
   code: string;
 }
 
@@ -198,10 +198,10 @@ export class AuthenticationService implements CanActivate {
     return this.http.post<RegistrationResponse>(url, data);
   }
 
-  verifyByEmail(data: VerificationDTO): Observable<RegistrationResponse> {
-    const url = `${this.apiUrlBase}verify-email`;
-    return this.http.post<RegistrationResponse>(url, data);
-  }
+verifyByEmail(data: { email: string; code: string }): Observable<RegistrationResponse> {
+  const url = `${this.apiUrlBase}verify-email`;
+  return this.http.post<RegistrationResponse>(url, data);
+}
 
   /* ---------------------------------------------
      Auth Guard

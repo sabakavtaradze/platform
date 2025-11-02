@@ -12,6 +12,7 @@ import { HeaderService } from 'src/app/services/header.service';
 import { PostService } from 'src/app/services/post/post.service';
 
 
+
 @Component({
   selector: 'app-mainpage',
   templateUrl: './mainpage.component.html',
