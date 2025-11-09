@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { BaseResponse } from 'src/app/interfaces/ResponseInterface';
+import { BaseResponse} from 'src/app/interfaces/ResponseInterface';
 
 
 
