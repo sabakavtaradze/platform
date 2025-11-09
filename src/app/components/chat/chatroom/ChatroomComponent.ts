@@ -1,437 +1,339 @@
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Auth, Storage } from 'aws-amplify';
-import { APIService, ModelMessageConditionInput } from 'src/app/API.service';
-import { APIServicem } from 'src/app/apiservicem';
-import { HeaderService } from 'src/app/services/header.service';
+import { ActivatedRoute } from '@angular/router';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
-import { ScrollToBottomDirective } from './scroll-to-bottom.directive';
-import GraphQLAPI from '@aws-amplify/api-graphql';
-const { "v4": uuidv4 } = require('uuid');
+import { ChatroomService } from 'src/app/services/user/chatroom/chatroom.service';
+import { SignalRService } from 'src/app/services/SignalRService/signal-rservice.service';
+import { firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-chatroom',
   templateUrl: './chatroom.component.html',
   styleUrls: ['./chatroom.component.scss'],
   queries: {
-    'contentRef': new ViewChild('contentRef')
-  }
+    contentRef: new ViewChild('contentRef'),
+  },
 })
-export class ChatroomComponent {
-  text: any = "";
+export class ChatroomComponent implements OnInit, OnDestroy {
+  // Form
   chatForm: FormGroup;
-  chatId: any;
-  messageList: any;
+
+  // Chat state
+  chatId!: number;
+  messageList: any[] = [];
   currentUser: any;
-  userToChat: any;
-  HeaderNames: string = "";
-  headerBackName: string = "/chat";
-  messageSubscription: any;
-  notMe: any;
-  @ViewChild(ScrollToBottomDirective)
-  scroll!: ScrollToBottomDirective;
-  commonchats: any;
-  userChatroomsList:any;
-  chatroomMenu = true;
-  imageUrl: string | ArrayBuffer | null = null;
-  imageprew: any;
+  otherUserName = '';
+  otherUserId = 0;
+  // message ordering: keep messages in DESC by SentAt (newest first)
+  private descending = true;
+  
+ headerBackName = '/chat';
+ chatroomMenu = true;
 
+  // Image handling
+  private imagePreview: string | null = null;
+  selectedImages: string[] = []; // base64 images
 
+  // Pagination
+  private skip = 0;
+  private take = 20;
+  private loading = false;
+  private allLoaded = false;
 
+  // Subscriptions
+  private subs = new Subscription();
 
+  // get the scroll container (your HTML already has #scrollMe on the div)
+  @ViewChild('scrollMe', { static: false }) scrollMe!: ElementRef<HTMLDivElement>;
 
-
-
-
-  constructor(private router: Router, private authguard: AuthenticationService, private cdRef: ChangeDetectorRef, private activeRoute: ActivatedRoute, private fb: FormBuilder, private apiservice: APIService, private apiservicem: APIServicem, private headerService: HeaderService) {
+  constructor(
+    private fb: FormBuilder,
+    private authguard: AuthenticationService,
+    private chatroomService: ChatroomService,
+    private route: ActivatedRoute,
+    private chatSignalR: SignalRService
+  ) {
     this.chatForm = this.fb.group({
       text: ['', [Validators.required, Validators.minLength(1)]],
     });
   }
-  setupMessageListener(): void {
-    let filter = {
-      chatroomID: { eq: this.chatId }
-    };
-    this.messageSubscription = this.apiservice.OnCreateMessageListener(filter).subscribe((message) => {
-      let newMessage = message.value.data?.onCreateMessage
-      this.messageList.push(newMessage)
-      this.messageList.sort((a: any, b: any) =>
-        a.createdAt > b.createdAt ? -1 : 1
-      );
-      return this.messagesseen(), message
-    });
-  }
-  sendMessage(x: FormGroup) {
-    let messageId: any;;
-    let messageInput = {
-      text: x.value.text,
-      chatroomID: this.chatId,
-      userID: this.currentUser.attributes.sub,
-    };
-    this.chatForm.reset(); // Reset the form
-    this.chatForm.markAsPristine(); // Mark form as pristine (no changes)
-    this.chatForm.markAsUntouched(); //
-    let sendMessage = this.apiservice.CreateMessage(messageInput).then(msg => {
-      messageId = msg.id;
-      console.log('Message sent:', msg);
 
-      let lastmessageInput = {
-        id: this.chatId,
-        chatroomLastMessageId: messageId
-      }
-       let updatechatroom =  this.apiservice.UpdateChatroom(lastmessageInput).then((updateResult) => {
-        console.log('Chatroom updated:', updateResult);
-        this.notMe.forEach((e: any) => {
-          let input = {
-            id: e.user.id
-          }
-        });
-        
-      })
-      this.userChatroomsList.items.forEach((e:any) => {
-        let userchatroominput = {
-          id: e.id
-        }
-        let updateuserchatroom =  this.apiservice.UpdateUserChatroom(userchatroominput)
-        
-      });
-    })
-  }
-
-
-
-  async messagesseen() {
+  // ---------- Lifecycle ----------
+  async ngOnInit() {
+    this.chatId = Number(this.route.snapshot.paramMap.get('chatId'));
+    this.currentUser = await this.authguard.GuardUserAuth();
+    // Start SignalR and load initial data
     try {
-      let date = new Date()
-      let time = date.toISOString()
-      console.log(time)
-      console.log(this.currentUser)
-      let input = {
-        id: this.currentUser.attributes.sub,
-        messagesseen: time
-      }
-
-      let updateseen = await this.apiservice.UpdateUser(input)
-      console.log(updateseen)
-    }
-    catch (e) {
-      console.log(e)
-    }
-  }
-
-
-  async getuserchatrooms(){
-    try{
+      // Setup SignalR - this also sets up message listener
+      await this.chatSignalR.startConnection();
       
-      this.userChatroomsList = await this.apiservice.UserChatroomsByChatroomId(this.chatId)
-      console.log(this.userChatroomsList)
-    }
-    catch(e){
-      console.log(e)
-    }
-  }
+      // Join this specific chat room
+      await this.chatSignalR.joinChatRoom(this.chatId);
 
-
-
-
-
-  async getMessages(num: number) {
-    // num
-    try {
-      let g = this.chatId.toString();
-      // console.log(g)
-      let chatroomID = g;
-      // let limit:number = 10
-      let desc = "DESC"
-      let getchatroom = await this.apiservicem.GetChatroomMessages(g, num, desc);
-      console.log(getchatroom)
-      if (!getchatroom) {
-        // this.router.navigateByUrl('/chat')
-      }
-
-      if (getchatroom) {
-        if (getchatroom.Messages) {
-          this.messageList = getchatroom.Messages.items;
-          // console.log(this.messageList)
-
-          return this.user();
-        }
-      }
-
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  async user() {
-    try {
-      let userchats = await this.apiservicem.GetChatroomUser(this.chatId);
-      this.commonchats = userchats.users?.items || [];
-      this.notMe = this.commonchats.filter((x: { user: { id: any; }; }) => x.user.id !== this.currentUser.attributes.sub);
-      this.HeaderNames = this.notMe.map((item: any) => item.user.name).join(', ');
-    }
-    catch (error) {
-      console.log(error);
-    }
-  }
-  async auth() {
-    try {
-      this.currentUser = await this.authguard.GuardUserAuth()
-    }
-    catch (error) {
-      console.error(error);
-    }
-  }
-  ngOnDestroy(): void {
-    if (this.messageSubscription) {
-      this.messageSubscription.unsubscribe();
-    }
-  }
-  async getChatRoom() {
-    try {
-      let get = await this.apiservice.GetChatroom(this.chatId)
-      console.log(get)
-      if (!get) {
-        this.router.navigateByUrl('/chat')
-      }
-      return this.getuserchatrooms()
-
+      // Subscribe to messages
+      this.getmessages()
     } catch (e) {
-      console.log(e)
+      console.error('SignalR setup failed:', e);
     }
-  }
-  ngOnInit() {
-    this.chatId = this.activeRoute.snapshot.paramMap.get('chatId');
-    console.log(this.chatId)
-    this.getChatRoom()
-    // console.log(this.chatId)
-    let headerhide = localStorage.setItem("productId", this.chatId)
-    this.auth();
-    // console.log(this.chatId);
 
-    this.getMessages(10);
-    // this.sendProductIdToApp();
-    this.setupMessageListener();
-  }
-
-
-
-  async test() {
+    this.getChatroomById(this.chatId);
+    
+    // Try to load the full chat history on init (useful when you want entire conversation)
+    // If it fails or returns empty, fall back to the paged loader.
     try {
-      let test = await this.apiservice.GetChatroom(this.chatId)
-      console.log(test)
-      let users: any[] = [];
-      let usersChatroom: any[] = []
-      console.log(this.commonchats)
-      if (this.commonchats) {
-        this.commonchats.forEach((el: any) => {
-          console.log(el)
-          users.push(el.user.id)
-        });
-      }
+      const res = await firstValueFrom(this.chatroomService.getHistory(this.chatId));
+      if (res?.isSuccess) {
+  const allDesc: any[] = res.data || [];
+  // backend returns DESC by SentAt — keep DESC (newest -> oldest)
+  this.messageList = [...allDesc];
+  console.log(this.messageList);
+        // mark as all loaded (we fetched entire history)
+        this.allLoaded = true;
+        // ensure skip matches total so paged loader won't re-request the same items
+        this.skip = allDesc.length;
 
-      let usrch1: any[] = [];
-      for (let usr of users) {
-        let usrChat = await this.apiservice.UserChatroomsByUserId(usr)
-        for (let childUsrChat of usrChat.items) {
-          if (childUsrChat) {
-            if (childUsrChat.chatroomId === this.chatId) {
-              let input = {
-                id: childUsrChat.id
-              }
-              let dlt = await this.apiservice.DeleteUserChatroom(input)
-              let inpt = {
-                id: this.chatId
-              }
-              let dltRoom = await this.apiservice.DeleteChatroom(inpt)
-              this.router.navigateByUrl('/chat')
-            }
-
+        // after load, position viewport: for descending lists show newest at top
+        setTimeout(() => {
+          if (this.descending) {
+            this.scrollToTop();
+          } else {
+            this.scrollToBottom();
           }
-        }
-      }
+        }, 0);
 
-    }
-    catch (error) {
-      console.log(error)
+        // mark messages as read
+        this.subs.add(
+          this.chatroomService.markRead(this.chatId).subscribe({
+            error: (error) => console.error('Failed to mark messages as read:', error),
+          })
+        );
+      } else {
+        // fallback to paged initial load (safer for very large histories)
+        await this.initialLoad();
+      }
+    } catch (err) {
+      console.warn('Full history load failed, falling back to paged load:', err);
+      await this.initialLoad();
     }
   }
-  async deleteMessage(event: string) {
-    try {
-      let filter = {
-        chatroomID: { eq: this.chatId }
+getmessages() {
+  this.subs.add(
+    this.chatSignalR.messageReceived$.subscribe(msg => {
+      if (!msg) return;
+
+      console.log('Received message structure:', msg);
+
+      // The server sends messages with specific fields:
+      // messageID, senderID, recipientID, content, images, isRead, sentAt
+      const message = {
+        ...msg,
+        chatRoomId: this.chatId, // Ensure it has chatRoomId for consistency
+        senderId: msg.senderID,   // normalize case for component usage
+      };
+
+      // Always add to list - we're already in the correct chat room because of SignalR groups
+      if (this.descending) {
+        console.log('Adding message to start of list:', message);
+        this.messageList = [message, ...this.messageList];
+        setTimeout(() => this.scrollToTop(), 0);
+      } else {
+        console.log('Adding message to end of list:', message);
+        this.messageList = [...this.messageList, message];
+        setTimeout(() => this.scrollToBottom(), 0);
       }
-      let desc = "DESC"
-      let num = 10000
-      let g = this.chatId
-      let getchatroom = await this.apiservicem.GetChatroomMessagesall(g, desc);
-      let getchatroom1: any[] = [];
-      if (getchatroom) {
-        if (getchatroom.Messages?.items) {
-          getchatroom.Messages.items.forEach((v: any) => {
-            getchatroom1.push(v)
-          })
-          getchatroom1.forEach((m: any) => {
-            let input = {
-              id: m.id
-            }
-            if (m.images !== null && m.images !== undefined) {
 
-              m.images.forEach((el: any) => {
-                let storageRemove = Storage.remove(el)
-              });
-            }
-            this.apiservice.DeleteMessage(input)
-          })
-          let chat = {
-            id: this.chatId,
-          }
-          this.apiservice.UpdateChatroom(chat)
-        }
-      }
-      let messageList = await this.apiservice.ListMessages(filter)
-      let messageItems: any[] = [];
-      messageList.items.forEach((v: any) => {
-        messageItems.push(v)
-      })
-      messageItems.forEach((m: any) => {
-        let input = {
-          id: m.id
-        }
-        if (m.images !== null) {
-
-          m.images.forEach((el: any) => {
-            let storageRemove = Storage.remove(el)
-          });
-        }
-
-        this.apiservice.DeleteMessage(input)
-      })
-      if (event === 'deleteChat')
-        this.test()
-    }
-    catch (error) {
-      console.log(error)
-    }
+      // Mark as read
+      this.subs.add(
+        this.chatroomService.markRead(this.chatId).subscribe({
+          error: (error) => console.error('Failed to mark message as read:', error)
+        })
+      );
+    })
+  );
+}
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 
+  // ---------- Header info ----------
+  getChatroomById(id: number) {
+    this.subs.add(
+      this.chatroomService.getChatRoomById(id).subscribe((res) => {
+        if (res?.isSuccess) {
+          this.otherUserName = res.data.otherUsername;
+          this.otherUserId = res.data.otherUserId;
+          console.log(res)
+        }
+      })
+    );
+  }
 
+  // ---------- Message Sending ----------
+  sendMessage(form: FormGroup) {
+    const content = (form.value.text || '').trim() || null;
+    const images = this.selectedImages.length ? this.selectedImages : null;
+    if (!content && !images) return;
+
+    const dto = {
+      recipientID: 0, // backend ignores when ChatRoomId is provided
+      chatRoomId: this.chatId,
+      content,
+      images,
+    };
+
+    this.subs.add(
+      this.chatroomService.sendMessage(dto).subscribe({
+        next: (res) => {
+          if (res?.isSuccess && res.data) {
+            // Local update - SignalR will also broadcast this
+            if (this.descending) {
+              this.messageList = [res.data, ...this.messageList];
+              setTimeout(() => this.scrollToTop(), 0);
+            } else {
+              this.messageList = [...this.messageList, res.data];
+              setTimeout(() => this.scrollToBottom(), 0);
+            }
+          }
+          // Reset form state
+          this.chatForm.reset();
+          this.selectedImages = [];
+          this.imagePreview = null;
+        },
+        error: (error) => {
+          console.error('Failed to send message:', error);
+        }
+      })
+    );
+  }
+
+  // ---------- Image Handling ----------
   async onFileSelected(event: any): Promise<void> {
     const files: FileList = event.target.files;
-    const imageprew: File = event.target.files[0];
-    if (imageprew) {
-      this.imageprew = await this.readAsDataURL(imageprew);
-    }
-    console.log(files)
-    if (files) {
-      // for (let i = 0; i < files.length; i++) {
-      // const file: File = files[i];
-      // console.log(file)
-      const imageUrl = await this.uploadImage(files);
-      console.log(imageUrl)
-      // }
+    if (!files || files.length === 0) return;
+
+    for (let i = 0; i < files.length; i++) {
+      const file: File = files[i];
+      try {
+        const base64 = await this.readAsDataURL(file);
+        this.imagePreview = base64;          // preview last chosen
+        this.selectedImages.push(base64);    // queue for sending
+      } catch (error) {
+        console.error('Error reading file:', error);
+      }
     }
   }
-  readAsDataURL(file: File): Promise<any> {
+
+  private readAsDataURL(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-
-      reader.onload = () => {
-        resolve(reader.result); // Resolve with the URL of the selected file
-      };
-
-      reader.onerror = () => {
-        reject('Error reading file'); // Reject if there's an error reading the file
-      };
-
-      reader.readAsDataURL(file); // Read file as Data URL
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = (error) => reject(`Error reading file: ${error}`);
+      reader.readAsDataURL(file);
     });
   }
 
-
-  async uploadImage(files: FileList) {
-    let imgs: any[] = [];
-
-    // Iterate through the files array
-    const filesArray = Array.from(files);
-    for (const file of filesArray) {
-      const reader = new FileReader();
-
-      // Read the file content
-      reader.readAsArrayBuffer(file);
-
-      // Handle the onload event
-
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        const blob = new Blob([arrayBuffer], { type: file.type });
-
-        // Generate a unique key for the file
-        const key = `${uuidv4()}.png`;
-
-        // Upload the file to storage
-        const result = await Storage.put(key, blob, {
-          contentType: 'image/png',
-          metadata: { ACL: 'public-read' }
-        });
-
-        // Add the uploaded file's key to the imgs array
-        imgs.push(result.key);
-        console.log('File uploaded successfully:', result.key);
-      } catch (uploadError) {
-        console.error('Error uploading file:', uploadError);
-      }
-
+  // ---------- Scroll Handling ----------
+  onScrollUp(event: any) {
+    const el = event.target as HTMLElement;
+    // If user scrolls near top, load older messages
+    if (el.scrollTop <= 20 && !this.loading && !this.allLoaded) {
+      this.loadOlderMessages();
     }
-
-    this.sendImage(imgs);
   }
-  sendImage(img: any) {
-    let im: any[] = []
-    let messageInputt = {
-      chatroomID: this.chatId,
-      images: img,
-      userID: this.currentUser.attributes.sub,
-    };
-    let messageId: any;;
 
+  private scrollToBottom() {
+    const box = this.scrollMe?.nativeElement;
+    if (box) box.scrollTop = box.scrollHeight;
+  }
 
+  private scrollToTop() {
+    const box = this.scrollMe?.nativeElement;
+    if (box) box.scrollTop = 0;
+  }
 
-    console.log(messageInputt)
-    let sendMessage = this.apiservice.CreateMessage(messageInputt).then(msg => {
-      messageId = msg.id;
-      console.log('Message sent:', msg);
+  // ---------- Message Loading ----------
+  private async initialLoad() {
+    this.skip = 0;
+    this.allLoaded = false;
+    this.messageList = [];
 
-      let lastmessageInput = {
-        id: this.chatId,
-        chatroomLastMessageId: messageId
-      }
-      return this.apiservice.UpdateChatroom(lastmessageInput).then((updateResult) => {
-        console.log('Chatroom updated:', updateResult);
-        this.notMe.forEach((e: any) => {
-          console.log(e.user.id)
-          let input = {
-            id: e.user.id
-          }
-          let updateUser = this.apiservice.UpdateUser(input)
+    await this.fetchPage(true);
+    
+    // After first load, position viewport according to ordering
+    setTimeout(() => {
+      if (this.descending) this.scrollToTop();
+      else this.scrollToBottom();
+    }, 0);
 
-        });
-
+    // Mark messages as read
+    this.subs.add(
+      this.chatroomService.markRead(this.chatId).subscribe({
+        error: (error) => console.error('Failed to mark messages as read:', error)
       })
-    }).catch(error => {
-      // Error handling, if applicable
-      console.error('Error creating message:', error);
-    });
-    console.log(sendMessage)
-
-
-    // } catch (error) {
-    //   console.log(error)
-    // }
+    );
   }
 
+  private loadOlderMessages() {
+    if (this.loading || this.allLoaded) return;
+    this.fetchPage(false);
+  }
+  deleteMessage(event:any) {
+  
+  }
+  
+  /**
+   * Fetches a page of messages from the backend.
+   * - Backend returns messages in DESC order by SentAt
+   * - We convert to ASC for display (oldest → newest)
+   * - When loading older messages, we prepend while preserving scroll position
+   */
+  private fetchPage(isFirstLoad: boolean) {
+    this.loading = true;
+
+    this.subs.add(
+      this.chatroomService.getHistoryPaged(this.chatId, this.skip, this.take).subscribe({
+        next: (res) => {
+          if (!res?.isSuccess) {
+            console.error('Failed to fetch messages:', res?.errorMessage);
+            this.loading = false;
+            return;
+          }
+
+          const pageDesc: any[] = res.data || [];
+          if (pageDesc.length === 0) {
+            this.allLoaded = true;
+            this.loading = false;
+            return;
+          }
+
+          // Backend returns DESC by SentAt. Keep DESC ordering (newest -> oldest)
+          const page = [...pageDesc];
+
+          if (isFirstLoad) {
+            this.messageList = page;
+          } else {
+            // For DESC lists, older messages come after current list, so append them
+            const box = this.scrollMe?.nativeElement;
+            const prevScrollTop = box?.scrollTop || 0;
+
+
+            // After DOM update, restore previous scrollTop so viewport stays anchored
+            setTimeout(() => {
+              if (!box) return;
+              box.scrollTop = prevScrollTop;
+            }, 0);
+          }
+
+          // Update skip for next page
+          this.skip += page.length;
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error fetching messages:', error);
+          this.loading = false;
+        },
+      })
+    );
+  }
 }
-
-
-
-

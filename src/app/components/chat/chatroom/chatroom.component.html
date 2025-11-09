@@ -2,11 +2,11 @@
 
     <div class="header">
         <app-chatheader (someEvent)="deleteMessage($event)" [chatroomMenu]="chatroomMenu"
-            [headerBackName]="headerBackName" [HeaderNames]="HeaderNames"></app-chatheader>
+            [headerBackName]="headerBackName" [HeaderNames]="otherUserName" [otherUserId]="otherUserId"></app-chatheader>
     </div>
     <div class="main-container">
         <div class="chat-area-container">
-            <div class="chat-area-main-container " #scrollMe [scrollTop]="scrollMe.scrollHeight">
+            <div class="chat-area-main-container " #scrollMe>
                 <div class="messages" *ngFor="let message of messageList">
                     <app-chatmessages [message]="message" [currentUser]="currentUser"></app-chatmessages>
                 </div>

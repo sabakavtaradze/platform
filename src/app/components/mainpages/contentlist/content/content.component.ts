@@ -7,6 +7,7 @@ import { ContentzoomdialogComponent } from './contentzoomdialog/contentzoomdialo
 import { AuthenticatedUser, UserAttributes } from 'src/app/interfaces/authentication/user';
 import { PostService } from 'src/app/services/post/post.service';
 import { UserService } from 'src/app/services/user/user.service';
+import { PostLikeService } from 'src/app/services/post/post-like.service';
 
 @Component({
   selector: 'app-content',
@@ -33,12 +34,14 @@ export class ContentComponent implements OnInit, OnDestroy {
     private authService: AuthenticationService,
     private postService: PostService,
     public dialog: MatDialog,
-    private userService: UserService
+    private userService: UserService,
+    private postLikeService: PostLikeService
   ) {}
 
   ngOnInit() {
     this.auth();
     this.loadPost(this.postId);
+
   }
 
   ngOnDestroy(): void {}
@@ -46,8 +49,11 @@ export class ContentComponent implements OnInit, OnDestroy {
   loadPost(id: number) {
     this.postService.getPostById(id).subscribe(res => {
       this.content = res.data;
+      console.log(res.data)
       this.checkOwner();
       this.loadProfilePicture();
+      this.getLikesCount();
+      this.doesIlikePost();
     });
   }
 
@@ -116,9 +122,28 @@ export class ContentComponent implements OnInit, OnDestroy {
       this.loading = false;
     }
   }
-  likePost(){}
-
-  removeLikePost(){}
+  toggleLike() {
+    this.postLikeService.toggleLike(this.content.postID).subscribe((res) => {
+      if (res?.isSuccess) {
+        this.doesIlikePost();
+      }
+      this.getLikesCount();
+    })
+  };
+  getLikesCount(){
+    this.postLikeService.getLikesCount(this.content.postID).subscribe((res) => {
+      console.log(this.alreadyLiked);
+      console.log(this.contentLikes)
+      this.contentLikes = res.data;
+      console.log(res)
+    });
+  }
+  doesIlikePost(){
+    this.postLikeService.userLiked(this.content.postID).subscribe((res) => {
+      this.alreadyLiked = res.data;
+      console.log(this.alreadyLiked)
+    });
+  } 
 
   handleImageError() {
     this.profilePicture = '';

@@ -1,78 +1,93 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { Auth } from 'aws-amplify';
 import { APIService } from 'src/app/API.service';
 import { APIServicem } from 'src/app/apiservicem';
 import { chatUsersList } from 'src/app/interfaces/chat/interfaceChat';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
+import { ChatroomService } from 'src/app/services/user/chatroom/chatroom.service';
+import { SignalRService } from 'src/app/services/SignalRService/signal-rservice.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-chatusers',
   templateUrl: './chatusers.component.html',
   styleUrls: ['./chatusers.component.scss']
 })
-export class ChatusersComponent {
+export class ChatusersComponent implements OnInit, OnDestroy {
   headerBackName: string = '/chat'
   currentUser: any;
   ChatName: string = "Contacts"
-  constructor(private router: Router, public apiservice: APIService, private apiservicem: APIServicem, private authGuard: AuthenticationService) {
+  private subs = new Subscription();
+  chats: chatUsersList[] = []
+
+  constructor(
+    private router: Router,
+    public apiservice: APIService,
+    private apiservicem: APIServicem,
+    private authService: AuthenticationService,
+    private chatroomService: ChatroomService
+    , private chatSignalR: SignalRService
+  ) {
   }
 
  
   async createChat(x: any) {
     try {
-      let userchats = await this.apiservicem.getchatroom(this.currentUser.attributes.sub)
-      let commonchats = userchats.Chatrooms?.items || []
-      let commonId: any[] = []
-      let chatroom = commonchats.filter((chat: { chatroom: { users: { items: any[]; }; }; }) =>
-        chat.chatroom.users.items.some(item => {
-          if (item.user.id === x.id) {
-            commonId.push(chat)
+      this.subs.add(
+        this.chatroomService.openOrCreateRoom(x.id).subscribe(response => {
+          if (response && response.data) {
+            this.router.navigate(['/chat/chatroom/' + response.data]);
           }
-
         })
       );
-      if (commonId.length > 0) {
-        this.router.navigate(['/chat/chatroom/' + commonId[0].chatroom.id]);
-      } else {
-        let content = {
-        }
-        let chatRoom = await this.apiservice.CreateChatroom(content)
-        if (chatRoom) {
-          let userChatRoomContent = {
-            chatroomId: chatRoom.id,
-            userId: x.id
-          }
-          let myuserChatRoomContent = {
-            chatroomId: chatRoom.id,
-            userId: this.currentUser.attributes.sub
-          }
-          let userChatRoom = await this.apiservice.CreateUserChatroom(userChatRoomContent)
-          let myuserChatRoom = await this.apiservice.CreateUserChatroom(myuserChatRoomContent)
-          this.router.navigate(['/chat/chatroom/' + chatRoom.id]);
-        }
-
-      }
-
     } catch (error) {
       console.log(error)
     }
   }
+
   async auth() {
     try {
-      this.currentUser = await this.authGuard.GuardUserAuth()
+      this.currentUser =  this.authService.GuardUserAuth()
     }
     catch (error) {
       console.error(error)
     }
   }
-  chats: chatUsersList[] = []
+getChatrooms(){
+  this.subs.add(
+    this.chatroomService.getChatRooms().subscribe((result) => {
+      console.log(result)
+      this.chats = result.data.filter(item => item !== null) as chatUsersList[];
+    })
+  );
+}
 
   ngOnInit() {
-    this.auth()
-    this.apiservice.ListUsers().then((result) => {
-      console.log(result)
-      this.chats = result.items.filter(item => item !== null) as chatUsersList[];
-    })
+    (async () => {
+      await this.auth();
+      this.getChatrooms();
+
+      // start SignalR connection and listen for messages
+      try {
+        this.chatSignalR.startConnection();
+        this.chatSignalR.listenForMessages();
+      } catch (e) {
+        console.warn('SignalR start failed', e);
+      }
+
+      // subscribe to incoming messages and refresh chat list or update UI
+      this.subs.add(
+        this.chatSignalR.messageReceived$.subscribe(msg => {
+          if (!msg) return;
+          console.log('SignalR message in chatusers:', msg);
+          // simple strategy: refresh chatrooms when a new message arrives
+          this.getChatrooms();
+        })
+      );
+    })();
+  }
+
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 }

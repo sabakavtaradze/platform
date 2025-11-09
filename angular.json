@@ -75,13 +75,11 @@
           },
           "defaultConfiguration": "development"
         },
-        "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
-          "options": {
-            "browserTarget": "platform:build"
-          }
-        },
-        "test": {
+    "extract-i18n": {
+  "builder": "@angular-devkit/build-angular:extract-i18n",
+  "options": {
+    "buildTarget": "platform:build"
+  },        "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "polyfills": [

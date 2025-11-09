@@ -11,11 +11,12 @@ export interface chatList {
     updatedAt: string;
 }
 export interface chatUsersList {
-    createdAt?:string;
-    id?:string;
-    name?:string;
-    status?:string;
-    updatedAt?:string;
-    userid?:string;
-    profilepicture?:string;
+    chatRoomID: number;           // backend may use this exact casing
+    chatRoomId: number;           // camelCase alias
+    lastMessageContent: string;
+    lastMessageSenderId: number;
+    lastMessageSentAt: string;    // ISO datetime
+    otherUserId: number;
+    otherUsername: string;
+    unreadCount?: number;
 }

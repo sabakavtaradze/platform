@@ -15,10 +15,11 @@
       
       
         <div *ngIf="!searchBoolean" class="messages-main-container">
-            <i  [routerLink]="['/chat']" class="bi bi-envelope"></i>
+            <a [routerLink]="['/chat']">
+                <i class="bi bi-envelope"></i>
+            </a>
             <div *ngIf="messagesAlert" class="exclamation-container">
-                <i  class="bi bi-exclamation-lg"></i>
-
+                <i class="bi bi-exclamation-lg"></i>
             </div>
         </div>
         <div *ngIf="searchBoolean"  class="messages-main-container">
@@ -33,11 +34,10 @@
             <div  class="users-main-container">
                 <div  *ngFor="let user of users" class="users-container">
                     <!-- <a></a> -->
-                    <div [routerLink]="['/profile/'+ user.id]" (click)="searchClick()" class="user">
-                        <!-- <div (error)="handleImageError()"  *ngIf="user.profilepicture && user.profilepicture.length > 0" class="user-image" [style.background-image]="'url(https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/' + user.profilepicture + ')'"></div> -->
-                        <img (error)="handleImageError()"  *ngIf="user.profilepicture && user.profilepicture.length > 0"  [src]="'https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/' +user.profilepicture" alt="">
-                        <div class="user-name">{{user.name}}</div>
-                    </div>
+                    <a [routerLink]="['/profile/'+ user.userID]" (click)="searchClick()" class="user">
+                        <img (error)="handleImageError()" *ngIf="user.userProfilePictureUrl && user.userProfilePictureUrl.length > 0" [src]="user.userProfilePictureUrl" alt="">
+                        <div class="user-name">{{user.userFirstName}} {{user.userLastName}}</div>
+                    </a>
                 </div>
 
             </div>

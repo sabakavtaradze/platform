@@ -63,12 +63,10 @@ export class ChatmessagesComponent {
   }
   }
   ngOnInit(){
-    this.imageProcess(this.message)
-    if(this.currentUser.attributes.sub === this.message.userID){
+    if(this.currentUser.attributes.sub == this.message.senderID){
       this.owner = true;
       
     }
-    
   }
 
 }

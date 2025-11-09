@@ -11,6 +11,7 @@ export class ChatheaderComponent {
 @Input() chatroomMenu?:boolean = false;
 @Input() ChatName? :string = ""
 @Input() HeaderNames?: string = ""
+@Input() otherUserId?: number = 0
 @Output() someEvent = new EventEmitter<string>();
 constructor(){
   
@@ -29,5 +30,6 @@ deleteChat(){
 
 ngOnInit(){
   console.log(this.chatroomMenu)
+  console.log(this.otherUserId)
 }
 }

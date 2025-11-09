@@ -1,9 +1,9 @@
 <div [class.owner]="owner" class="message-main-container">
     <div class="message-container">
-        <span class="time" *ngIf="message.createdAt">{{ message.createdAt | messageTime }}</span>
-        <div *ngIf="message.text" class="message">
+        <span class="time" *ngIf="message.sentAt">{{ message.sentAt | messageTime }}</span>
+        <div *ngIf="message.content" class="message">
 
-            <p *ngIf="message.text">{{message.text}}</p>
+            <p *ngIf="message.content">{{message.content}}</p>
 
         </div>
         <div class="image-main-container row" *ngIf="images">

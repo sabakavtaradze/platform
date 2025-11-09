@@ -5,7 +5,7 @@
                 <button [routerLink]="['']"><i class="bi bi-arrow-90deg-left"></i> </button>
             </div>
             <div class="profile-header-list">
-                <button [routerLink]="['/chat']"><i class="bi bi-envelope"></i></button>
+                <button [routerLink]="['/chat/' + profileUser.userID]"><i class="bi bi-envelope"></i></button>
             </div>
         </div>
     </div>
@@ -45,7 +45,7 @@
         <div class="stats-main-container">
             <div class="stats-container">
                 <div class="followers-container">
-                    <div class="followers-number">{{friendCount}}</div>
+                        <div class="followers-number">{{FollowersCount}}</div>
                     <div class="followers-text">followers</div>
                 </div>
                 <div class="following-container">
@@ -72,12 +72,12 @@
         <div class="directives-main-container">
             <div *ngIf="!profileOwner" class="directives-container">
                 <div class="directives-list">
-                    <button class="follow" *ngIf="!userIsFollowing" [disabled]="process" (click)="addFriend(profileUser)">Follow</button>
-                    <button class="following" *ngIf="userIsFollowing" [disabled]="process" (click)="removeFriend()">Following</button>
+                    <button class="follow" *ngIf="!userIsFollowing" [disabled]="process" (click)="FollowUser(profileUser)">Follow</button>
+                    <button class="following" *ngIf="userIsFollowing" [disabled]="process" (click)="UnfollowUser(profileUser)">Following</button>
                     
                 </div>
                 <div class="directives-list">
-                    <button class="message" (click)="createChat(profileUser)">Message</button>
+                    <button class="message" (click)="messageUser()">Message</button>
                 </div>
             </div>
         </div>
@@ -94,7 +94,7 @@
             <div class="content-container row" *ngIf="profileImages">
             
                 <div  class="col-4 image-container" *ngFor="let image of profileImages">
-                    <img (click)="openImageDialog(image)" [src]="s3BucketUrl + image.images[0]" alt="">
+                    <img (click)="openImageDialog(image)" [src]="s3BucketUrl + image" alt="">
                 </div>
                 
             </div>  

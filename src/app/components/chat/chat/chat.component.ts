@@ -1,51 +1,63 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { APIService } from 'src/app/API.service';
 import { chatList } from 'src/app/interfaces/chat/interfaceChat';
-import Auth from '@aws-amplify/auth';
 import { Router } from '@angular/router';
 import { APIServicem } from 'src/app/apiservicem';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
+import { ChatroomService } from 'src/app/services/user/chatroom/chatroom.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss']
 })
-export class ChatComponent {
-  currentUser: String = ""
-  headerBackName: string = ''
+export class ChatComponent implements OnInit, OnDestroy {
+  currentUser: any = '';
+  headerBackName: string = '';
   chatroom: boolean = true;
   authuser: any;
   messageSubscription: any;
   messageList: any;
   chatUsersList: any;
-  ChatName = "Chat"
-  constructor(private router: Router, public apiservice: APIService, private am: APIServicem, private authGuard: AuthenticationService) { }
+  ChatName = 'Chat';
+  chatlistt: any[] = [];
+  private subs = new Subscription();
+
+  constructor(
+    private router: Router,
+    public apiservice: APIService,
+    private am: APIServicem,
+    private authService: AuthenticationService,
+    private chatroomService: ChatroomService
+  ) {}
+
   chatLink(x: any) {
-    console.log(x)
-    this.router.navigate(['/chat/chatroom/' + x.chatroom.id]);
+    console.log(x);
+    const id = x.chatRoomId || x.chatRoomID || x.chatroom?.id || x.chatroom?.chatroom?.id || x.chatroom?.id;
+    if (id) this.router.navigate(['/chat/chatroom/' + id]);
   }
-  chatlistt: any = [];
 
 
   async chatlist() {
     try {
-      this.currentUser = this.authuser.attributes.sub
-      this.chatUsersList = await this.am.getchatroom(this.authuser.attributes.sub)
-      console.log(this.chatUsersList)
-      if (this.chatUsersList.Chatrooms?.items) {
-        this.chatlistt = this.chatUsersList.Chatrooms?.items
-
-        this.chatlistt.sort((a: any, b: any) => {
-          if (a.chatroom.LastMessage !== null && a.chatroom.LastMessage !== undefined) {
-            return a.chatroom.LastMessage.updatedAt > b.chatroom.LastMessage.updatedAt ? -1 : 1
+      this.currentUser = this.authuser?.attributes?.sub;
+      // use ChatroomService to get chatrooms (returns BaseResponse<any[]>)
+      this.subs.add(
+        this.chatroomService.getChatRooms().subscribe((res) => {
+          if (res?.isSuccess && Array.isArray(res.data)) {
+            this.chatlistt = res.data;
+            // optionally sort if lastMessageSentAt or chatroom.LastMessage exists
+            this.chatlistt.sort((a: any, b: any) => {
+              const aDate = a.lastMessageSentAt || a.chatroom?.LastMessage?.updatedAt || '';
+              const bDate = b.lastMessageSentAt || b.chatroom?.LastMessage?.updatedAt || '';
+              if (!aDate || !bDate) return 0;
+              return aDate > bDate ? -1 : 1;
+            });
+            console.log(this.chatlistt);
           }
-          else{
-            return
-          }
-        });
-        console.log(this.chatlistt)
-      }
+        })
+      );
     } catch (error) {
       console.error(error)
     }
@@ -73,19 +85,18 @@ export class ChatComponent {
 
   async userAuth() {
     try {
-      this.authuser =
-        // this.authuser = await Auth.currentAuthenticatedUser()
-        this.authuser = await this.authGuard.GuardUserAuth()
-      console.log(this.authuser)
-      // 
-      return this.chatlist(), this.newtry(), this.messagesseen()
-    }
-    catch (error) {
-      console.error(error)
+      this.authuser = await this.authService.GuardUserAuth();
+      console.log(this.authuser);
+      await this.chatlist();
+      this.newtry();
+      this.messagesseen();
+    } catch (error) {
+      console.error(error);
     }
   }
+
   ngOnInit() {
-    this.userAuth()
+    this.userAuth();
   }
 
 
@@ -98,9 +109,9 @@ export class ChatComponent {
       userId: { eq: this.authuser.attributes.sub }
     };
     this.messageSubscription = this.apiservice.OnUpdateUserChatroomListener(filter).subscribe((message) => {
-      this.chatlist()
-      this.messagesseen()
-      return message
+      this.chatlist();
+      this.messagesseen();
+      return message;
     });
   }
 
@@ -108,6 +119,7 @@ export class ChatComponent {
     if (this.messageSubscription) {
       this.messageSubscription.unsubscribe();
     }
+    this.subs.unsubscribe();
   }
 
 

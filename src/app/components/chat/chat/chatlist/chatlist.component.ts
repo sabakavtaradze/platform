@@ -1,6 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { APIService } from 'src/app/API.service';
-import { chatList } from 'src/app/interfaces/chat/interfaceChat';
+import { Component, Input } from '@angular/core';
+import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
   selector: 'app-chatlist',
@@ -8,56 +7,42 @@ import { chatList } from 'src/app/interfaces/chat/interfaceChat';
   styleUrls: ['./chatlist.component.scss']
 })
 export class ChatlistComponent {
-  @Input() item!: any;
+  @Input() item!: any; // chat summary object
   @Input() currentUser!: any;
-  usersFiltered: any;
-  profilepicture: string = ""
-  @Input() authuser: any;
-  messageSubscription: any;
-  @Output() someEvent = new EventEmitter<any>();
-  errorLoadingImage = false
-  lastSenderName: any;
-  constructor(private apiservice: APIService) {
+  errorLoadingImage = false;
+  usersFiltered: string = '';
+  profilepicture: string = '';
+  lastSenderName: string | null = null;
+
+  constructor(private userService: UserService) {}
+
+  ngOnInit() {
+    this.syncFromItem();
+    this.getUser()
   }
-  update() {
-    let notMe = this.item.chatroom.users.items.filter((item: any) => item.user.id !== this.currentUser);
-    this.profilepicture = notMe[0].profilepicture
-    let Me = this.item.chatroom.users.items.filter((item: any) => item.user.id == this.currentUser);
-    if (notMe.length > 0) {
-      // console.log("userFiltered")
-      this.usersFiltered = notMe.map((item: any) => item.user.name).join(', ');
-      if (notMe.length > 0) {
-        this.profilepicture = notMe[0].user.profilepicture
-      }
+  getUser(){
+    this.userService.getUserById(this.item.otherUserId).subscribe(response => {
+      console.log(response)
+      this.usersFiltered = response.data?.username || '';
+      this.profilepicture = response.data?.userProfilePictureUrl || '';
+    });
+  }
+  // Map summary fields from backend to local view fields
+  private syncFromItem() {
+    if (!this.item) return;
+    this.usersFiltered = this.item.otherUsername || this.item.name || '';
+    this.profilepicture = this.item.profilepicture || '';
+    if (this.item.lastMessageSenderId !== undefined && this.item.lastMessageSenderId !== null) {
+      this.lastSenderName = this.item.lastMessageSenderId == this.currentUser ? 'you' : (this.item.otherUsername || '').split(' ')[0];
     } else {
-      // console.log("notFIltered")
-      this.usersFiltered = Me.map((item: any) => item.user.name).join(', ');
-
+      this.lastSenderName = null;
     }
-    if (this.item.chatroom.LastMessage !== undefined && this.item.chatroom.LastMessage !== null) {
-
-      let lastMessageSender = this.item.chatroom.users.items.filter((item: any) => item.user.id == this.item.chatroom.LastMessage.userID);
-      let myName = Me[0].user.id
-      let sender = lastMessageSender[0].user.id
-      if (lastMessageSender !== undefined && lastMessageSender !== null) {
-        if (myName === sender) {
-          this.lastSenderName = "you"
-        }
-        if (myName !== sender) {
-          let fullname = lastMessageSender[0].user.name
-          this.lastSenderName = fullname.split(' ')[0];
-
-        }
-      }
-    }
-
   }
 
   handleImageError() {
     this.errorLoadingImage = true;
   }
-  ngOnInit() {
-    this.update()
-  }
-
 }
+ 
+
+

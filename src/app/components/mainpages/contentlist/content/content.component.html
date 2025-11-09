@@ -12,7 +12,7 @@
                         alt="">
                 </div>
                 <div class="content-info-detail">
-                    <div class="content-info-name">{{content.postOwner.userFirstName}}  {{content.postOwner.userLastName}}</div>
+                    <div class="content-info-name">{{content.postOwner.userFirstName}}   {{content.postOwner.userLastName}}</div>
                     <div class="content-info-date">{{content.createdAt | messageTime}} </div>
                 </div>
             </div>
@@ -91,9 +91,9 @@
                         <div class="content-options-list-numbers">{{content.dislike}}</div>
                     </button> -->
                     <button class="content-options-list ">
-                        <button (click)="likePost()" [disabled]="accessLike" *ngIf="!alreadyLiked"> <i
+                        <button (click)="toggleLike()" [disabled]="accessLike" *ngIf="!alreadyLiked"> <i
                                 class="bi bi-balloon-heart"></i> </button>
-                        <button (click)="removeLikePost()" [disabled]="accessLike" *ngIf="alreadyLiked"> <i
+                        <button (click)="toggleLike()" [disabled]="accessLike" *ngIf="alreadyLiked"> <i
                                 class="liked bi bi-balloon-heart-fill"></i> </button>
                         <div *ngIf="contentLikes > 0" class="content-options-list-numbers">{{contentLikes}}</div>
                     </button>

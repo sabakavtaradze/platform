@@ -1,10 +1,10 @@
-<app-chatheader [ChatName]="ChatName"[headerBackName]="headerBackName" [chatroom]="chatroom"></app-chatheader>
+<app-chatheader [ChatName]="ChatName" [headerBackName]="headerBackName" [chatroom]="chatroom"></app-chatheader>
 
 <div class="container">
 <!-- <button  >users</button> -->
-<div (click)="chatLink(chat)"  class="chat-list-container" *ngFor="let chat of chatlistt">
+<div (click)="chatLink(chat)" class="chat-list-container" *ngFor="let chat of chatlistt">
     <!-- (someEvent)="updateMessage($event)" -->
-    <app-chatlist  [item]="chat" [authuser]="authuser" [currentUser]="currentUser"></app-chatlist>
+    <app-chatlist [item]="chat"  [currentUser]="currentUser"></app-chatlist>
 </div>
 
 </div>

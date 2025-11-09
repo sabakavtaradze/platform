@@ -2,6 +2,21 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+interface ServiceResponse<T> {
+  data: T;
+  isSuccess: boolean;
+  message: string;
+  errorMessage?: string;
+}
+
+interface UserPublicDTO {
+  id: number;
+  name: string;
+  email: string;
+  profilePicture?: string;
+  status?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -76,6 +91,14 @@ export class UserService {
 // 🧩 get user profile by id
 getUserById(id:number):Observable<any>{
   return this.http.get(`${this.baseUrl}/${id}`, {
+    headers: this.getAuthHeaders()
+  });
+}
+
+// 🔍 Search users by name
+searchUsers(query: string): Observable<ServiceResponse<UserPublicDTO[]>> {
+  return this.http.get<ServiceResponse<UserPublicDTO[]>>(`${this.baseUrl}/search`, {
+    params: { q: query },
     headers: this.getAuthHeaders()
   });
 }

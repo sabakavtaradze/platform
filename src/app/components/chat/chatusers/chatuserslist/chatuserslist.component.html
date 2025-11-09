@@ -1,11 +1,11 @@
 <div class="main-container">
     <div class="image-container">
-        <img (error)="handleImageError()"  *ngIf="item !== undefined && item.profilepicture !==undefined && item.profilepicture !== null && item.profilepicture.length > 0" class="content-info-detail-picture" [src]="'https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/' +item.profilepicture" alt="">
+        <img (error)="handleImageError()"  *ngIf="user !== undefined && user.profilepicture !==undefined && user.profilepicture !== null && user.profilepicture.length > 0" class="content-info-detail-picture" [src]="user.profilepicture" alt="">
 
     <!-- <img [src]="item.profilepicture" alt=""> -->
 </div>
 <div class="content">
-    <div class="name">{{item.name}}</div>
-    <p>{{item.status}}</p>
+    <div class="name">{{user.name}}</div>
+    <p>{{user.lastMessageContent}}</p>
 </div>
 </div>

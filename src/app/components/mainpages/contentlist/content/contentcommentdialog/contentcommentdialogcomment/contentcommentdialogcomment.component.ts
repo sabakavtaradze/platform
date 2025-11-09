@@ -13,14 +13,10 @@ export class ContentcommentdialogcommentComponent {
   profilepicture = ""
 images: any[] = [];
 errorLoadingImage = false
+
 constructor(private apiservice: APIService, private userService: UserService){}
 
-async getUser(){
-  try{
-  }catch(error){
-    console.log(error)
-  }
-}
+
 getprofilepicture(){
   this.userService.getProfilePicture(this.comment.author.userID).subscribe(item => {
     this.profilepicture = item.data
@@ -30,10 +26,17 @@ getprofilepicture(){
 handleImageError() {
   this.errorLoadingImage = true;
 }
+getUser(){
+  this.userService.getUserById(this.comment.author.userID).subscribe(response => {
+    this.user = response.data;
+    console.log(this.user)
+  });
+}
   ngOnInit(): void {
     this.getUser()
     this.getprofilepicture()
     console.log(this.comment)
+    this.getUser()
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     //Add 'implements OnInit' to the class.
     

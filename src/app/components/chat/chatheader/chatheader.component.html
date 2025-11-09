@@ -12,7 +12,7 @@
     <div class="left-side">
 
  
-        <div *ngIf="HeaderNames" class="names-container">
+        <div  [routerLink]="'/profile/' + otherUserId" *ngIf="HeaderNames ||  otherUserId" class="names-container">
             {{HeaderNames}}
         </div>
         <div *ngIf="chatroomMenu" class="chatroom-menu-container">
