@@ -11,7 +11,10 @@ import { AuthenticationService } from 'src/app/services/user/authentication/auth
 import { HeaderService } from 'src/app/services/header.service';
 import { PostService } from 'src/app/services/post/post.service';
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> abe3a20 (removed aws key)
 
 @Component({
   selector: 'app-mainpage',
