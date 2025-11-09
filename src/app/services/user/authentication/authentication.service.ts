@@ -59,13 +59,8 @@ interface SendCodeByEmailDTO {
 }
 
 interface VerificationDTO {
-<<<<<<< HEAD
   userID?: number;   // optional
   email?: string;    // optional
-=======
-  userID: number;
-  email: string;
->>>>>>> 8d5ef69 (removed mostly aws and created functions for .net)
   code: string;
 }
 
@@ -203,17 +198,10 @@ export class AuthenticationService implements CanActivate {
     return this.http.post<RegistrationResponse>(url, data);
   }
 
-<<<<<<< HEAD
-verifyByEmail(data: { email: string; code: string }): Observable<RegistrationResponse> {
-  const url = `${this.apiUrlBase}verify-email`;
-  return this.http.post<RegistrationResponse>(url, data);
-}
-=======
   verifyByEmail(data: VerificationDTO): Observable<RegistrationResponse> {
     const url = `${this.apiUrlBase}verify-email`;
     return this.http.post<RegistrationResponse>(url, data);
   }
->>>>>>> 8d5ef69 (removed mostly aws and created functions for .net)
 
   /* ---------------------------------------------
      Auth Guard

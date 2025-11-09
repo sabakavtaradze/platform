@@ -48,86 +48,6 @@ export class RegisterconfromComponent implements OnInit {
     
     // Automatically attempt to resend the code using available data
     this.resendCode();
-<<<<<<< HEAD
-  }
-
-  /**
-   * Unifies the logic for resending the verification code.
-   * Calls sendCodeByID if UserID is valid, otherwise calls sendCodeByEmail if email is present.
-   */
- resendCode() {
-  this.loading = true;
-
-  const emailToUse = (this.manualEmail || this.email).trim().toLowerCase();
-  if (!emailToUse) {
-    this.loading = false;
-    alert("Enter your email manually.");
-    this.showManualEmailInput = true;
-    return;
-  }
-
-  this.authService.sendCodeByEmail(emailToUse).subscribe({
-    next: (response) => {
-      this.loading = false;
-      if (response.isSuccess) alert("Code sent.");
-      else alert(response.errorMessage || 'Failed to send code.');
-    },
-    error: (err: HttpErrorResponse) => {
-      this.loading = false;
-      alert(this.errorService.extractMessage(err));
-    }
-  });
-}
-  /**
-   * 🔑 NEW UNIFIED METHOD: Determines whether to call verifyByID or verifyByEmail.
-   */
- handleVerification() {
-  this.loading = true;
-
-  const emailToUse = (this.manualEmail || this.email).trim().toLowerCase();
-  const codeToUse = this.code.trim();
-
-  if (!codeToUse) {
-    this.loading = false;
-    alert('Please enter the verification code.');
-    return;
-  }
-
-  const dto = { email: emailToUse, code: codeToUse };
-
-  this.authService.verifyByEmail(dto).subscribe({
-    next: (response) => {
-      this.loading = false;
-      if (response.isSuccess) {
-        alert("Account verified successfully!");
-        this.handleSuccessfulVerification(false);
-      } else {
-        alert(response.errorMessage || 'Invalid code');
-      }
-    },
-    error: (err: HttpErrorResponse) => {
-      this.loading = false;
-      alert(this.errorService.extractMessage(err));
-    }
-  });
-}
-
-  /**
-   * Handles cleanup and navigation after successful verification/login.
-   */
-  handleSuccessfulVerification(forceLogin: boolean = false) {
-    // Cleanup local storage items used for verification state
-    localStorage.removeItem("verifId");
-    localStorage.removeItem("verifpsw");
-    localStorage.removeItem("UserID");
-    
-    if (forceLogin || !this.authService.getAuthToken()) {
-        this.router.navigate(['/auth/login']); 
-    } else {
-        this.router.navigate(['']); 
-    }
-  }
-=======
   }
 
   /**
@@ -262,5 +182,4 @@ export class RegisterconfromComponent implements OnInit {
         this.router.navigate(['/main']); 
     }
   }
->>>>>>> 8d5ef69 (removed mostly aws and created functions for .net)
 }
