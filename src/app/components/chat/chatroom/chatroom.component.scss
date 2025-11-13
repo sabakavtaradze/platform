@@ -1,122 +1,184 @@
 .body-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 100dvh; // occupy full viewport
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    // display: flex;
+  }
+
+  .main-container {
+    position: relative;
     display: flex;
     flex-direction: column;
-    position: relative;
+    flex: 1 1 auto;
+    overflow: hidden; // contain scroll area
 
-    .header {
-        position: sticky;
-        top: 0;
-        z-index: 2;
-        // display: flex;
+    .chat-area-container {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      min-height: 0; // allow flex shrinking
     }
 
-    .main-container {
-        position: relative;
-        // min-height: 87%;
+    .chat-area-main-container {
+      flex: 1 1 0;
+      min-height: 0; // allow flex shrinking
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      flex-direction: column; // natural top->bottom order
+      padding: 0 0 0.75rem 0; // dynamic bottom padding set by TS
+    }
+
+    .message-main-container {
+      flex: 0 0 auto;
+      position: fixed; /* anchor at viewport bottom */
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      background-color: white;
+      z-index: 10;
+      box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.06);
+      padding-bottom: env(safe-area-inset-bottom);
+
+      .message-container {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
+        padding-left: 1rem;
+        padding-right: 1rem;
 
-        .chat-area-container {
-            // display: flex;
-            // min-height: -webkit-fill-available;
-            flex: 1;
-            position: sticky;
-        }
-
-        .chat-area-main-container {
-            // max-height: 35rem;
-            overflow-y: scroll;
-            flex: 1;
+        .attach-container {
+          width: 5rem;
+          display: flex;
+          align-items: center;
+          button {
+            width: 3rem;
+            height: 3rem;
             display: flex;
-            flex-direction: column-reverse;
-            height: 86vh;
-            padding-bottom: 2rem;
-        }
+            justify-content: center;
+            background-color: #a974ff;
+            border-radius: 2rem;
+            border: none;
+            align-items: center;
 
-
-
-
-
-        .message-main-container {
-            position: sticky;
-            bottom: 0;
-            width: 100%;
-            background-color: white;
-
-            .message-container {
-                display: flex;
-                flex-direction: row;
-                padding-left: 1rem;
-                padding-right: 1rem;
-
-                .attach-container {
-                    width: 5rem;
-                    display: flex;
-                    align-items: center;
-                    button {
-                        width: 3rem;
-                        height: 3rem;
-                        display: flex;
-                        justify-content: center;
-                        background-color: #a974ff;
-                        border-radius: 2rem;
-                        border: none;
-                        align-items: center;
-
-                        i {
-                            font-size:  1.4rem;
-                            color: white;
-                        }
-                    }
-
-                }
-
-                form {
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: space-between;
-                    // background-color: white;
-                    align-items: center;
-                    width: 100%;
-                    .text-area{
-                        width: 100%;
-                        ::ng-deep{
-                            .mdc-text-field--filled.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-floating-label, .mdc-text-field--filled.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-floating-label--float-above{
-                                color: gray;
-                            }
-                            .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple::before{
-                                border-bottom-color: #8f8f8f;
-                            }
-                            .mat-mdc-form-field-subscript-wrapper{
-                                display: none;
-                            }
-                        }
-                    }
-                    .sendMessage-container {
-                        button:active {
-                            background-color: rgb(0 163 247 / 51%);
-                        }
-
-                        button {
-                            border: none;
-                            background-color: transparent;
-                            width: 3rem;
-                            height: 3rem;
-                            display: flex;
-                            justify-content: center;
-                            background-color: #58b9ff;
-                            border-radius: 3rem;
-                            align-items: center;
-
-                            i {
-                                background-color: transparent;
-                                color: white;
-                                font-size: 1.4rem;
-                            }
-                        }
-                    }
-                }
+            i {
+              font-size: 1.4rem;
+              color: white;
             }
+          }
         }
+
+        form {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          // background-color: white;
+          align-items: center;
+          width: 100%;
+          .text-area {
+            width: 100%;
+            ::ng-deep {
+              .mdc-text-field--filled.mdc-text-field--invalid:not(.mdc-text-field--disabled)
+                .mdc-floating-label,
+              .mdc-text-field--filled.mdc-text-field--invalid:not(.mdc-text-field--disabled)
+                .mdc-floating-label--float-above {
+                color: gray;
+              }
+              .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple::before {
+                border-bottom-color: #8f8f8f;
+              }
+              .mat-mdc-form-field-subscript-wrapper {
+                display: none;
+              }
+            }
+          }
+          .sendMessage-container {
+            button:active {
+              background-color: rgb(0 163 247 / 51%);
+            }
+
+            button {
+              border: none;
+              background-color: transparent;
+              width: 3rem;
+              height: 3rem;
+              display: flex;
+              justify-content: center;
+              background-color: #58b9ff;
+              border-radius: 3rem;
+              align-items: center;
+
+              i {
+                background-color: transparent;
+                color: white;
+                font-size: 1.4rem;
+              }
+            }
+          }
+        }
+      }
+
+      /* Selected images preview (borrowed from Createcontentdialog styles) */
+      .selectedImage {
+        width: 100%;
+        padding: 0.4rem 0.75rem 0.6rem;
+        max-height: 32vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+
+        .selectedimg {
+          margin-left: -0.25rem;
+          margin-right: -0.25rem;
+        }
+
+        .image-container {
+          position: relative;
+          padding: 0.25rem;
+
+          img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 0.55rem;
+            display: block;
+            object-fit: cover;
+            background: #f2f2f2; // fallback background
+            image-rendering: auto;
+          }
+
+          .close-container {
+            position: absolute;
+            top: 0.2rem;
+            right: 0.2rem;
+            font-size: 1.5rem;
+            color: white;
+            background-color: #cbcbcb87;
+            border-radius: 40rem;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            place-content: center;
+            align-items: center;
+
+            i {
+              color: #25396f;
+            }
+          }
+        }
+      }
     }
+  }
+}
+
+@media (max-width: 768px) {
+  .main-container .chat-area-main-container {
+    padding-top: 0; // space is set dynamically
+  }
 }

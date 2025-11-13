@@ -33,8 +33,7 @@
                 <input type="password" matInput formControlName="password">
             </mat-form-field>
 
-            <div *ngIf="authFalse" class="auth-incorrect">Email is incorrect</div>
-            <div *ngIf="usernotfound" class="auth-incorrect">Password is incorrect</div>
+            <div *ngIf="authFalse || usernotfound" class="auth-incorrect">Invalid email or password.</div>
 
             <button type="submit" [disabled]="loading || loginForm.invalid" class="signup-account">
                 Next

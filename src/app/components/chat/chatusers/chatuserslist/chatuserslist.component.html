@@ -1,11 +1,22 @@
 <div class="main-container">
-    <div class="image-container">
-        <img (error)="handleImageError()"  *ngIf="user !== undefined && user.profilepicture !==undefined && user.profilepicture !== null && user.profilepicture.length > 0" class="content-info-detail-picture" [src]="user.profilepicture" alt="">
+  <div class="image-container">
+    <img
+      (error)="handleImageError()"
+      *ngIf="
+        user !== undefined &&
+        user.profilepicture !== undefined &&
+        user.profilepicture !== null &&
+        user.profilepicture.length > 0
+      "
+      class="content-info-detail-picture"
+      [src]="user.profilepicture"
+      alt=""
+    />
 
     <!-- <img [src]="item.profilepicture" alt=""> -->
-</div>
-<div class="content">
-    <div class="name">{{user.name}}</div>
-    <p>{{user.lastMessageContent}}</p>
-</div>
+  </div>
+  <div class="content">
+    <div class="name">{{ user.name }}</div>
+    <p>{{ user.lastMessageContent | truncateWords: 10 }}</p>
+  </div>
 </div>

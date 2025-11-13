@@ -110,6 +110,11 @@ export class RegisterComponent implements OnInit {
       error: (err: HttpErrorResponse) => {
         this.loading = false;
 
+        console.error('Registration error:', err);
+        console.error('Error status:', err.status);
+        console.error('Error message:', err.error?.errorMessage || err.message);
+        console.error('Full error object:', err.error);
+
         if (
           err.status === 409 ||
           (err.error &&
@@ -117,6 +122,10 @@ export class RegisterComponent implements OnInit {
             err.error.errorMessage.includes('email already exists'))
         ) {
           this.errorEmail = true;
+        } else if (err.status === 500) {
+          this.errorEmail = false;
+          const errorMsg = err.error?.errorMessage || err.error?.message || 'Internal server error';
+          alert(`Server error: ${errorMsg}\n\nPlease check the console for more details or contact support.`);
         } else {
           this.errorEmail = false;
           alert('A server error occurred. Please try again later.');

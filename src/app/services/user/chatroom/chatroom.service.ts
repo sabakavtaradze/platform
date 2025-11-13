@@ -1,8 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
 import { BaseResponse } from 'src/app/interfaces/ResponseInterface/BaseResponse';
+import { environment } from 'src/environments/environment';
 import { AuthenticationService } from '../authentication/authentication.service';
 
 @Injectable({
@@ -14,23 +14,27 @@ export class ChatroomService {
     private authService: AuthenticationService
   ) {}
 
-  // Attach JWT from AuthenticationService
-  private getAuthHeaders(): HttpHeaders {
+  // 🔹 Attach JWT token to all requests
+  private getAuthHeaders(includeContentType: boolean = true): HttpHeaders {
     const token = this.authService.getAuthToken();
-    return new HttpHeaders({
+    let headers = new HttpHeaders({
       Authorization: token ? `Bearer ${token}` : '',
+    });
+
+    // ❗ Add Content-Type only for JSON, not for FormData
+    if (includeContentType) headers = headers.set('Content-Type', 'application/json');
+    return headers;
+  }
+
+  // ============================================================
+  // 🔹 CHATROOM MANAGEMENT
+  // ============================================================
+  getChatRooms(): Observable<BaseResponse<any[]>> {
+    return this.http.get<BaseResponse<any[]>>(`${environment.apiUrl}/api/chat/rooms`, {
+      headers: this.getAuthHeaders(),
     });
   }
 
-  // GET user chatrooms
-  getChatRooms(): Observable<BaseResponse<any[]>> {
-    return this.http.get<BaseResponse<any[]>>(
-      `${environment.apiUrl}/api/chat/rooms`,
-      { headers: this.getAuthHeaders() }
-    );
-  }
-
-  // ✅ create or open room with user
   openOrCreateRoom(otherUserId: number): Observable<BaseResponse<number>> {
     return this.http.post<BaseResponse<number>>(
       `${environment.apiUrl}/api/chat/open-or-create/${otherUserId}`,
@@ -39,28 +43,41 @@ export class ChatroomService {
     );
   }
 
-  // ✅ send directly to room id
-  // ✅ send via recipient API (text or images)
-  sendMessage(dto: {
-    recipientID: number;
-    content: string | null;
-    images: string[] | null;
-  }): Observable<BaseResponse<any>> {
-    return this.http.post<BaseResponse<any>>(
-      `${environment.apiUrl}/api/chat/send`,
-      dto,
+  // ✅ DELETE CHATROOM (Full Cascade: messages + room)
+  deleteChatRoom(chatRoomId: number): Observable<BaseResponse<boolean>> {
+    return this.http.delete<BaseResponse<boolean>>(
+      `${environment.apiUrl}/api/chat/room/${chatRoomId}`,
       { headers: this.getAuthHeaders() }
     );
   }
 
-  getChatRoomById(id: number): Observable<BaseResponse<any>> {
-    return this.http.get<BaseResponse<any>>(
-      `${environment.apiUrl}/api/chat/room/${id}`,
-      { headers: this.getAuthHeaders() }
-    );
+  // ============================================================
+  // 🔹 SEND MESSAGE (multipart/form-data): chatRoomId, content, images[]
+  // ============================================================
+  sendMessage(data: {
+    chatRoomId: number;
+    content?: string;
+    images?: File[];
+  }): Observable<BaseResponse<any>> {
+    const formData = new FormData();
+    formData.append('chatRoomId', String(data.chatRoomId));
+    if (data.content) formData.append('content', data.content);
+    data.images?.forEach((file) => formData.append('images', file, file.name));
+
+    return this.http.post<BaseResponse<any>>(`${environment.apiUrl}/api/Chat/send`, formData, {
+      headers: this.getAuthHeaders(false),
+    });
   }
-  // ✅ get history by room
-  // ✅ get history by room
+
+  // ============================================================
+  // 🔹 CHATROOM & MESSAGE DATA
+  // ============================================================
+  getChatRoomById(id: number): Observable<BaseResponse<any>> {
+    return this.http.get<BaseResponse<any>>(`${environment.apiUrl}/api/chat/room/${id}`, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
   getHistory(chatRoomId: number): Observable<BaseResponse<any[]>> {
     return this.http.get<BaseResponse<any[]>>(
       `${environment.apiUrl}/api/chat/history/${chatRoomId}`,
@@ -72,28 +89,34 @@ export class ChatroomService {
     chatRoomId: number,
     skip: number,
     take: number
-  ): Observable<BaseResponse<any[]>> {
-    return this.http.get<BaseResponse<any[]>>(
-      `${environment.apiUrl}/api/chat/history/${chatRoomId}?skip=${skip}&take=${take}`,
+  ): Observable<BaseResponse<{ messages: any[]; totalCount: number }>> {
+    return this.http.get<BaseResponse<{ messages: any[]; totalCount: number }>>(
+      `${environment.apiUrl}/api/chat/history-paged/${chatRoomId}?skip=${skip}&take=${take}`,
       { headers: this.getAuthHeaders() }
     );
   }
-  // ✅ mark read
-  // ✅ mark read
-  markRead(chatRoomId: number): Observable<BaseResponse<any>> {
-    return this.http.post<BaseResponse<any>>(
+
+  getRoomMediaUrls(chatRoomId: number, skip = 0, take = 20): Observable<BaseResponse<string[]>> {
+    return this.http.get<BaseResponse<string[]>>(
+      `${environment.apiUrl}/api/chat/media/${chatRoomId}?skip=${skip}&take=${take}`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  // ============================================================
+  // 🔹 NOTIFICATIONS
+  // ============================================================
+  markRead(chatRoomId: number): Observable<BaseResponse<boolean>> {
+    return this.http.post<BaseResponse<boolean>>(
       `${environment.apiUrl}/api/chat/mark-read/${chatRoomId}`,
       {},
       { headers: this.getAuthHeaders() }
     );
   }
 
-  // ✅ unseen count
-  // ✅ unseen count
   getUnseenCount(): Observable<BaseResponse<number>> {
-    return this.http.get<BaseResponse<number>>(
-      `${environment.apiUrl}/api/chat/unseen-count`,
-      { headers: this.getAuthHeaders() }
-    );
+    return this.http.get<BaseResponse<number>>(`${environment.apiUrl}/api/chat/unseen-count`, {
+      headers: this.getAuthHeaders(),
+    });
   }
 }

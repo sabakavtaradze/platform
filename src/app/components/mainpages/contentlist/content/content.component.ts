@@ -54,6 +54,8 @@ export class ContentComponent implements OnInit, OnDestroy {
       this.loadProfilePicture();
       this.getLikesCount();
       this.doesIlikePost();
+      console.log(this.profilePicture)
+      console.log(this.postOwner)
     });
   }
 
@@ -67,6 +69,8 @@ export class ContentComponent implements OnInit, OnDestroy {
   loadProfilePicture() {
     this.userService.getProfilePicture(this.content.postOwner.userID).subscribe(res => {
       this.profilePicture = res.data;
+      console.log(this.content.postOwner.userID)
+      console.log(res.data)
     });
   }
 
@@ -123,9 +127,11 @@ export class ContentComponent implements OnInit, OnDestroy {
     }
   }
   toggleLike() {
+    this.alreadyLiked = !this.alreadyLiked;
     this.postLikeService.toggleLike(this.content.postID).subscribe((res) => {
       if (res?.isSuccess) {
         this.doesIlikePost();
+        console.log(res)
       }
       this.getLikesCount();
     })
@@ -135,7 +141,6 @@ export class ContentComponent implements OnInit, OnDestroy {
       console.log(this.alreadyLiked);
       console.log(this.contentLikes)
       this.contentLikes = res.data;
-      console.log(res)
     });
   }
   doesIlikePost(){

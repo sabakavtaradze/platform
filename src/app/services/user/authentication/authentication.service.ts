@@ -1,9 +1,16 @@
 // src/app/services/user/authentication/authentication.service.ts
-import { HttpClient, HttpParams } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpParams,
+} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, UrlTree } from '@angular/router';
-import { Observable, catchError, of, tap } from 'rxjs';
-import { RegisterData, RegistrationResponse } from 'src/app/interfaces/authentication/register-data';
+import { Observable, catchError, of, tap, BehaviorSubject } from 'rxjs';
+import {
+  RegisterData,
+  RegistrationResponse,
+} from 'src/app/interfaces/authentication/register-data';
 import { environment } from 'src/environments/environment';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 
@@ -59,8 +66,8 @@ interface SendCodeByEmailDTO {
 }
 
 interface VerificationDTO {
-  userID?: number;   // optional
-  email?: string;    // optional
+  userID?: number; // optional
+  email?: string; // optional
   code: string;
 }
 
@@ -74,7 +81,7 @@ export interface UnseenCountResponse {
    Main Authentication Service
 --------------------------------------------- */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthenticationService implements CanActivate {
   authenticatedUser: AuthenticatedUser | null | undefined;
@@ -84,13 +91,23 @@ export class AuthenticationService implements CanActivate {
   private readonly TOKEN_KEY = 'authToken';
   private readonly VERIF_EMAIL_KEY = 'verifId';
 
+  // BehaviorSubject to track authentication state changes
+  private authStateSubject = new BehaviorSubject<boolean>(this.hasValidToken());
+  public authState$ = this.authStateSubject.asObservable();
+
   constructor(private router: Router, private http: HttpClient) {}
+
+  private hasValidToken(): boolean {
+    const token = this.getAuthToken();
+    return !!token;
+  }
 
   /* ---------------------------------------------
      Token Management Helpers
   --------------------------------------------- */
   setAuthToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
+    this.authStateSubject.next(true); // Notify subscribers of auth state change
     console.log('🟢 Token saved to localStorage');
   }
 
@@ -105,6 +122,7 @@ export class AuthenticationService implements CanActivate {
   removeAuthToken(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     this.authenticatedUser = null;
+    this.authStateSubject.next(false); // Notify subscribers of auth state change
     console.log('🔴 Token removed from localStorage');
   }
 
@@ -119,7 +137,7 @@ export class AuthenticationService implements CanActivate {
       return of({
         data: 0,
         isSuccess: false,
-        errorMessage: 'User not authenticated'
+        errorMessage: 'User not authenticated',
       } as UnseenCountResponse);
     }
 
@@ -129,7 +147,7 @@ export class AuthenticationService implements CanActivate {
         return of({
           data: 0,
           isSuccess: false,
-          errorMessage: error.message || 'Server error'
+          errorMessage: error.message || 'Server error',
         });
       })
     );
@@ -157,14 +175,16 @@ export class AuthenticationService implements CanActivate {
           );
         }
       }),
-      catchError((error) => {
+      catchError((error: HttpErrorResponse) => {
         console.error('HTTP Error during sign-in:', error);
-        this.removeAuthToken();
+
+        // take backend error directly if exists
+        const backend = error.error?.errorMessage || error.error?.message;
+
         return of({
           data: '',
           isSuccess: false,
-          errorMessage: error.message || 'Server error',
-          message: 'Failed to connect'
+          errorMessage: backend || error.message || 'Server error',
         } as LoginResponse);
       })
     );
@@ -247,7 +267,7 @@ export class AuthenticationService implements CanActivate {
       const userAttributes: UserAttributes = {
         sub: tokenPayload.nameid,
         email: tokenPayload.email ?? '',
-        family_name: tokenPayload.family_name ?? ''
+        family_name: tokenPayload.family_name ?? '',
       };
 
       this.authenticatedUser = { attributes: userAttributes };

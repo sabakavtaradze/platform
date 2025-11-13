@@ -47,7 +47,10 @@ export class ChatusersComponent implements OnInit, OnDestroy {
 
   async auth() {
     try {
-      this.currentUser =  this.authService.GuardUserAuth()
+
+       this.authService.GuardUserAuth().then(user => {
+        this.currentUser = user;
+       })
     }
     catch (error) {
       console.error(error)

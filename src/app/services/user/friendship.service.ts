@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FriendshipService {
 
-  private readonly baseUrl = 'https://localhost:7274/api/friendship';
+  private readonly baseUrl = `${environment.apiUrl}/api/friendship`;
 
   constructor(private http: HttpClient) { }
 

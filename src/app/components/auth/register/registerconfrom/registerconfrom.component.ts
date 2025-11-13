@@ -179,7 +179,7 @@ export class RegisterconfromComponent implements OnInit {
     if (forceLogin || !this.authService.getAuthToken()) {
         this.router.navigate(['/auth/login']); 
     } else {
-        this.router.navigate(['/main']); 
+        this.router.navigate(['']); 
     }
   }
 }

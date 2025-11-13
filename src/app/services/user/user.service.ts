@@ -1,6 +1,8 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
 interface ServiceResponse<T> {
   data: T;
@@ -18,10 +20,13 @@ interface UserPublicDTO {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserService {
-  private readonly baseUrl = 'https://localhost:7274/api/User'; // ✅ Your backend URL
+  private readonly baseUrl = `${environment.apiUrl}/api/User`;
+  // Broadcast current user's profile picture URL to listeners (footer, header, etc.)
+  private profilePictureSubject = new BehaviorSubject<string | null>(null);
+  profilePicture$ = this.profilePictureSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -29,7 +34,7 @@ export class UserService {
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token'); // or from your AuthenticationService
     return new HttpHeaders({
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     });
   }
 
@@ -47,9 +52,16 @@ export class UserService {
   updateProfilePicture(profile: File): Observable<any> {
     const formData = new FormData();
     formData.append('File', profile);
-    return this.http.put(`${this.baseUrl}/update-profile-picture`, formData, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http
+      .put(`${this.baseUrl}/update-profile-picture`, formData, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(
+        tap(() => {
+          // After successful update, refresh and emit latest picture URL
+          this.refreshOwnProfilePicture();
+        })
+      );
   }
 
   // 🖼️ Update cover picture only
@@ -69,7 +81,7 @@ export class UserService {
   }
 
   // 🔵 Get profile picture by userId
-  getProfilePicture(userId:number): Observable<any> {
+  getProfilePicture(userId: number): Observable<any> {
     return this.http.get(`${this.baseUrl}/${userId}/profile-picture`, {
       headers: this.getAuthHeaders(),
     });
@@ -83,24 +95,36 @@ export class UserService {
   }
 
   // 🔵 Get cover picture by userId
-  getCoverPictureById(userId:number): Observable<any> {
+  getCoverPictureById(userId: number): Observable<any> {
     return this.http.get(`${this.baseUrl}/${userId}/cover-picture`, {
       headers: this.getAuthHeaders(),
     });
   }
-// 🧩 get user profile by id
-getUserById(id:number):Observable<any>{
-  return this.http.get(`${this.baseUrl}/${id}`, {
-    headers: this.getAuthHeaders()
-  });
-}
+  // 🧩 get user profile by id
+  getUserById(id: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/${id}`, {
+      headers: this.getAuthHeaders(),
+    });
+  }
 
-// 🔍 Search users by name
-searchUsers(query: string): Observable<ServiceResponse<UserPublicDTO[]>> {
-  return this.http.get<ServiceResponse<UserPublicDTO[]>>(`${this.baseUrl}/search`, {
-    params: { q: query },
-    headers: this.getAuthHeaders()
-  });
-}
+  // Emit a new value to subscribers
+  setProfilePicture(url: string | null): void {
+    this.profilePictureSubject.next(url);
+  }
 
+  // Fetch current user's profile picture from backend and broadcast
+  refreshOwnProfilePicture(): void {
+    this.getOwnProfilePicture().subscribe({
+      next: (res: any) => this.setProfilePicture(res?.data ?? null),
+      error: () => this.setProfilePicture(null),
+    });
+  }
+
+  // 🔍 Search users by name
+  searchUsers(query: string): Observable<ServiceResponse<UserPublicDTO[]>> {
+    return this.http.get<ServiceResponse<UserPublicDTO[]>>(`${this.baseUrl}/search`, {
+      params: { q: query },
+      headers: this.getAuthHeaders(),
+    });
+  }
 }

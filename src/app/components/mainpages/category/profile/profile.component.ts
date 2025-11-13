@@ -1,27 +1,24 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 
 import { APIService } from 'src/app/API.service';
 import { APIServicem } from 'src/app/apiservicem';
+import { PostService } from 'src/app/services/post/post.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
+import { ChatroomService } from 'src/app/services/user/chatroom/chatroom.service';
 import { FriendshipService } from 'src/app/services/user/friendship/friendship.service';
 import { UserService } from 'src/app/services/user/user.service';
-import { PostService } from 'src/app/services/post/post.service';
-import { ChatroomService } from 'src/app/services/user/chatroom/chatroom.service';
 
 import { ContentphotodialogComponent } from '../../contentlist/content/contentphotodialog/contentphotodialog.component';
 
-import {
-  AuthenticatedUser,
-  UserAttributes,
-} from 'src/app/interfaces/authentication/user';
+import { AuthenticatedUser, UserAttributes } from 'src/app/interfaces/authentication/user';
 
-import {BaseResponse} from 'src/app/interfaces/ResponseInterface/BaseResponse';
 import { Subscription } from 'rxjs';
+import { BaseResponse } from 'src/app/interfaces/ResponseInterface/BaseResponse';
 
-// ⚠️ If you use the npm uuid package, switch to:
-// import { v4 as uuidv4 } from 'uuid';
+import heic2any from 'heic2any'; // ✅ ADDED
+
 const { v4: uuidv4 } = require('uuid');
 
 @Component({
@@ -32,24 +29,21 @@ const { v4: uuidv4 } = require('uuid');
 export class ProfileComponent implements OnInit, OnDestroy {
   currentUser: UserAttributes | null = null;
 
-  profileId!: number;                // route param (number)
-  profileUser: any = null;           // backend user DTO
+  profileId!: number;
+  profileUser: any = null;
   profileOwner = false;
 
   profilePicture = '';
   cover = '';
   profileImages: string[] = [];
 
-  imageprew: any;
-  files!: FileList;
+  imageprew: string | null = null;
 
-  userIsFollowing = false;           // ← state for follow button
+  userIsFollowing = false;
   FollowersCount = 0;
 
-  process = false;                   // your flag (left as-is)
-
-  s3BucketUrl =
-    'https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/';
+  process = false;
+  s3BucketUrl = 'https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/';
 
   private subs = new Subscription();
 
@@ -66,17 +60,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private chatroomService: ChatroomService
   ) {}
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // Lifecycle
-  // ────────────────────────────────────────────────────────────────────────────
   ngOnInit(): void {
-    // react to route changes
     this.subs.add(
       this.activeRoute.paramMap.subscribe((params: ParamMap) => {
         const pid = params.get('profileId');
         this.profileId = Number(pid ?? 0);
-
-        // authenticate, then load profile
         this.auth();
       })
     );
@@ -86,12 +74,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // Counters / Following State
-  // ────────────────────────────────────────────────────────────────────────────
-
   loadFollowersCount() {
-    // Count is based on the *profile being viewed*, not the logged-in user
     if (!this.profileId) return;
 
     this.subs.add(
@@ -104,29 +87,24 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   GetIsFollowing() {
-    // Check if *logged-in user* follows the *profile user*
     if (!this.profileId) return;
 
     this.subs.add(
       this.friendshipService
         .getIsFollowing(this.profileId)
         .subscribe((res: BaseResponse<boolean>) => {
-          if (res?.isSuccess) {
-            this.userIsFollowing = !!res.data;
-          }
+          if (res?.isSuccess) this.userIsFollowing = !!res.data;
         })
     );
   }
 
-  // Keep original names
   async UnfollowUser(profileUser: any) {
     if (!profileUser?.userID) return;
 
     this.process = true;
     this.subs.add(
       this.friendshipService.unfollowUser(profileUser.userID).subscribe({
-        next: (res: BaseResponse<boolean>) => {
-          // refresh state
+        next: () => {
           this.GetIsFollowing();
           this.loadFollowersCount();
         },
@@ -142,11 +120,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.process = true;
     this.subs.add(
       this.friendshipService.followUser(profileUser.userID).subscribe({
-        next: (res: BaseResponse<boolean>) => {
-          // refresh state
+        next: () => {
           this.GetIsFollowing();
           this.loadFollowersCount();
-          console.log(res);
         },
         error: (err) => console.error(err),
         complete: () => (this.process = false),
@@ -154,9 +130,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     );
   }
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // Media / Dialog
-  // ────────────────────────────────────────────────────────────────────────────
   openImageDialog(post: any): void {
     const dialogRef = this.dialog.open(ContentphotodialogComponent, {
       panelClass: 'full-width-dialog',
@@ -166,27 +139,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.subs.add(dialogRef.afterClosed().subscribe(() => {}));
   }
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // User Loading
-  // ────────────────────────────────────────────────────────────────────────────
   async getUser() {
     try {
-      // Determine if viewed profile is the owner (only when logged in)
       this.profileOwner =
-        !!this.currentUser &&
-        Number(this.currentUser.sub) === Number(this.profileId);
+        !!this.currentUser && Number(this.currentUser.sub) === Number(this.profileId);
 
-      // Always load counters and following visibility (following needs auth; this method just triggers)
       this.loadFollowersCount();
       if (this.currentUser) this.GetIsFollowing();
 
-      // Load profile details
       this.subs.add(
         this.userService.getUserById(this.profileId).subscribe((res: BaseResponse<any>) => {
           this.profileUser = res?.data ?? null;
           if (!this.profileUser) return;
 
-          // Profile and cover images:
           if (this.profileOwner) {
             this.subs.add(
               this.userService.getOwnProfilePicture().subscribe((r: BaseResponse<string>) => {
@@ -200,18 +165,21 @@ export class ProfileComponent implements OnInit, OnDestroy {
             );
           } else {
             this.subs.add(
-              this.userService.getProfilePicture(this.profileId).subscribe((r: BaseResponse<string>) => {
-                if (r?.isSuccess) this.profilePicture = r.data;
-              })
+              this.userService
+                .getProfilePicture(this.profileId)
+                .subscribe((r: BaseResponse<string>) => {
+                  if (r?.isSuccess) this.profilePicture = r.data;
+                })
             );
             this.subs.add(
-              this.userService.getCoverPictureById(this.profileId).subscribe((r: BaseResponse<string>) => {
-                if (r?.isSuccess) this.cover = r.data;
-              })
+              this.userService
+                .getCoverPictureById(this.profileId)
+                .subscribe((r: BaseResponse<string>) => {
+                  if (r?.isSuccess) this.cover = r.data;
+                })
             );
           }
 
-          // Load photos after we have the profile id
           this.loadPhotos();
         })
       );
@@ -230,87 +198,124 @@ export class ProfileComponent implements OnInit, OnDestroy {
     );
   }
 
-  // (kept for parity; now implemented through GetIsFollowing above)
-  async checkFollowing() {
-    if (!this.currentUser) return;
-    this.GetIsFollowing();
-  }
-
-  // ────────────────────────────────────────────────────────────────────────────
-  // Auth
-  // ────────────────────────────────────────────────────────────────────────────
   async auth() {
     try {
-      const currentuser: AuthenticatedUser | null =
-        await this.authService.GuardUserAuth();
+      const currentuser: AuthenticatedUser | null = await this.authService.GuardUserAuth();
 
       if (currentuser && currentuser.attributes) {
         this.currentUser = currentuser.attributes;
-        // after auth, load profile and follow state
         this.getUser();
       } else {
         this.currentUser = null;
-        // still load public profile
         this.getUser();
       }
     } catch (error) {
-      console.error('Authentication check failed:', error);
+      console.error('Auth failed:', error);
       this.currentUser = null;
-      this.getUser(); // load public profile anyway
+      this.getUser();
     }
   }
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // Uploads
-  // ────────────────────────────────────────────────────────────────────────────
+  // ───────────────────────────────────────────────
+  // FIXED HEIC-SAFE UPLOAD
+  // ───────────────────────────────────────────────
   async onFileSelected(event: any, choice: boolean): Promise<void> {
-    this.files = event.target.files;
-    const imageprew: File = event.target.files[0];
-    if (imageprew) {
-      this.imageprew = await this.readAsDataURL(imageprew);
-    }
-    this.uploadImage(this.files, choice);
+    const list: FileList | null = event?.target?.files || null;
+    const file: File | undefined = list && list.length > 0 ? list[0] : undefined;
+    if (!file) return;
+
+    // Convert → JPEG base64
+    const jpegBase64 = await this.convertToJpegBase64(file);
+    this.imageprew = jpegBase64;
+
+    // Convert base64 → real file
+    const jpegBlob = await (await fetch(jpegBase64)).blob();
+    const jpegFile = new File([jpegBlob], `${file.name}.jpg`, { type: 'image/jpeg' });
+
+    this.uploadSingleImage(jpegFile, choice);
   }
 
-  readAsDataURL(file: File): Promise<any> {
+  private async convertToJpegBase64(file: File): Promise<string> {
+    try {
+      if (
+        file.type.includes('heic') ||
+        file.name.toLowerCase().endsWith('.heic') ||
+        file.type.includes('heif')
+      ) {
+        const jpegBlob = (await heic2any({
+          blob: file,
+          toType: 'image/jpeg',
+          quality: 0.9,
+        })) as Blob;
+
+        return await this.blobToBase64(jpegBlob);
+      }
+
+      const bitmap = await createImageBitmap(file);
+      const canvas = document.createElement('canvas');
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas error');
+      ctx.drawImage(bitmap, 0, 0);
+
+      return canvas.toDataURL('image/jpeg', 0.9);
+    } catch (err) {
+      console.warn('Fallback convert used', err);
+
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return reject('Canvas error');
+            ctx.drawImage(img, 0, 0);
+
+            resolve(canvas.toDataURL('image/jpeg', 0.9));
+          };
+          img.onerror = () => reject('Image load error');
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+  }
+
+  private blobToBase64(blob: Blob): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => reject('Error reading file');
-      reader.readAsDataURL(file);
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
     });
   }
 
-  async uploadImage(files: FileList, choice: boolean) {
-    if (!files || files.length === 0) return;
-
-    const file = files[0]; // only 1 file for profile / cover
+  private uploadSingleImage(file: File, choice: boolean) {
+    if (!file) return;
 
     if (choice === false) {
-      // PROFILE
       this.subs.add(
         this.userService.updateProfilePicture(file).subscribe({
-          next: (r) => {
-            console.log('profile updated', r);
-            this.getUser(); // reload profile
-          },
+          next: () => this.getUser(),
           error: (e) => console.error(e),
         })
       );
+      return;
     }
 
-    if (choice === true) {
-      // COVER
-      this.subs.add(
-        this.userService.updateCoverPicture(file).subscribe({
-          next: (r) => {
-            console.log('cover updated', r);
-            this.getUser(); // reload profile
-          },
-          error: (e) => console.error(e),
-        })
-      );
-    }
+    this.subs.add(
+      this.userService.updateCoverPicture(file).subscribe({
+        next: () => this.getUser(),
+        error: (e) => console.error(e),
+      })
+    );
   }
 
   editProfilePicture(imgs: any) {
@@ -324,7 +329,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (this.profileUser?.profilepicture) {
       console.log('[TODO] Remove old profile picture:', this.profileUser.profilepicture);
     }
-    // call your API to save editProfile if needed
   }
 
   editCoverPicture(imgs: any) {
@@ -339,16 +343,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
       console.log('[TODO] Remove old cover picture:', this.profileUser.cover);
     }
 
-    // placeholder legacy flow you had:
     this.apiservice.UpdateUser(editProfile).then(() => {
       const input = { id: this.currentUser!.sub };
       return this.apiservice.UpdateUser(input);
     });
   }
 
-  // ────────────────────────────────────────────────────────────────────────────
-  // Messaging
-  // ────────────────────────────────────────────────────────────────────────────
   messageUser() {
     if (!this.currentUser?.sub) return;
 
@@ -364,9 +364,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     );
   }
 
-  // kept (no-op, you had unsubscribe before)
   async updateUserFunction() {
     if (!this.currentUser?.sub) return;
-    // add live user updates if you need, unsub handled by this.subs
   }
 }

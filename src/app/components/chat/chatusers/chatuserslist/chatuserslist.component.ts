@@ -17,7 +17,7 @@ export class ChatuserslistComponent {
   async ngOnInit() {
      this.userService.getUserById(this.item.otherUserId).subscribe(response => {
       this.user = response.data;
-      console.log(this.user)
+      
      })
   }
   handleImageError() {

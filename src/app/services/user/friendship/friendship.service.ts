@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BaseResponse } from 'src/app/interfaces/ResponseInterface/BaseResponse';
+import { environment } from 'src/environments/environment';
 
 
 @Injectable({
@@ -9,7 +10,7 @@ import { BaseResponse } from 'src/app/interfaces/ResponseInterface/BaseResponse'
 })
 export class FriendshipService {
 
-  private readonly baseUrl = 'https://localhost:7274/api/follow';
+  private readonly baseUrl = `${environment.apiUrl}/api/follow`;
 
   constructor(private http: HttpClient) { }
 

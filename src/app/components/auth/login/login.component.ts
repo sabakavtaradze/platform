@@ -5,28 +5,22 @@ import {
   AuthenticationService,
   LoginData,
   LoginResponse,
-  // Assuming VerificationStatusResponse is needed but not imported explicitly here
 } from 'src/app/services/user/authentication/authentication.service';
+import { BaseResponse } from 'src/app/interfaces/ResponseInterface/BaseResponse';
 import { HttpErrorResponse } from '@angular/common/http';
 import { switchMap, catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit {
-
   loginForm!: FormGroup;
   loading = false;
   errorMessage: string | null = null;
-
-  // used by template
   authFalse: boolean = false;
   usernotfound: boolean = false;
-
-  // Use a constant for consistency across checks
-  private readonly UNVERIFIED_TEXT = 'account not verified. please verify your email first.';
 
   constructor(
     private fb: FormBuilder,
@@ -37,53 +31,35 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
-  /**
-   * Getter for easy access to form controls in the template
-   */
-  get f() { return this.loginForm.controls; } // 🎯 FIX: Added missing getter
+  get f() {
+    return this.loginForm.controls;
+  }
 
-  /**
-   * Normalize a backend HTTP error payload that might be:
-   * - an object with errorMessage / userID
-   * - a string (JSON or plain)
-   */
-  private normalizeHttpError(err: HttpErrorResponse): { errorMessage: string; userID?: number } {
-    let msg = '';
-    let uid: number | undefined;
-
-    try {
-      if (typeof err.error === 'string') {
-        // try to parse JSON string
-        const maybe = JSON.parse(err.error);
-        msg = (maybe?.errorMessage || maybe?.message || err.message || '').toString();
-        uid = typeof maybe?.userID === 'number' ? maybe.userID : undefined;
-      } else if (err.error && typeof err.error === 'object') {
-        msg = (err.error.errorMessage || err.error.message || err.message || '').toString();
-        uid = typeof err.error.userID === 'number' ? err.error.userID : undefined;
-      } else {
-        msg = err.message || '';
-      }
-    } catch {
-      msg = (err.message || '').toString();
+  private normalizeError(err: HttpErrorResponse): BaseResponse<any> {
+    if (err.error && typeof err.error === 'object') {
+      if ('isSuccess' in err.error && 'errorMessage' in err.error)
+        return err.error as BaseResponse<any>;
     }
-
-    return { errorMessage: msg, userID: uid };
+    return {
+      isSuccess: false,
+      data: null,
+      errorMessage: err.error?.message || err.message || 'Unknown error',
+    };
   }
 
-  private toLowerSafe(s?: string | null) {
-    return (s ?? '').toLowerCase();
+  private storeCredentials(email: string, password: string, userId?: string) {
+    localStorage.setItem('register_email', email);
+    localStorage.setItem('register_psw', password);
+    if (userId) localStorage.setItem('register_uid', userId);
+    localStorage.setItem('verifId', email);
+    localStorage.setItem('verifpsw', password);
   }
 
-  /**
-   * Handles the login submission. Arguments are ignored, data is read from the form.
-   * We keep the arguments to satisfy the HTML template binding without errors.
-   */
-  signIn($event1: any, $event2: any): void { // 🎯 FIX: Changed signature to accept arguments for HTML compatibility
-
+  signIn($event1: any, $event2: any): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -91,92 +67,82 @@ export class LoginComponent implements OnInit {
 
     this.loading = true;
     this.authFalse = false;
-    this.usernotfound = false;
     this.errorMessage = null;
 
-    // 🎯 FIX: Read data directly from the form for correctness
-    const email = this.loginForm.get('email')?.value ?? '';
-    const password = this.loginForm.get('password')?.value ?? '';
-
+    const email = this.f['email'].value;
+    const password = this.f['password'].value;
     const loginData: LoginData = { email, password };
 
-    this.authService.login(loginData).pipe(
-
-      // Handle raw HTTP errors (e.g., 400) and convert into stream
-      catchError((err: HttpErrorResponse) => {
-        const { errorMessage, userID } = this.normalizeHttpError(err);
-
-        // If this is the unverified-account case, stash keys and redirect
-        if (this.toLowerSafe(errorMessage).includes(this.UNVERIFIED_TEXT)) {
-          localStorage.setItem('register_email', email);
-          localStorage.setItem('register_psw', password); // 🎯 FIX: Stash password
-          // even if userID is missing in error, store empty string to keep keys consistent
-          localStorage.setItem('register_uid', (userID ?? '').toString());
+    this.authService
+      .login(loginData)
+      .pipe(
+        catchError((err: HttpErrorResponse) => {
           this.loading = false;
-          this.router.navigate(['/auth/registerconfrom']);
-          // return a short-circuit value so downstream doesn't run
-          return of({ isSuccess: false } as LoginResponse);
-        }
+          const error = this.normalizeError(err);
 
-        // Other errors -> show message and stop
-        this.loading = false;
-        this.errorMessage = errorMessage || 'Connection error';
-        this.authFalse = true;
-        return of({ isSuccess: false } as LoginResponse);
-      }),
+          console.log("BACKEND ERROR MESSAGE >>>", error.errorMessage);
+          console.log("FULL ERROR OBJECT >>>", err.error);
 
-      // Successful HTTP response path (still could be business-failure)
-      switchMap((res: LoginResponse) => {
-        if (!res || !res.isSuccess) {
-          // Business-level failure from API (200 with isSuccess=false)
-          const msg = this.toLowerSafe(res?.errorMessage);
-
-          // Same unverified check here
-          if (msg.includes(this.UNVERIFIED_TEXT)) {
-            localStorage.setItem('register_email', email);
-            localStorage.setItem('register_psw', password); // 🎯 FIX: Stash password
-            localStorage.setItem('register_uid', (res.userID ?? '').toString());
-            this.loading = false;
+          // UNVERIFIED ACCOUNT
+          if (
+            error.errorMessage?.toLowerCase().includes('verify') ||
+            err.error?.toString().toLowerCase().includes('verify')
+          ) {
+            const userId = (err.error?.userID ?? '').toString();
+            this.storeCredentials(email, password, userId);
             this.router.navigate(['/auth/registerconfrom']);
-            return of(res);
+            return of({ isSuccess: false } as LoginResponse);
           }
 
-          // Other business error → show UI flags
-          this.loading = false;
-          this.errorMessage = res?.errorMessage || 'Invalid email or password';
-          if (this.errorMessage.toLowerCase().includes('not found')) {
-            this.usernotfound = true;
-          } else {
+          // INVALID CREDENTIALS
+          if (error.errorMessage == 'Invalid email or password.') {
+            this.errorMessage = error.errorMessage ?? null;
             this.authFalse = true;
+            return of({ isSuccess: false } as LoginResponse);
           }
+
+          // ANY OTHER ERROR
+          this.errorMessage = error.errorMessage ?? null;
+          this.authFalse = true;
+          return of({ isSuccess: false } as LoginResponse);
+        }),
+
+        switchMap((res: LoginResponse) => {
           return of(res);
+        })
+      )
+      .subscribe((res) => {
+        this.loading = false;
+
+        console.log('SUBSCRIBE - Full response:', res);
+        console.log('SUBSCRIBE - Error message:', res?.errorMessage);
+
+        // Handle failure cases
+        if (!res?.isSuccess) {
+          // Check for unverified account
+          if (res.errorMessage === 'Account not verified. Please verify your email first.') {
+            console.log('UNVERIFIED DETECTED - Redirecting to registerconfrom');
+            this.storeCredentials(email, password, res.userID?.toString());
+            this.router.navigate(['/auth/registerconfrom']);
+            return;
+          }
+
+          // Handle invalid credentials
+          if (res.errorMessage === 'Invalid email or password.') {
+            this.errorMessage = res.errorMessage;
+            this.authFalse = true;
+            return;
+          }
+
+          // Other errors
+          this.errorMessage = res.errorMessage || 'An error occurred';
+          this.authFalse = true;
+          return;
         }
 
-        // SUCCESS login: stash keys (email + password + userID) then check verification
-        localStorage.setItem('verifId', email);
-        localStorage.setItem('verifpsw', password); // 🎯 FIX: Stash password
-        localStorage.setItem('register_uid', (res.userID ?? '').toString());
-
-        return this.authService.isVerifiedByEmail(email);
-      })
-
-    ).subscribe((ver: any) => {
-      // This runs for success path (isVerifiedByEmail result) or if earlier returned a value
-      this.loading = false;
-
-      // If earlier we short-circuited with an error object or null, ver might be a non-object or non-verification response
-      if (!ver || typeof ver !== 'object' || typeof ver.data === 'undefined') return;
-
-      // Verified -> home; Not verified -> confirmation
-      if (ver.data === true) {
+        // SUCCESS CASE
+        this.storeCredentials(email, password, (res.userID ?? '').toString());
         this.router.navigate(['']);
-      } else {
-        console.log(ver)
-         localStorage.setItem('verifId', email);
-        localStorage.setItem('verifpsw', password); // 🎯 FIX: Stash password
-
-        this.router.navigate(['/auth/registerconfrom']);
-      }
-    });
+      });
   }
 }

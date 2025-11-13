@@ -1,15 +1,14 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
-import { CreatecontentdialogComponent } from '../gadgets/createcontent/createcontentdialog/createcontentdialog.component';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
+import { Subscription } from 'rxjs';
 import { APIService } from 'src/app/API.service';
-import { NotificationsService } from 'src/app/services/notifications.service';
 import { HeaderService } from 'src/app/services/header.service';
+import { NotificationsService } from 'src/app/services/notifications.service';
+import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
+import { CreatecontentdialogComponent } from '../gadgets/createcontent/createcontentdialog/createcontentdialog.component';
 // 🔑 Import the necessary interfaces for type safety
-import {
-  AuthenticatedUser,
-  UserAttributes,
-} from 'src/app/interfaces/authentication/user';
+import { AuthenticatedUser } from 'src/app/interfaces/authentication/user';
+import { FeedRefreshService } from 'src/app/services/feed-refresh.service';
 import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
@@ -28,8 +27,8 @@ export class FooterComponent implements OnInit, OnDestroy {
   profilePicture: any;
   notoficationAlert: boolean = false;
   friendsUpdateSubscribe: any;
-  s3BucketUrl =
-    'https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/';
+  private profilePicSub?: Subscription;
+  s3BucketUrl = 'https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/';
   @Input() activePage: string = '';
 
   constructor(
@@ -38,17 +37,38 @@ export class FooterComponent implements OnInit, OnDestroy {
     private authService: AuthenticationService,
     private apiservice: APIService,
     private notificationservice: NotificationsService,
-    private userService: UserService
+    private userService: UserService,
+    private feedRefresh: FeedRefreshService
   ) {}
 
   ngOnInit(): void {
     this.auth();
+
+    // Subscribe to authentication state changes
+    this.authService.authState$.subscribe((isAuthenticated) => {
+      if (isAuthenticated) {
+        console.log('Auth state changed to authenticated, reloading profile...');
+        this.auth();
+      } else {
+        console.log('Auth state changed to unauthenticated');
+        this.currentUser = null;
+        this.profilePicture = null;
+      }
+    });
+
+    // Listen for profile picture updates across the app
+    this.profilePicSub = this.userService.profilePicture$.subscribe((url) => {
+      if (url !== undefined) {
+        this.profilePicture = url;
+      }
+    });
   }
 
   ngOnDestroy(): void {
     if (this.friendsUpdateSubscribe) {
       this.friendsUpdateSubscribe.unsubscribe();
     }
+    this.profilePicSub?.unsubscribe();
   }
 
   createPost(): void {
@@ -61,7 +81,12 @@ export class FooterComponent implements OnInit, OnDestroy {
       data: {},
       width: '100%',
     });
-    dialog.afterClosed().subscribe((result: any) => {});
+    dialog.afterClosed().subscribe((result: any) => {
+      // If post was created successfully, notify feed to refresh
+      if (result === true) {
+        this.feedRefresh.triggerRefresh();
+      }
+    });
   }
   /**
    * EDITED: Uses GuardUserAuth (token-based) and safely accesses attributes.
@@ -71,14 +96,15 @@ export class FooterComponent implements OnInit, OnDestroy {
     try {
       // GuardUserAuth returns AuthenticatedUser | null
       const user: AuthenticatedUser | null = await this.authService.GuardUserAuth();
-      if(user){
-      this.currentUser = user.attributes.sub
-      console.log(this.currentUser)
-        this.getUser()
+      if (user) {
+        this.currentUser = user.attributes.sub;
+        console.log(this.currentUser);
+        this.getUser();
+        // Also refresh the broadcasted value so footer reflects the latest
+        this.userService.refreshOwnProfilePicture();
         // FIX: Safely check if a user object exists and has attributes
         // this.updateFromNotifications();
-    }
-    else {
+      } else {
         this.currentUser = null;
         console.warn('User not authenticated.');
       }
@@ -94,15 +120,16 @@ export class FooterComponent implements OnInit, OnDestroy {
 
   async getUser() {
     // Ensure both currentUser and its sub property exist before calling API
-   
+
     try {
       // 🔑 Fetch and set profileUser using the authenticated user's ID
 
       // Now that profileUser is set, proceed with logic that depends on it:
-       this.userService.getOwnProfilePicture().subscribe(item => {
-        this.profilePicture = item.data
-        console.log(this.profilePicture)
-       } )
+      this.userService.getOwnProfilePicture().subscribe((item) => {
+        this.profilePicture = item.data;
+        // push into shared stream so other components update as well
+        this.userService.setProfilePicture(this.profilePicture);
+      });
       console.log(this.profilePicture);
       // this.getFollowers();
       // this.notificationsSubscribe();
@@ -118,9 +145,7 @@ export class FooterComponent implements OnInit, OnDestroy {
    */
   async notificationsseen() {
     if (!this.currentUser || !this.currentUser.sub) {
-      console.error(
-        'Cannot update notifications seen: Current user SUB is missing.'
-      );
+      console.error('Cannot update notifications seen: Current user SUB is missing.');
       return;
     }
     try {
@@ -150,11 +175,9 @@ export class FooterComponent implements OnInit, OnDestroy {
     // let filter = {
     //   id: { eq: this.currentUser.sub },
     // }; // Unsubscribe from previous listener if it exists
-
     // if (this.friendsUpdateSubscribe) {
     //   this.friendsUpdateSubscribe.unsubscribe();
     // }
-
     // this.friendsUpdateSubscribe = this.apiservice
     //   .OnUpdateFriendsListener(filter)
     //   .subscribe((message) => {

@@ -1,45 +1,74 @@
 <div class="body-container">
-
-    <div class="header">
-        <app-chatheader (someEvent)="deleteMessage($event)" [chatroomMenu]="chatroomMenu"
-            [headerBackName]="headerBackName" [HeaderNames]="otherUserName" [otherUserId]="otherUserId"></app-chatheader>
-    </div>
-    <div class="main-container">
-        <div class="chat-area-container">
-            <div class="chat-area-main-container " #scrollMe>
-                <div class="messages" *ngFor="let message of messageList">
-                    <app-chatmessages [message]="message" [currentUser]="currentUser"></app-chatmessages>
-                </div>
-            </div>
+  <div class="header">
+    <app-chatheader
+      (someEvent)="deleteMessage($event)"
+      [chatroomMenu]="chatroomMenu"
+      [headerBackName]="headerBackName"
+      [HeaderNames]="otherUserName"
+      [otherUserId]="otherUserId"
+    ></app-chatheader>
+  </div>
+  <div class="main-container">
+    <div class="chat-area-container">
+      <div class="chat-area-main-container" #scrollMe>
+        <div class="messages" *ngFor="let message of messageList">
+          <app-chatmessages [message]="message" [currentUser]="currentUser"></app-chatmessages>
         </div>
-        <div class="message-main-container">
-            <div class="message-container">
-
-                <div class="attach-container">
-                    <input type="file" multiple  #fileInput style="display: none;" (change)="onFileSelected($event)" />
-                    <button (click)="fileInput.click()">
-                 
-                    <i class="bi bi-file-earmark-image"></i>
-                    
-                    </button>
-                </div>
-                <form [formGroup]="chatForm" (ngSubmit)="sendMessage(chatForm)">
-                    <div class="text-main-container">
-                        <mat-form-field class="text-area">
-                            <mat-label>Write text</mat-label>
-                            <textarea matInput cdkTextareaAutosize #autosize="cdkTextareaAutosize"
-                                formControlName="text"
-                                cdkAutosizeMaxRows="2"
-                                 cdkAutosizeMinRows="1" ></textarea>
-                        </mat-form-field>
-                    </div>
-                    <div class="sendMessage-container">
-                        <button type="submit" [disabled]="chatForm.invalid" class="signup-account">
-                            <i class="bi bi-send"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+      </div>
     </div>
+    <div class="message-main-container" #composer>
+      <div class="message-container">
+        <div class="attach-container">
+          <input
+            type="file"
+            multiple
+            #fileInput
+            style="display: none"
+            accept="image/*"
+            (change)="onFileSelected($event)"
+          />
+          <button (click)="fileInput.click()">
+            <i class="bi bi-file-earmark-image"></i>
+          </button>
+        </div>
+        <form [formGroup]="chatForm" (ngSubmit)="sendMessage(chatForm)">
+          <div class="text-main-container">
+            <mat-form-field class="text-area">
+              <mat-label>Write text</mat-label>
+              <textarea
+                matInput
+                cdkTextareaAutosize
+                #autosize="cdkTextareaAutosize"
+                formControlName="content"
+                cdkAutosizeMaxRows="2"
+                cdkAutosizeMinRows="1"
+              ></textarea>
+            </mat-form-field>
+          </div>
+          <div class="sendMessage-container">
+            <button type="submit" [disabled]="isSendDisabled()" class="signup-account">
+              <i class="bi bi-send"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+      <div *ngIf="imageprews && imageprews.length > 0" class="selectedImage container">
+        <div class="selectedimg row">
+          <div
+            [class.col-4]="imageprews.length > 2"
+            [class.col-6]="imageprews.length === 2"
+            [class.col-12]="imageprews.length === 1"
+            *ngFor="let image of imageprews"
+            class="image-container"
+          >
+            <img class="col-12 preview-img" *ngIf="image" [src]="image" alt="" draggable="false" />
+
+            <div (click)="removeImg(image)" class="close-container">
+              <i class="bi bi-x"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
