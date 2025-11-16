@@ -10,9 +10,11 @@
   </div>
   <div class="main-container">
     <div class="chat-area-container">
-      <div class="chat-area-main-container" #scrollMe>
-        <div class="messages" *ngFor="let message of messageList">
-          <app-chatmessages [message]="message" [currentUser]="currentUser"></app-chatmessages>
+      <div class="chat-area-main-container" #scrollMe (scroll)="onScrollUp($event)">
+        <div class="messages-wrapper">
+          <div class="messages" *ngFor="let message of messageList; trackBy: trackByMessage">
+            <app-chatmessages [message]="message" [currentUser]="currentUser"></app-chatmessages>
+          </div>
         </div>
       </div>
     </div>

@@ -112,7 +112,9 @@
         <div class="content-options-list-container">
           <button (click)="openComments()" class="content-options-list">
             <i class="bi bi-chat-text"></i>
-            <div class="content-options-list-numbers">{{ content.comment }}</div>
+            <div *ngIf="commentCount && commentCount > 0" class="content-options-list-numbers">
+              {{ commentCount }}
+            </div>
           </button>
         </div>
 

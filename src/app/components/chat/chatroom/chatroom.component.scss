@@ -3,6 +3,8 @@
   flex-direction: column;
   position: relative;
   height: 100dvh; // occupy full viewport
+  // allow inner scroller to handle overflow
+  overflow: visible;
 
   .header {
     position: sticky;
@@ -16,25 +18,39 @@
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
-    overflow: hidden; // contain scroll area
+    min-height: 0; // allow inner flex child to shrink and scroll
+    // Let inner scroll container handle its own overflow
+    overflow: visible;
 
     .chat-area-container {
       flex: 1 1 0;
       display: flex;
       flex-direction: column;
       position: relative;
-      overflow: hidden;
-      min-height: 0; // allow flex shrinking
+      // let inner scroll area manage its own overflow
+      overflow: visible;
+      min-height: 0;
+      // do NOT force height here; let flex sizing flow down to the scroller
     }
 
     .chat-area-main-container {
-      flex: 1 1 0;
-      min-height: 0; // allow flex shrinking
+      flex: 1 1 auto;
+      min-height: 0; // allow flex shrinking within flex parent
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      display: flex;
-      flex-direction: column; // natural top->bottom order
+      touch-action: pan-y; // ensure vertical panning works on mobile
+      overscroll-behavior: contain;
+      display: block; // avoid flex-based scroll container quirks on mobile
       padding: 0 0 0.75rem 0; // dynamic bottom padding set by TS
+
+      // When content is shorter than viewport, keep messages pinned to bottom
+      .messages-wrapper {
+        min-height: 100%; // occupy full height of scroller
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end; // stick to bottom
+        min-height: 100%;
+      }
     }
 
     .message-main-container {

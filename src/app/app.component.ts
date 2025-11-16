@@ -1,95 +1,88 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { API, Amplify } from 'aws-amplify';
-import { BehaviorSubject, filter } from 'rxjs';
-import awsmobile from 'src/aws-exports';
+import { Subscription } from 'rxjs';
 import { HeaderService } from './services/header.service';
-import { S3 } from 'aws-sdk';
-const AWS = require('aws-sdk');
-Amplify.configure(awsmobile)
-// import awsmobile from '../../aws-exports'
-API.configure(awsmobile)
-const s3 = new AWS.S3();
-const bucket = new S3(
-  {
-    region: 'us-east-1'
-  }
-);
 
-
-
-// Amplify.configure({
-//   aws_access_key_id: process.env['ACCESS_KEY_ID'],
-//   aws_secret_access_key: process.env['SECRET_ACCESS_KEY'],
-// })
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'socialplatform';
+
   components = true;
   chatId: any;
   productId: string | null = null;
-  showComponent: boolean = true;
-  profilePage: boolean = false;
-  activePage: string = ""
+  showComponent = true;
+  profilePage = false;
+  activePage = '';
   isHeaderVisible = false;
   hideHeaderScrollThreshold = 50;
   aboutPage = false;
-  constructor(private router: Router, private activeRoute: ActivatedRoute, private headerService: HeaderService) {
-    this.router.events.subscribe((event) => {
+
+  // 🔥 Subscriptions storage
+  private routerSub!: Subscription;
+  private headerScrollSub!: Subscription;
+
+  constructor(
+    private router: Router,
+    private activeRoute: ActivatedRoute,
+    private headerService: HeaderService
+  ) {
+    // 🔥 Save subscription to destroy later
+    this.routerSub = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        let routerName = event.urlAfterRedirects
-        if (routerName !== "/about/privacy" && routerName !== "/about/termsandconditions" && routerName !== "/auth/welcome" && routerName !== "/auth/login" && routerName !== "/auth/register" && routerName !== "/auth/registerconfrom" && routerName !== "/chat" && !routerName.includes("chat/chatroom") && routerName !== "/chat/users") {
-          this.components = true
-          console.log(this.aboutPage)
+        const routerName = event.urlAfterRedirects;
 
-          if (routerName.includes('/feed')) {
-            this.activePage = "feed"
-          }
-          if (routerName.includes('/library')) {
-            this.activePage = "library"
-          }
-          if (routerName.includes('/notifications')) {
-            this.activePage = "notifications"
-          }
-          if (routerName.includes('/profile')) {
-            this.activePage = "profile"
-          }
-          console.log(this.activePage)
+        // Show bottom components only on main pages
+        if (
+          routerName !== '/about/privacy' &&
+          routerName !== '/about/termsandconditions' &&
+          routerName !== '/auth/welcome' &&
+          routerName !== '/auth/login' &&
+          routerName !== '/auth/register' &&
+          routerName !== '/auth/registerconfrom' &&
+          routerName !== '/chat' &&
+          !routerName.includes('chat/chatroom') &&
+          routerName !== '/chat/users'
+        ) {
+          this.components = true;
+
+          if (routerName.includes('/feed')) this.activePage = 'feed';
+          if (routerName.includes('/library')) this.activePage = 'library';
+          if (routerName.includes('/notifications')) this.activePage = 'notifications';
+          if (routerName.includes('/profile')) this.activePage = 'profile';
+        } else {
+          this.components = false;
         }
 
-        else {
-          this.components = false
-          console.log(this.aboutPage)
-        }
-        if (routerName.includes("/profile")) {
-          this.profilePage = true;
-        } if (!routerName.includes("/profile")) {
-          this.profilePage = false;
+        // Profile page
+        this.profilePage = routerName.includes('/profile');
 
-        }
- 
-        
-        
-        if (routerName === "/about/privacy" || routerName === "/about/termsandconditions" || routerName === "/auth/welcome" || routerName === "/auth/login" || routerName === "/auth/register" || routerName === "/auth/registerconfrom") {
-          this.aboutPage = true
-        }
-        else {
-          this.aboutPage = false
-          
-        }
+        // About/Auth pages
+        this.aboutPage =
+          routerName === '/about/privacy' ||
+          routerName === '/about/termsandconditions' ||
+          routerName === '/auth/welcome' ||
+          routerName === '/auth/login' ||
+          routerName === '/auth/register' ||
+          routerName === '/auth/registerconfrom';
       }
     });
   }
 
-
   ngOnInit() {
-    this.headerService.getScrollPosition().subscribe((visiable: boolean) => {
-      this.isHeaderVisible = visiable
-      // console.log(this.isHeaderVisible)
+    // 🔥 Save subscription to destroy later
+    this.headerScrollSub = this.headerService.getScrollPosition().subscribe((visible: boolean) => {
+      this.isHeaderVisible = visible;
     });
+  }
+
+  // 🧹 CLEANUP — prevents memory leaks
+  ngOnDestroy() {
+    if (this.routerSub) this.routerSub.unsubscribe();
+    if (this.headerScrollSub) this.headerScrollSub.unsubscribe();
+    console.log('AppComponent destroyed → subscriptions cleaned');
   }
 }

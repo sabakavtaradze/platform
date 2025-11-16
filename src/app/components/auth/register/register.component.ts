@@ -1,18 +1,18 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import {
+  AbstractControl,
   FormBuilder,
   FormGroup,
-  Validators,
-  AbstractControl,
   ValidationErrors,
+  Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 import {
   RegisterData,
   RegistrationResponse,
 } from 'src/app/interfaces/authentication/register-data';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
-import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
@@ -44,11 +44,14 @@ export class RegisterComponent implements OnInit {
         email: ['', [Validators.required, Validators.email, Validators.minLength(6)]],
         date: ['', Validators.required],
 
-        password: ['', [
-          Validators.required,
-          Validators.minLength(6),
-          Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[#?!@$%^&*-]).{6,}$')
-        ]],
+        password: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(6),
+            Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[#?!@$%^&*-]).{6,}$'),
+          ],
+        ],
 
         repeatPassword: ['', Validators.required],
         acceptTerms: [false, Validators.requiredTrue],
@@ -94,9 +97,20 @@ export class RegisterComponent implements OnInit {
           if (response.data) {
             const userID = response.data.toString();
 
+            // Clear legacy keys to avoid stale state
+            localStorage.removeItem('verifId');
+            localStorage.removeItem('verifpsw');
+            localStorage.removeItem('UserID');
+
+            // Write canonical keys
             localStorage.setItem('register_uid', userID);
             localStorage.setItem('register_email', form.value.email);
             localStorage.setItem('register_psw', form.value.password);
+
+            // Also write legacy keys for backward compatibility with confirm component
+            localStorage.setItem('UserID', userID);
+            localStorage.setItem('verifId', form.value.email);
+            localStorage.setItem('verifpsw', form.value.password);
 
             this.router.navigate(['/auth/registerconfrom']);
           } else {
@@ -125,7 +139,9 @@ export class RegisterComponent implements OnInit {
         } else if (err.status === 500) {
           this.errorEmail = false;
           const errorMsg = err.error?.errorMessage || err.error?.message || 'Internal server error';
-          alert(`Server error: ${errorMsg}\n\nPlease check the console for more details or contact support.`);
+          alert(
+            `Server error: ${errorMsg}\n\nPlease check the console for more details or contact support.`
+          );
         } else {
           this.errorEmail = false;
           alert('A server error occurred. Please try again later.');

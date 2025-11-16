@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import heic2any from 'heic2any'; // ✅ ADDED
+import heic2any from 'heic2any';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { SignalRService } from 'src/app/services/SignalRService/signal-rservice.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
@@ -46,6 +46,7 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('scrollMe', { static: false }) scrollMe!: ElementRef<HTMLDivElement>;
   @ViewChild('composer', { static: false }) composer!: ElementRef<HTMLDivElement>;
   private composerHeight: number = 0;
+  private composerResizeObs?: ResizeObserver;
 
   constructor(
     private fb: FormBuilder,
@@ -58,6 +59,13 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     this.chatForm = this.fb.group({
       content: [''],
     });
+  }
+
+  // -------------------------------------------------------------
+  // 🔥 ADD TRACKBY — BEST PERFORMANCE UPGRADE
+  // -------------------------------------------------------------
+  trackByMessage(index: number, message: any) {
+    return message.messageID ?? message.id;
   }
 
   // ---------- Lifecycle ----------
@@ -100,6 +108,12 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.measureComposer();
+    try {
+      if ('ResizeObserver' in window && this.composer?.nativeElement) {
+        this.composerResizeObs = new ResizeObserver(() => this.measureComposer());
+        this.composerResizeObs.observe(this.composer.nativeElement);
+      }
+    } catch {}
   }
 
   private measureComposer() {
@@ -111,6 +125,7 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  // ---------- FIXED REAL-TIME MESSAGE RECEIVE ----------
   getmessages() {
     this.subs.add(
       this.chatSignalR.messageReceived$.subscribe((msg) => {
@@ -127,16 +142,31 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
         if (messageId && this.seenMessageIds.has(messageId)) return;
         if (messageId) this.seenMessageIds.add(messageId);
 
-        this.messageList = [...this.messageList, message];
-        setTimeout(() => this.scrollToBottom(), 0);
+        this.messageList.push(message);
 
-        this.subs.add(this.chatroomService.markRead(this.chatId).subscribe());
+        this.scrollToBottomSafe();
       })
     );
   }
 
+  private scrollToBottomSafe() {
+    const box = this.scrollMe?.nativeElement;
+    if (!box) return;
+
+    const nearBottom = box.scrollHeight - (box.scrollTop + box.clientHeight) < 120;
+
+    if (nearBottom) {
+      requestAnimationFrame(() => {
+        box.scrollTop = box.scrollHeight;
+      });
+    }
+  }
+
   ngOnDestroy(): void {
     this.subs.unsubscribe();
+    try {
+      this.composerResizeObs?.disconnect();
+    } catch {}
     for (const url of this.objectUrls) {
       try {
         URL.revokeObjectURL(url);
@@ -152,7 +182,6 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     return !(hasText || hasImages);
   }
 
-  // ---------- Header info ----------
   getChatroomById(id: number) {
     this.subs.add(
       this.chatroomService.getChatRoomById(id).subscribe((res) => {
@@ -164,7 +193,6 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
-  // ---------- Message Sending ----------
   sendMessage(form: FormGroup) {
     const raw = (form.value.content || '').trim();
     const content: string | undefined = raw.length ? raw : undefined;
@@ -189,8 +217,8 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
 
             if (optimisticId && !this.seenMessageIds.has(optimisticId)) {
               this.seenMessageIds.add(optimisticId);
-              this.messageList = [...this.messageList, optimistic];
-              setTimeout(() => this.scrollToBottom(), 0);
+              this.messageList.push(optimistic);
+              this.scrollToBottomSafe();
             }
           }
 
@@ -205,7 +233,6 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
-  // ---------- Image Handling ----------
   onFileSelected(event: any) {
     const newFiles: FileList = event?.target?.files;
     if (!newFiles || newFiles.length === 0) return;
@@ -222,9 +249,9 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.previewBase64(newFiles);
+    this.measureComposer();
   }
 
-  // ---------- FIXED PREVIEW (HEIC + PNG + JPG) ----------
   private async previewBase64(filesToPreview: FileList) {
     const filesArray = Array.from(filesToPreview);
 
@@ -245,12 +272,11 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     this.imageprewsForRemove.forEach((f) => dt.items.add(f.file));
     this.files = dt.files;
     this.filesUpdate = dt.files;
+    this.measureComposer();
   }
 
-  // ---------- CAMERA-SAFE JPEG CONVERTER ----------
   private async convertToJpegBase64(file: File): Promise<string> {
     try {
-      // If file is HEIC → convert using heic2any
       if (
         file.type.includes('heic') ||
         file.name.toLowerCase().endsWith('.heic') ||
@@ -265,7 +291,6 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
         return await this.blobToBase64(converted);
       }
 
-      // Normal images → use bitmap
       const bitmap = await createImageBitmap(file);
 
       const canvas = document.createElement('canvas');
@@ -314,7 +339,6 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  // ---------- Scroll Handling ----------
   onScrollUp(event: any) {
     const el = event.target as HTMLElement;
     if (el.scrollTop <= 20 && !this.loading && !this.allLoaded) {
@@ -340,7 +364,6 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  // ---------- Message Loading ----------
   private async initialLoad() {
     this.skip = 0;
     this.allLoaded = false;

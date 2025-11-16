@@ -1,6 +1,5 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Auth } from 'aws-amplify';
 import { Subscription } from 'rxjs';
 import { APIService } from 'src/app/API.service';
 import { FeedRefreshService } from 'src/app/services/feed-refresh.service';
@@ -44,8 +43,6 @@ export class MainpageComponent implements OnInit, OnDestroy {
 
   async signOut() {
     try {
-      const out = Auth.signOut();
-      console.log(out);
       this.authGuard.canActivate();
       this.router.navigateByUrl('/auth/welcome');
     } catch (error) {
