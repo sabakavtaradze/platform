@@ -25,14 +25,15 @@
       </div>
     </div>
     <div class="content-more-main-container">
-      <div *ngIf="postOwner" class="chatroom-menu-container">
-          <button
-            mat-icon-button
+      <div *ngIf="postOwner || isAdmin" class="chatroom-menu-container">
+        <button
+          mat-icon-button
+          type="button"
           [matMenuTriggerFor]="menu"
-            aria-label="Example icon-button with a menu"
-          >
-            <mat-icon>more_vert</mat-icon>
-          </button>
+          aria-label="Example icon-button with a menu"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
         <mat-menu #menu="matMenu">
           <button (click)="editPost()" mat-menu-item>
             <i style="padding-right: 0.5rem" class="bi bi-envelope-x"></i>
@@ -88,29 +89,22 @@
     <div class="content-options-container">
       <div class="content-options">
         <div class="content-options-list-container">
-          <!-- <button class="content-options-list content-option-like">
-                        <i class="bi bi-hand-thumbs-up"></i>
-                        <div class="content-options-list-numbers">{{content.like}}</div>
-                    </button> -->
-          <!-- <button class="content-options-list content-option-dislike">
-                        <i class="bi bi-hand-thumbs-down"></i>
-                        <div class="content-options-list-numbers">{{content.dislike}}</div>
-                    </button> -->
-          <button class="content-options-list">
-            <button (click)="toggleLike()" [disabled]="accessLike" *ngIf="!alreadyLiked">
+          <!-- Like -->
+          <div class="content-options-list">
+            <button type="button" (click)="toggleLike()" [disabled]="accessLike" *ngIf="!alreadyLiked">
               <i class="bi bi-balloon-heart"></i>
             </button>
-            <button (click)="toggleLike()" [disabled]="accessLike" *ngIf="alreadyLiked">
+            <button type="button" (click)="toggleLike()" [disabled]="accessLike" *ngIf="alreadyLiked">
               <i class="liked bi bi-balloon-heart-fill"></i>
             </button>
             <div *ngIf="contentLikes > 0" class="content-options-list-numbers">
               {{ contentLikes }}
             </div>
-          </button>
+          </div>
         </div>
 
         <div class="content-options-list-container">
-          <button (click)="openComments()" class="content-options-list">
+          <button type="button" (click)="openComments()" class="content-options-list">
             <i class="bi bi-chat-text"></i>
             <div *ngIf="commentCount && commentCount > 0" class="content-options-list-numbers">
               {{ commentCount }}
@@ -119,7 +113,7 @@
         </div>
 
         <div class="content-options-list-container">
-          <button class="content-options-list">
+          <button type="button" class="content-options-list">
             <mat-icon>share</mat-icon>
             <div class="content-options-list-numbers">{{ content.share }}</div>
           </button>

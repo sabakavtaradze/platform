@@ -109,6 +109,18 @@
 
         place-self: center;
         display: flex;
+        // Remove default link underline/blue color from anchors
+        text-decoration: none;
+        color: inherit;
+        &:link,
+        &:visited,
+        &:hover,
+        &:active,
+        &:focus {
+          text-decoration: none;
+          color: inherit;
+          outline: none;
+        }
         i {
           font-size: 1.5rem;
           width: 1.5rem;

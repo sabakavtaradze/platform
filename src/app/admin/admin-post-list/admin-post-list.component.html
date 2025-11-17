@@ -1,22 +1,21 @@
-<p>admin-post-list works!</p>
- 
-<form class="example-form">
-<table class="example-full-width" cellspacing="0"><tr>
-    <td><mat-form-field class="example-full-width">
-      <mat-label>First name</mat-label>
-      <input matInput>
-    </mat-form-field></td>
-    <td><mat-form-field class="example-full-width">
-      <mat-label>Last name</mat-label>
-      <input matInput>
-    </mat-form-field></td>
-  </tr>
-<tr>
-    <td><mat-form-field class="example-full-width">
-      <mat-label>ID</mat-label>
-      <input matInput>
-    </mat-form-field></td>
-  </tr>
-</table>
+<form class="example-form" [formGroup]="form" (ngSubmit)="submit()">
+  <mat-form-field appearance="fill" class="example-full-width" style="width:100%">
+    <mat-label>Search posts by name, email, userId or postId</mat-label>
+    <input matInput formControlName="q" placeholder="e.g. 5, saba, saba@gmail.com, saba kavtaradze" />
+    <mat-error *ngIf="form.get('q')?.hasError('required') && form.get('q')?.touched">Enter a search query</mat-error>
+    <mat-error *ngIf="form.get('q')?.hasError('minlength') && form.get('q')?.touched">Enter a search query</mat-error>
+  </mat-form-field>
 
+  <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading">
+    {{ loading ? 'Searching…' : 'Search' }}
+  </button>
+
+  <div *ngIf="error" class="text-danger" style="margin-top: 1rem;">{{ error }}</div>
+
+  <div *ngIf="posts?.length" style="margin-top: 1rem;">
+    <div *ngFor="let item of posts" style="margin-bottom: 0.5rem;">
+      <app-admin-posts [postId]="item.postID" (onDeletePost)="removePostFromList($event)"></app-admin-posts>
+      <!-- <pre style="white-space: pre-wrap; word-break: break-word;">{{ item | json }}</pre> -->
+    </div>
+  </div>
 </form>

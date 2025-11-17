@@ -28,6 +28,7 @@ import { ContentcommentdialogComponent } from './contentlist/content/contentcomm
 import { ContentcommentdialogcommentComponent } from './contentlist/content/contentcommentdialog/contentcommentdialogcomment/contentcommentdialogcomment.component';
 import { ContenteditdialogComponent } from './contentlist/content/contentcommentdialog/contenteditdialog/contenteditdialog.component';
 import { ContentphotodialogComponent } from './contentlist/content/contentphotodialog/contentphotodialog.component';
+import { ContentzoomdialogComponent } from './contentlist/content/contentzoomdialog/contentzoomdialog.component';
 import { ContentvoteComponent } from './contentlist/contentvote/contentvote.component';
 import { ModelsComponent } from './contentlist/models/models.component';
 import { CreatecontentComponent } from './gadgets/createcontent/createcontent.component';
@@ -80,6 +81,7 @@ const routes: Routes = [
     ContentcommentdialogComponent,
     ContentcommentdialogcommentComponent,
     ContenteditdialogComponent,
+    ContentzoomdialogComponent,
     ProfileComponent,
     ContentphotodialogComponent,
     NotificationslistComponent,
@@ -110,6 +112,7 @@ const routes: Routes = [
     RouterModule.forChild(routes)
 
   ],
+  exports: [ContentComponent],
   providers: [DialogpickertemplateComponent],
 
 })
