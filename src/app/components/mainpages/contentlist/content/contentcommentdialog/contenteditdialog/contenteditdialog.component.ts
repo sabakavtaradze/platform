@@ -2,11 +2,10 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { APIService } from 'src/app/API.service';
-import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
-import { AuthenticatedUser, UserAttributes } from 'src/app/interfaces/authentication/user'; 
+import { AuthenticatedUser, UserAttributes } from 'src/app/interfaces/authentication/user';
 import { PostService } from 'src/app/services/post/post.service';
-
-const { "v4": uuidv4 } = require('uuid'); 
+import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
+import { v4 as uuidv4 } from 'uuid';
 
 interface EditPostInput {
   id: string;
@@ -37,7 +36,6 @@ export class ContenteditdialogComponent implements OnInit {
   imageprews: any[] = [];
   imageprews1: any[] = [];
 
-  s3BucketUrl = 'https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/';
   
   constructor(
     private authService: AuthenticationService, 

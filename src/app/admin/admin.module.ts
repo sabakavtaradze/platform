@@ -8,6 +8,6 @@ import { AdminComponent } from './admin.component';
 
 @NgModule({
   declarations: [AdminComponent, AdminPostListComponent],
-  imports: [CommonModule, AdminRoutingModule, MatButtonModule],
+  imports: [CommonModule, AdminRoutingModule, MatButtonModule,],
 })
-export class AdminModule {}
+export class AdminModule { }

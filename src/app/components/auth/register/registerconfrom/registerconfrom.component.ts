@@ -22,6 +22,7 @@ export class RegisterconfromComponent implements OnInit {
   manualEmail: string = '';
   isUserIDMissing: boolean = false;
   loading: boolean = false;
+  private static readonly CODE_RESEND_COOLDOWN_MS = 120000; // 2 minutes
 
   constructor(
     private router: Router,
@@ -47,8 +48,16 @@ export class RegisterconfromComponent implements OnInit {
       return;
     }
 
-    // Automatically attempt to resend the code using available data
-    this.resendCode();
+    // Automatically attempt to resend only if cooldown expired
+    const lastSent = parseInt(localStorage.getItem('register_last_code_sent') || '0', 10);
+    const now = Date.now();
+    if (now - lastSent >= RegisterconfromComponent.CODE_RESEND_COOLDOWN_MS) {
+      this.resendCode();
+    } else {
+      const remainingMs = RegisterconfromComponent.CODE_RESEND_COOLDOWN_MS - (now - lastSent);
+      const remainingSec = Math.ceil(remainingMs / 1000);
+      console.log(`Skip auto resend. Cooldown ${remainingSec}s remaining.`);
+    }
   }
 
   /**
@@ -56,6 +65,15 @@ export class RegisterconfromComponent implements OnInit {
    * Calls sendCodeByID if UserID is valid, otherwise calls sendCodeByEmail if email is present.
    */
   resendCode() {
+    // Cooldown guard
+    const lastSent = parseInt(localStorage.getItem('register_last_code_sent') || '0', 10);
+    const now = Date.now();
+    if (now - lastSent < RegisterconfromComponent.CODE_RESEND_COOLDOWN_MS) {
+      const remainingMs = RegisterconfromComponent.CODE_RESEND_COOLDOWN_MS - (now - lastSent);
+      const remainingSec = Math.ceil(remainingMs / 1000);
+      alert(`Please wait ${remainingSec}s before requesting a new code.`);
+      return;
+    }
     this.loading = true;
     let resend$: Observable<RegistrationResponse> = EMPTY;
 
@@ -89,6 +107,7 @@ export class RegisterconfromComponent implements OnInit {
         if (response.isSuccess) {
           alert('Verification code sent/resent successfully.');
           this.showManualEmailInput = false;
+          localStorage.setItem('register_last_code_sent', Date.now().toString());
         } else {
           console.error('Server reported failure:', response.errorMessage);
           alert(`Error resending code: ${response.errorMessage || 'Failed to resend code.'}`);

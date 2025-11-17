@@ -19,8 +19,6 @@ import { BaseResponse } from 'src/app/interfaces/ResponseInterface/BaseResponse'
 
 import heic2any from 'heic2any'; // ✅ ADDED
 
-const { v4: uuidv4 } = require('uuid');
-
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
@@ -43,7 +41,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   FollowersCount = 0;
 
   process = false;
-  s3BucketUrl = 'https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/';
 
   private subs = new Subscription();
 
