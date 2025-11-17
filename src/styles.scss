@@ -1,3 +1,5 @@
+/* Global styles only; Material theme is loaded via prebuilt CSS */
+body { margin: 0; }
 @use "@angular/material" as mat;
 @use "@fortawesome/fontawesome-free/scss/fontawesome.scss" as *;
 @use "@fortawesome/fontawesome-free/scss/solid.scss" as *;
@@ -10,20 +12,15 @@
 $theme: mat.$light-theme;
 @include mat.all-component-themes($theme);
 
-body { margin: 0; }
-@use "@angular/material" as mat;
 
 /* Minimal test theme to verify Material SCSS resolution */
 $theme: mat.$light-theme;
 @include mat.all-component-themes($theme);
 
-body { margin: 0; }
 /* ========================================= */
 /* ALL @use MUST BE AT THE VERY TOP          */
 /* ========================================= */
 
-/* Material */
-@use "@angular/material" as mat;
 
 /* Font Awesome */
 @use "@fortawesome/fontawesome-free/scss/fontawesome.scss" as *;
