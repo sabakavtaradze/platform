@@ -37,9 +37,10 @@ import {MatTreeFlatDataSource, MatTreeFlattener, MatTreeModule} from '@angular/m
 //   level: number;
 // }
 @Component({
-  selector: 'app-subcategory',
-  templateUrl: './subcategory.component.html',
-  styleUrls: ['./subcategory.component.scss']
+    selector: 'app-subcategory',
+    templateUrl: './subcategory.component.html',
+    styleUrls: ['./subcategory.component.scss'],
+    standalone: false
 })
 export class SubcategoryComponent {
   // private _transformer = (node: FoodNode, level: number) => {

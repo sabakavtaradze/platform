@@ -7,9 +7,10 @@ import { AuthenticationService } from 'src/app/services/user/authentication/auth
 import { AuthenticatedUser, UserAttributes } from 'src/app/interfaces/authentication/user'; 
 
 @Component({
-  selector: 'app-notifications',
-  templateUrl: './notifications.component.html',
-  styleUrls: ['./notifications.component.scss']
+    selector: 'app-notifications',
+    templateUrl: './notifications.component.html',
+    styleUrls: ['./notifications.component.scss'],
+    standalone: false
 })
 export class NotificationsComponent implements OnInit, OnDestroy { 
   // 🔑 Type currentUser to match the attributes derived from the JWT

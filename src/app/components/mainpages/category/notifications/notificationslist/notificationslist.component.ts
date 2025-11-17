@@ -5,9 +5,10 @@ import { AuthenticationService } from 'src/app/services/user/authentication/auth
 import { AuthenticatedUser, UserAttributes } from 'src/app/interfaces/authentication/user'; 
 
 @Component({
-  selector: 'app-notificationslist',
-  templateUrl: './notificationslist.component.html',
-  styleUrls: ['./notificationslist.component.scss']
+    selector: 'app-notificationslist',
+    templateUrl: './notificationslist.component.html',
+    styleUrls: ['./notificationslist.component.scss'],
+    standalone: false
 })
 export class NotificationslistComponent implements OnInit { // 🔑 Added OnInit
   @Input() follower:any;

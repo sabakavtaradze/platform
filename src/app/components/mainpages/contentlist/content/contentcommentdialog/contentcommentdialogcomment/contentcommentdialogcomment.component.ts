@@ -3,9 +3,10 @@ import { APIService } from 'src/app/API.service';
 import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
-  selector: 'app-contentcommentdialogcomment',
-  templateUrl: './contentcommentdialogcomment.component.html',
-  styleUrls: ['./contentcommentdialogcomment.component.scss']
+    selector: 'app-contentcommentdialogcomment',
+    templateUrl: './contentcommentdialogcomment.component.html',
+    styleUrls: ['./contentcommentdialogcomment.component.scss'],
+    standalone: false
 })
 export class ContentcommentdialogcommentComponent {
   @Input() comment!:any;

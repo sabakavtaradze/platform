@@ -9,9 +9,10 @@ import { SignalRService } from 'src/app/services/SignalRService/signal-rservice.
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-chatusers',
-  templateUrl: './chatusers.component.html',
-  styleUrls: ['./chatusers.component.scss']
+    selector: 'app-chatusers',
+    templateUrl: './chatusers.component.html',
+    styleUrls: ['./chatusers.component.scss'],
+    standalone: false
 })
 export class ChatusersComponent implements OnInit, OnDestroy {
   headerBackName: string = '/chat'

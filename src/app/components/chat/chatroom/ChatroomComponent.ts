@@ -8,12 +8,13 @@ import { AuthenticationService } from 'src/app/services/user/authentication/auth
 import { ChatroomService } from 'src/app/services/user/chatroom/chatroom.service';
 
 @Component({
-  selector: 'app-chatroom',
-  templateUrl: './chatroom.component.html',
-  styleUrls: ['./chatroom.component.scss'],
-  queries: {
-    contentRef: new ViewChild('contentRef'),
-  },
+    selector: 'app-chatroom',
+    templateUrl: './chatroom.component.html',
+    styleUrls: ['./chatroom.component.scss'],
+    queries: {
+        contentRef: new ViewChild('contentRef'),
+    },
+    standalone: false
 })
 export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
   chatForm: FormGroup;

@@ -7,9 +7,10 @@ import { PostCommentService } from 'src/app/services/post/post-comment.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 
 @Component({
-  selector: 'app-contentcommentdialog',
-  templateUrl: './contentcommentdialog.component.html',
-  styleUrls: ['./contentcommentdialog.component.scss'],
+    selector: 'app-contentcommentdialog',
+    templateUrl: './contentcommentdialog.component.html',
+    styleUrls: ['./contentcommentdialog.component.scss'],
+    standalone: false
 })
 export class ContentcommentdialogComponent implements OnInit, OnDestroy {
   post: any;

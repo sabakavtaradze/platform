@@ -3,9 +3,10 @@ import { chatUsersList } from 'src/app/interfaces/chat/interfaceChat';
 import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
-  selector: 'app-chatuserslist',
-  templateUrl: './chatuserslist.component.html',
-  styleUrls: ['./chatuserslist.component.scss']
+    selector: 'app-chatuserslist',
+    templateUrl: './chatuserslist.component.html',
+    styleUrls: ['./chatuserslist.component.scss'],
+    standalone: false
 })
 export class ChatuserslistComponent {
   @Input() item!: chatUsersList;

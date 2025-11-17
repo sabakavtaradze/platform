@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'messageTime'
+    name: 'messageTime',
+    standalone: false
 })
 export class MessageTimePipe implements PipeTransform {
   transform(value: any): string {

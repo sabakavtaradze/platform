@@ -8,9 +8,10 @@ import { PostService } from 'src/app/services/post/post.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 
 @Component({
-  selector: 'app-mainpage',
-  templateUrl: './mainpage.component.html',
-  styleUrls: ['./mainpage.component.scss'],
+    selector: 'app-mainpage',
+    templateUrl: './mainpage.component.html',
+    styleUrls: ['./mainpage.component.scss'],
+    standalone: false
 })
 export class MainpageComponent implements OnInit, OnDestroy {
   // contents: Content[] = [

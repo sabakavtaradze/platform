@@ -2,9 +2,10 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-contentphotodialog',
-  templateUrl: './contentphotodialog.component.html',
-  styleUrls: ['./contentphotodialog.component.scss']
+    selector: 'app-contentphotodialog',
+    templateUrl: './contentphotodialog.component.html',
+    styleUrls: ['./contentphotodialog.component.scss'],
+    standalone: false
 })
 export class ContentphotodialogComponent {
   image:any;

@@ -21,10 +21,10 @@ interface Item {
 
 // }
 @Component({
-  selector: 'app-models',
-  templateUrl: './models.component.html',
-  styleUrls: ['./models.component.scss'],
-  
+    selector: 'app-models',
+    templateUrl: './models.component.html',
+    styleUrls: ['./models.component.scss'],
+    standalone: false
 })
 export class ModelsComponent {
   @Input() item!: Item;

@@ -11,9 +11,10 @@ import { Category, Professions } from 'src/app/interfaces/library/interfacelibra
 
 
 @Component({
-  selector: 'app-dialogpickertemplate',
-  templateUrl: './dialogpickertemplate.component.html',
-  styleUrls: ['./dialogpickertemplate.component.scss']
+    selector: 'app-dialogpickertemplate',
+    templateUrl: './dialogpickertemplate.component.html',
+    styleUrls: ['./dialogpickertemplate.component.scss'],
+    standalone: false
 })
 
 export class DialogpickertemplateComponent {

@@ -1,8 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'truncateWords',
-  pure: true,
+    name: 'truncateWords',
+    pure: true,
+    standalone: false
 })
 export class TruncateWordsPipe implements PipeTransform {
   transform(value: any, limit: number = 10): string {

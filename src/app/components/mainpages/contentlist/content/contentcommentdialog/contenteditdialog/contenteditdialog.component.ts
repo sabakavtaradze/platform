@@ -15,9 +15,10 @@ interface EditPostInput {
 }
 
 @Component({
-  selector: 'app-contenteditdialog',
-  templateUrl: './contenteditdialog.component.html',
-  styleUrls: ['./contenteditdialog.component.scss']
+    selector: 'app-contenteditdialog',
+    templateUrl: './contenteditdialog.component.html',
+    styleUrls: ['./contenteditdialog.component.scss'],
+    standalone: false
 })
 export class ContenteditdialogComponent implements OnInit {
 

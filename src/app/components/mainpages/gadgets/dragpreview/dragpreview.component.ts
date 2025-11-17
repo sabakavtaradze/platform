@@ -9,11 +9,10 @@ import {
 } from '@angular/cdk/drag-drop';
 import { NgFor } from '@angular/common';
 @Component({
-  selector: 'app-dragpreview',
-  templateUrl: './dragpreview.component.html',
-  styleUrls: ['./dragpreview.component.scss'],
-  // standalone: true,
-  // imports: [CdkDropList, NgFor, CdkDrag, CdkDragPreview],
+    selector: 'app-dragpreview',
+    templateUrl: './dragpreview.component.html',
+    styleUrls: ['./dragpreview.component.scss'],
+    standalone: false
 })
 export class DragpreviewComponent {
   // tslint:disable:max-line-length

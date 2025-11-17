@@ -7,9 +7,10 @@ import { ErrorCheckeService } from 'src/app/services/error-check.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 
 @Component({
-  selector: 'app-registerconfrom',
-  templateUrl: './registerconfrom.component.html',
-  styleUrls: ['./registerconfrom.component.scss'],
+    selector: 'app-registerconfrom',
+    templateUrl: './registerconfrom.component.html',
+    styleUrls: ['./registerconfrom.component.scss'],
+    standalone: false
 })
 export class RegisterconfromComponent implements OnInit {
   code = '';

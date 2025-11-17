@@ -8,9 +8,10 @@ import { AuthenticationService } from 'src/app/services/user/authentication/auth
 import { CreatecontentComponent } from '../createcontent.component';
 
 @Component({
-  selector: 'app-createcontentdialog',
-  templateUrl: './createcontentdialog.component.html',
-  styleUrls: ['./createcontentdialog.component.scss'],
+    selector: 'app-createcontentdialog',
+    templateUrl: './createcontentdialog.component.html',
+    styleUrls: ['./createcontentdialog.component.scss'],
+    standalone: false
 })
 export class CreatecontentdialogComponent implements OnInit {
   currentUser: UserAttributes | null = null;

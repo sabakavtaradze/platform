@@ -7,9 +7,10 @@ import {Professions } from 'src/app/interfaces/library/interfacelibrary';
 
 
 @Component({
-  selector: 'app-dialogpicker',
-  templateUrl: './dialogpicker.component.html',
-  styleUrls: ['./dialogpicker.component.scss']
+    selector: 'app-dialogpicker',
+    templateUrl: './dialogpicker.component.html',
+    styleUrls: ['./dialogpicker.component.scss'],
+    standalone: false
 })
 export class DialogpickerComponent {
   // @Input() professions: Category[] = [];

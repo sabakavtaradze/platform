@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
-  selector: 'app-chatlist',
-  templateUrl: './chatlist.component.html',
-  styleUrls: ['./chatlist.component.scss']
+    selector: 'app-chatlist',
+    templateUrl: './chatlist.component.html',
+    styleUrls: ['./chatlist.component.scss'],
+    standalone: false
 })
 export class ChatlistComponent {
   @Input() item!: any; // chat summary object

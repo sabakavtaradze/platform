@@ -20,9 +20,10 @@ import { BaseResponse } from 'src/app/interfaces/ResponseInterface/BaseResponse'
 import heic2any from 'heic2any'; // ✅ ADDED
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss'],
+    selector: 'app-profile',
+    templateUrl: './profile.component.html',
+    styleUrls: ['./profile.component.scss'],
+    standalone: false
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   currentUser: UserAttributes | null = null;

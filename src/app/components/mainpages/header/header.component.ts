@@ -13,9 +13,10 @@ import { SignalRService } from 'src/app/services/SignalRService/signal-rservice.
 import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss'],
+    selector: 'app-header',
+    templateUrl: './header.component.html',
+    styleUrls: ['./header.component.scss'],
+    standalone: false
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   profilepic =

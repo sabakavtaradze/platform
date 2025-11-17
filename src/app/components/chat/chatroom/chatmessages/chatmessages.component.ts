@@ -4,9 +4,10 @@ import { ChatimagedialogComponent } from '../chatimagedialog/chatimagedialog.com
 
 
 @Component({
-  selector: 'app-chatmessages',
-  templateUrl: './chatmessages.component.html',
-  styleUrls: ['./chatmessages.component.scss']
+    selector: 'app-chatmessages',
+    templateUrl: './chatmessages.component.html',
+    styleUrls: ['./chatmessages.component.scss'],
+    standalone: false
 })
 export class ChatmessagesComponent {
   @Input() message!: any;
