@@ -1,89 +1,92 @@
-// Custom Theming for Angular Material
-// For more information: https://material.angular.io/guide/theming
-@use '@angular/material' as mat;
-// Plus imports for other components in your app.
+@use "@angular/material" as mat;
+@use "@fortawesome/fontawesome-free/scss/fontawesome.scss" as *;
+@use "@fortawesome/fontawesome-free/scss/solid.scss" as *;
+@use "@fortawesome/fontawesome-free/scss/regular.scss" as *;
+@use "@fortawesome/fontawesome-free/scss/brands.scss" as *;
+@use "bootstrap/scss/bootstrap" as *;
+@use "bootstrap-icons/font/bootstrap-icons.scss" as *;
 
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
-@include mat.core();
+/* Minimal Material theme to confirm SCSS resolution */
+$theme: mat.$light-theme;
+@include mat.all-component-themes($theme);
 
-// Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
-// hue. Available color palettes: https://material.io/design/color/
-$platform-primary: mat.define-palette(mat.$indigo-palette);
-$platform-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+body { margin: 0; }
+@use "@angular/material" as mat;
 
-// The warn palette is optional (defaults to red).
-$platform-warn: mat.define-palette(mat.$red-palette);
+/* Minimal test theme to verify Material SCSS resolution */
+$theme: mat.$light-theme;
+@include mat.all-component-themes($theme);
 
-// Create the theme object. A theme consists of configurations for individual
-// theming systems such as "color" or "typography".
-$platform-theme: mat.define-light-theme(
-  (
-    color: (
-      primary: $platform-primary,
-      accent: $platform-accent,
-      warn: $platform-warn,
-    ),
-  )
-);
+body { margin: 0; }
+/* ========================================= */
+/* ALL @use MUST BE AT THE VERY TOP          */
+/* ========================================= */
 
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-@include mat.all-component-themes($platform-theme);
+/* Material */
+@use "@angular/material" as mat;
 
-/* You can add global styles to this file, and also import other style files */
+/* Font Awesome */
+@use "@fortawesome/fontawesome-free/scss/fontawesome.scss" as *;
+@use "@fortawesome/fontawesome-free/scss/solid.scss" as *;
+@use "@fortawesome/fontawesome-free/scss/regular.scss" as *;
+@use "@fortawesome/fontawesome-free/scss/brands.scss" as *;
 
-html,
-body {
+/* Bootstrap */
+@use "bootstrap/scss/bootstrap" as *;
+
+/* Bootstrap Icons */
+@use "bootstrap-icons/font/bootstrap-icons.scss" as *;
+
+/* ========================================= */
+/* MATERIAL THEME (MD3)                       */
+/* ========================================= */
+
+$primary: mat.define-palette(mat.$indigo-palette);
+$accent: mat.define-palette(mat.$pink-palette);
+$warn: mat.define-palette(mat.$red-palette);
+
+$theme: mat.define-theme((
+  color: (
+    primary: $primary,
+    accent: $accent,
+    warn: $warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0
+));
+
+@include mat.all-component-themes($theme);
+
+/* ========================================= */
+/* GLOBAL STYLES                              */
+/* ========================================= */
+
+html, body {
   height: 100%;
-}
-
-// #f0f2f5
-body {
   margin: 0;
+  font-family: Montserrat, 'Helvetica Neue', sans-serif;
   background-color: #f0f2f58a !important;
-  font-family: montserrat, 'Helvetica Neue', sans-serif !important;
+}
+
+/* Fonts */
+@font-face {
+  font-family: 'Montserrat';
+  src: url('./assets/fonts/montserrat/Montserrat-Regular.ttf') format('truetype');
 }
 
 @font-face {
   font-family: 'Montserrat';
-  src:
-    local('Montserrat'),
-    url(./assets/fonts/montserrat/Montserrat-Regular.ttf) format('truetype');
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src:
-    local('Montserrat'),
-    url(./assets/fonts/montserrat/Montserrat-Bold.ttf) format('truetype');
+  src: url('./assets/fonts/montserrat/Montserrat-Bold.ttf') format('truetype');
   font-weight: bold;
 }
 
-@import '@fortawesome/fontawesome-free/scss/fontawesome.scss';
-@import '@fortawesome/fontawesome-free/scss/solid.scss';
-@import '@fortawesome/fontawesome-free/scss/regular.scss';
-@import '@fortawesome/fontawesome-free/scss/brands.scss';
-
-@import 'mdb-angular-ui-kit/assets/scss/mdb.scss';
-
-/* Importing Bootstrap SCSS file. */
-@import 'bootstrap/scss/bootstrap';
-@import 'node_modules/bootstrap-icons/font/bootstrap-icons.scss';
-
+/* Helpers */
 .full-width-dialog .mat-dialog-container {
   max-width: 100vw !important;
 }
 
-// example matdialog
-// panelClass: 'full-width-dialog'
-
-/* Global image quality & consistency for avatar-sized images */
 .content-info-detail-picture {
-  display: block; /* avoid inline spacing that can cause subpixel blur */
-  object-fit: cover; /* keep subjects centered and avoid distortion */
-  image-rendering: auto; /* prefer high-quality interpolation for photos */
+  display: block;
+  object-fit: cover;
+  image-rendering: auto;
 }
