@@ -4,27 +4,27 @@ import { ChatimagedialogComponent } from '../chatimagedialog/chatimagedialog.com
 
 
 @Component({
-    selector: 'app-chatmessages',
-    templateUrl: './chatmessages.component.html',
-    styleUrls: ['./chatmessages.component.scss'],
-    standalone: false
+  selector: 'app-chatmessages',
+  templateUrl: './chatmessages.component.html',
+  styleUrls: ['./chatmessages.component.scss'],
+  standalone: false
 })
 export class ChatmessagesComponent {
   @Input() message!: any;
   @Input() currentUser!: any;
   owner: boolean = false;
-  s3BucketUrl = 'https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/'; 
-  images:any[] = []
+  s3BucketUrl = 'https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/';
+  images: any[] = []
 
   // img = '';
 
-  constructor(public dialog: MatDialog){
+  constructor(public dialog: MatDialog) {
 
   }
 
   openImageDialog(image: any): void {
     const dialogRef = this.dialog.open(ChatimagedialogComponent, {
-      data: {image: image},
+      data: { image: image },
       // panelClass: 'custom-dialog-panel',
       // backdropClass: "custom-dialog-backdrop"
     });
@@ -48,25 +48,25 @@ export class ChatmessagesComponent {
     else if (imageCount === 4) {
       return 'col-6';
     }
-    
+
     else {
       return ''; // No class applied if neither condition is met
     }
   }
 
   imageProcess(message: any): void {
-    if(message.images){
+    if (message.images) {
 
-    message.images.forEach((el:any) => {
-      let img  = `${this.s3BucketUrl}${el}`
-      this.images.push(img)
-    });
+      message.images.forEach((el: any) => {
+        let img = `${this.s3BucketUrl}${el}`
+        this.images.push(img)
+      });
+    }
   }
-  }
-  ngOnInit(){
-    if(this.currentUser.attributes.sub == this.message.senderID){
+  ngOnInit() {
+    const msgSender = this.message.senderID ?? this.message.senderId;
+    if (String(this.currentUser.attributes.sub) === String(msgSender)) {
       this.owner = true;
-      
     }
   }
 

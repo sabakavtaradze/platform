@@ -1,7 +1,6 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
-import { APIService } from 'src/app/API.service';
 import { HeaderService } from 'src/app/services/header.service';
 import { NotificationsService } from 'src/app/services/notifications.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
@@ -12,10 +11,10 @@ import { FeedRefreshService } from 'src/app/services/feed-refresh.service';
 import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
-    selector: 'app-footer',
-    templateUrl: './footer.component.html',
-    styleUrls: ['./footer.component.scss'],
-    standalone: false
+  selector: 'app-footer',
+  templateUrl: './footer.component.html',
+  styleUrls: ['./footer.component.scss'],
+  standalone: false
 })
 export class FooterComponent implements OnInit, OnDestroy {
   // 🔑 Added OnInit and OnDestroy
@@ -36,11 +35,10 @@ export class FooterComponent implements OnInit, OnDestroy {
     private headerservice: HeaderService,
     public dialog: MatDialog,
     private authService: AuthenticationService,
-    private apiservice: APIService,
     private notificationservice: NotificationsService,
     private userService: UserService,
     private feedRefresh: FeedRefreshService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.auth();
@@ -191,34 +189,7 @@ export class FooterComponent implements OnInit, OnDestroy {
    * Updated getFollowers to use safe checking for currentUser.sub
    */
   async getFollowers() {
-    if (!this.currentUser || !this.currentUser.sub) {
-      console.error('Cannot fetch followers: Current user SUB is missing.');
-      return;
-    }
-    try {
-      let filter = {
-        friendsID: { eq: this.currentUser.sub },
-      };
-      let getfollowers = await this.apiservice.ListFollowers(filter);
-      if (this.profileUser && this.profileUser.notificationsseen !== null) {
-        let checkseen = getfollowers.items.some((e: any) => {
-          let dateA = new Date(this.profileUser.notificationsseen);
-          let dateB = new Date(e.createdAt);
-          return dateA < dateB;
-        });
-        this.notoficationAlert = checkseen;
-      }
-      if (
-        this.profileUser &&
-        this.profileUser.notificationsseen === null &&
-        getfollowers.items.length > 0
-      ) {
-        this.notoficationAlert = true;
-      }
-      return;
-    } catch (e) {
-      console.log(e);
-    }
+
   }
   showHeader() {
     this.headerservice.setScrollPosition(true);

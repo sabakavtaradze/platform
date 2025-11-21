@@ -2,15 +2,14 @@ import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import heic2any from 'heic2any';
-import { APIService } from 'src/app/API.service';
 import { PostCommentService } from 'src/app/services/post/post-comment.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 
 @Component({
-    selector: 'app-contentcommentdialog',
-    templateUrl: './contentcommentdialog.component.html',
-    styleUrls: ['./contentcommentdialog.component.scss'],
-    standalone: false
+  selector: 'app-contentcommentdialog',
+  templateUrl: './contentcommentdialog.component.html',
+  styleUrls: ['./contentcommentdialog.component.scss'],
+  standalone: false
 })
 export class ContentcommentdialogComponent implements OnInit, OnDestroy {
   post: any;
@@ -31,7 +30,6 @@ export class ContentcommentdialogComponent implements OnInit, OnDestroy {
     public dialogRef: MatDialogRef<ContentcommentdialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private authguard: AuthenticationService,
-    private apiservice: APIService
   ) {
     this.currentUser = data.currentUser;
     this.content = data.content;
@@ -222,6 +220,6 @@ export class ContentcommentdialogComponent implements OnInit, OnDestroy {
   async updateUserFunction() {
     let filter = { id: { eq: this.currentUser.attributes.sub } };
     try {
-    } catch (error) {}
+    } catch (error) { }
   }
 }

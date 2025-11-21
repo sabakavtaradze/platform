@@ -1,5 +1,4 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { APIService } from 'src/app/API.service';
 import { APIServicem } from 'src/app/apiservicem';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 // 🔑 Import AuthenticatedUser, UserAttributes, and UnseenCountResponse
@@ -13,10 +12,10 @@ import { SignalRService } from 'src/app/services/SignalRService/signal-rservice.
 import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
-    selector: 'app-header',
-    templateUrl: './header.component.html',
-    styleUrls: ['./header.component.scss'],
-    standalone: false
+  selector: 'app-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.scss'],
+  standalone: false
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   profilepic =
@@ -31,12 +30,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   updateUser: Subscription | undefined;
   private unseenSub?: Subscription;
   constructor(
-    private apiservice: APIService,
     private authService: AuthenticationService,
     private apiservicem: APIServicem,
     private userService: UserService,
     private signalR: SignalRService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Start the authentication check and user loading process

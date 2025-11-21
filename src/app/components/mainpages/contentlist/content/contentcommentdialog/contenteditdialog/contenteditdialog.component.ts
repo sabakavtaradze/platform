@@ -2,7 +2,6 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AdminPostsService } from 'src/app/admin/services/admin-posts.service';
-import { APIService } from 'src/app/API.service';
 import { AuthenticatedUser, UserAttributes } from 'src/app/interfaces/authentication/user';
 import { PostService } from 'src/app/services/post/post.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
@@ -44,7 +43,6 @@ export class ContenteditdialogComponent implements OnInit {
     private authService: AuthenticationService,
     public dialogRef: MatDialogRef<ContenteditdialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private apiservice: APIService,
     private fb: FormBuilder,
     private postService: PostService,
     private adminPosts: AdminPostsService

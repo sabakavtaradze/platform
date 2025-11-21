@@ -1,18 +1,17 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { APIService } from 'src/app/API.service';
+import { Subscription } from 'rxjs';
 import { APIServicem } from 'src/app/apiservicem';
 import { chatUsersList } from 'src/app/interfaces/chat/interfaceChat';
+import { SignalRService } from 'src/app/services/SignalRService/signal-rservice.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 import { ChatroomService } from 'src/app/services/user/chatroom/chatroom.service';
-import { SignalRService } from 'src/app/services/SignalRService/signal-rservice.service';
-import { Subscription } from 'rxjs';
 
 @Component({
-    selector: 'app-chatusers',
-    templateUrl: './chatusers.component.html',
-    styleUrls: ['./chatusers.component.scss'],
-    standalone: false
+  selector: 'app-chatusers',
+  templateUrl: './chatusers.component.html',
+  styleUrls: ['./chatusers.component.scss'],
+  standalone: false
 })
 export class ChatusersComponent implements OnInit, OnDestroy {
   headerBackName: string = '/chat'
@@ -23,7 +22,6 @@ export class ChatusersComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    public apiservice: APIService,
     private apiservicem: APIServicem,
     private authService: AuthenticationService,
     private chatroomService: ChatroomService
@@ -31,7 +29,7 @@ export class ChatusersComponent implements OnInit, OnDestroy {
   ) {
   }
 
- 
+
   async createChat(x: any) {
     try {
       this.subs.add(
@@ -49,22 +47,22 @@ export class ChatusersComponent implements OnInit, OnDestroy {
   async auth() {
     try {
 
-       this.authService.GuardUserAuth().then(user => {
+      this.authService.GuardUserAuth().then(user => {
         this.currentUser = user;
-       })
+      })
     }
     catch (error) {
       console.error(error)
     }
   }
-getChatrooms(){
-  this.subs.add(
-    this.chatroomService.getChatRooms().subscribe((result) => {
-      console.log(result)
-      this.chats = result.data.filter(item => item !== null) as chatUsersList[];
-    })
-  );
-}
+  getChatrooms() {
+    this.subs.add(
+      this.chatroomService.getChatRooms().subscribe((result) => {
+        console.log(result)
+        this.chats = result.data.filter(item => item !== null) as chatUsersList[];
+      })
+    );
+  }
 
   ngOnInit() {
     (async () => {
@@ -85,6 +83,14 @@ getChatrooms(){
           if (!msg) return;
           console.log('SignalR message in chatusers:', msg);
           // simple strategy: refresh chatrooms when a new message arrives
+          this.getChatrooms();
+        })
+      );
+
+      // also refresh when server signals chat list changes (create/update/delete)
+      this.subs.add(
+        this.chatSignalR.chatListEvent$.subscribe(evt => {
+          if (!evt) return;
           this.getChatrooms();
         })
       );

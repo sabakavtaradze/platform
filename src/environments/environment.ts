@@ -6,7 +6,7 @@ export const environment = {
   production: false,
   // 🔑 Replace 'YOUR_DEV_API_URL' with the actual API endpoint for local development
 
-  // apiUrl: 'https://wbless.onrender.com',
+  // apiUrl: 'https://platformbackend-tour.onrender.com',
   apiUrl: 'https://localhost:7274',
 };
 // apiUrl: 'https://platformbackend-tour.onrender.com/'

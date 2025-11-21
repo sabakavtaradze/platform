@@ -8,13 +8,13 @@ import { AuthenticationService } from 'src/app/services/user/authentication/auth
 import { ChatroomService } from 'src/app/services/user/chatroom/chatroom.service';
 
 @Component({
-    selector: 'app-chatroom',
-    templateUrl: './chatroom.component.html',
-    styleUrls: ['./chatroom.component.scss'],
-    queries: {
-        contentRef: new ViewChild('contentRef'),
-    },
-    standalone: false
+  selector: 'app-chatroom',
+  templateUrl: './chatroom.component.html',
+  styleUrls: ['./chatroom.component.scss'],
+  queries: {
+    contentRef: new ViewChild('contentRef'),
+  },
+  standalone: false
 })
 export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
   chatForm: FormGroup;
@@ -43,6 +43,7 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
   private seenMessageIds = new Set<number>();
 
   private subs = new Subscription();
+  sending = false; // public for template disable binding
 
   @ViewChild('scrollMe', { static: false }) scrollMe!: ElementRef<HTMLDivElement>;
   @ViewChild('composer', { static: false }) composer!: ElementRef<HTMLDivElement>;
@@ -66,7 +67,7 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
   // 🔥 ADD TRACKBY — BEST PERFORMANCE UPGRADE
   // -------------------------------------------------------------
   trackByMessage(index: number, message: any) {
-    return message.messageID ?? message.id;
+    return message.messageID ?? message.id ?? message.tempId;
   }
 
   // ---------- Lifecycle ----------
@@ -114,7 +115,7 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
         this.composerResizeObs = new ResizeObserver(() => this.measureComposer());
         this.composerResizeObs.observe(this.composer.nativeElement);
       }
-    } catch {}
+    } catch { }
   }
 
   private measureComposer() {
@@ -131,20 +132,49 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subs.add(
       this.chatSignalR.messageReceived$.subscribe((msg) => {
         if (!msg) return;
+        const serverId: number | undefined = msg.messageID ?? msg.id;
+        const content = msg.content ?? '';
+        const incomingSenderRaw = msg.senderID ?? msg.senderId;
+        const incomingSender = this.normalizeSenderId(incomingSenderRaw);
 
-        const message = {
+        // Attempt to upgrade an optimistic message first
+        if (serverId) {
+          const existingIndex = this.messageList.findIndex(m => {
+            if (!m.temp || m.delivered) return false;
+            const mSender = this.normalizeSenderId(m.senderID ?? m.senderId ?? m.senderId);
+            return m.content === content && mSender === incomingSender;
+          });
+          if (existingIndex !== -1) {
+            const upgraded = {
+              ...this.messageList[existingIndex],
+              ...msg,
+              senderID: incomingSenderRaw,
+              senderId: incomingSenderRaw,
+              messageID: serverId,
+              id: serverId,
+              delivered: true,
+              status: 'sent'
+            };
+            this.messageList[existingIndex] = upgraded;
+            this.seenMessageIds.add(serverId);
+            this.scrollToBottomSafe();
+            return;
+          }
+        }
+
+        // Normal path: avoid duplicates by serverId
+        if (serverId && this.seenMessageIds.has(serverId)) return;
+        if (serverId) this.seenMessageIds.add(serverId);
+
+        const normalized = {
           ...msg,
           chatRoomId: this.chatId,
-          senderId: msg.senderID,
+          senderID: incomingSenderRaw,
+          senderId: incomingSenderRaw,
+          delivered: true,
+          status: 'sent'
         };
-
-        const messageId: number | undefined = (message as any).messageID ?? (message as any).id;
-
-        if (messageId && this.seenMessageIds.has(messageId)) return;
-        if (messageId) this.seenMessageIds.add(messageId);
-
-        this.messageList.push(message);
-
+        this.messageList.push(normalized);
         this.scrollToBottomSafe();
       })
     );
@@ -167,11 +197,11 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subs.unsubscribe();
     try {
       this.composerResizeObs?.disconnect();
-    } catch {}
+    } catch { }
     for (const url of this.objectUrls) {
       try {
         URL.revokeObjectURL(url);
-      } catch {}
+      } catch { }
     }
     this.objectUrls = [];
   }
@@ -195,43 +225,85 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   sendMessage(form: FormGroup) {
+    if (this.sending) return;
     const raw = (form.value.content || '').trim();
     const content: string | undefined = raw.length ? raw : undefined;
-
     const selectedFiles: File[] = this.imageprewsForRemove.map((e) => e.file);
-
     if (!content && selectedFiles.length === 0) return;
 
-    const dto = {
+    this.sending = true;
+
+    // Create optimistic message immediately
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const optimistic: any = {
+      temp: true,
+      tempId,
       chatRoomId: this.chatId,
-      ...(content ? { content } : {}),
-      ...(selectedFiles.length ? { images: selectedFiles } : {}),
+      senderID: this.currentUser?.attributes?.sub,
+      senderId: this.currentUser?.attributes?.sub,
+      content: content || '',
+      images: this.imageprews.slice(),
+      createdAt: new Date().toISOString(),
+      delivered: false,
+      status: 'sending'
     };
+    this.messageList.push(optimistic);
+    this.scrollToBottomSafe();
+
+    // Prepare DTO
+    const dto: any = { chatRoomId: this.chatId };
+    if (content) dto.content = content;
+    if (selectedFiles.length) dto.images = selectedFiles;
+
+    // Reset input immediately for UX
+    this.chatForm.reset();
+    this.imageprews = [];
+    this.imageprewsForRemove = [];
+    this.files = null;
+    this.filesUpdate = null;
+    this.measureComposer();
 
     this.subs.add(
       this.chatroomService.sendMessage(dto).subscribe({
         next: (res) => {
           if (res?.isSuccess && res.data) {
-            const optimistic = res.data;
-            const optimisticId: number | undefined =
-              (optimistic as any).messageID ?? (optimistic as any).id;
-
-            if (optimisticId && !this.seenMessageIds.has(optimisticId)) {
-              this.seenMessageIds.add(optimisticId);
-              this.messageList.push(optimistic);
-              this.scrollToBottomSafe();
+            const serverMsg = res.data;
+            const serverId: number | undefined = serverMsg.messageID ?? serverMsg.id;
+            const idx = this.messageList.findIndex(m => m.tempId === tempId);
+            if (idx !== -1) {
+              const merged = { ...this.messageList[idx], ...serverMsg, messageID: serverId, id: serverId, delivered: true, status: 'sent' };
+              this.messageList[idx] = merged;
+              if (serverId && !this.seenMessageIds.has(serverId)) this.seenMessageIds.add(serverId);
+            } else {
+              // Fallback if optimistic missing
+              this.messageList.push(serverMsg);
+              if (serverId && !this.seenMessageIds.has(serverId)) this.seenMessageIds.add(serverId);
             }
+            this.scrollToBottomSafe();
+          } else {
+            this.markTempFailed(tempId);
           }
-
-          this.chatForm.reset();
-          this.imageprews = [];
-          this.imageprewsForRemove = [];
-          this.files = null;
-          this.filesUpdate = null;
+          this.sending = false;
         },
-        error: (error) => console.error('Failed to send message:', error),
+        error: (error) => {
+          console.error('Failed to send message:', error);
+          this.markTempFailed(tempId);
+          this.sending = false;
+        },
       })
     );
+  }
+
+  private markTempFailed(tempId: string) {
+    const idx = this.messageList.findIndex(m => m.tempId === tempId);
+    if (idx !== -1) {
+      this.messageList[idx] = { ...this.messageList[idx], status: 'failed' };
+    }
+  }
+
+  private normalizeSenderId(id: any): string {
+    if (id === null || id === undefined) return '';
+    return String(id);
   }
 
   onFileSelected(event: any) {
@@ -263,7 +335,7 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private preview(filesToPreview: FileList) {}
+  private preview(filesToPreview: FileList) { }
 
   removeImg(image: string) {
     this.imageprewsForRemove = this.imageprewsForRemove.filter((e) => e.url !== image);

@@ -1,17 +1,16 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { APIService } from 'src/app/API.service';
 import { FeedRefreshService } from 'src/app/services/feed-refresh.service';
 import { HeaderService } from 'src/app/services/header.service';
 import { PostService } from 'src/app/services/post/post.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 
 @Component({
-    selector: 'app-mainpage',
-    templateUrl: './mainpage.component.html',
-    styleUrls: ['./mainpage.component.scss'],
-    standalone: false
+  selector: 'app-mainpage',
+  templateUrl: './mainpage.component.html',
+  styleUrls: ['./mainpage.component.scss'],
+  standalone: false
 })
 export class MainpageComponent implements OnInit, OnDestroy {
   // contents: Content[] = [
@@ -33,14 +32,13 @@ export class MainpageComponent implements OnInit, OnDestroy {
   hideHeaderScrollThreshold: number = 50;
   private feedRefreshSub?: Subscription;
   constructor(
-    public apiservice: APIService,
     private postService: PostService,
     private router: Router,
     private authGuard: AuthenticationService,
     private authguard: AuthenticationService,
     private headerservice: HeaderService,
     private feedRefresh: FeedRefreshService
-  ) {}
+  ) { }
 
   async signOut() {
     try {

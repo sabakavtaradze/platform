@@ -1,17 +1,15 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { APIService } from 'src/app/API.service';
-import { chatList } from 'src/app/interfaces/chat/interfaceChat';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { APIServicem } from 'src/app/apiservicem';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 import { ChatroomService } from 'src/app/services/user/chatroom/chatroom.service';
-import { Subscription } from 'rxjs';
 
 @Component({
-    selector: 'app-chat',
-    templateUrl: './chat.component.html',
-    styleUrls: ['./chat.component.scss'],
-    standalone: false
+  selector: 'app-chat',
+  templateUrl: './chat.component.html',
+  styleUrls: ['./chat.component.scss'],
+  standalone: false
 })
 export class ChatComponent implements OnInit, OnDestroy {
   currentUser: any = '';
@@ -27,11 +25,10 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    public apiservice: APIService,
     private am: APIServicem,
     private authService: AuthenticationService,
     private chatroomService: ChatroomService
-  ) {}
+  ) { }
 
   chatLink(x: any) {
     console.log(x);
@@ -109,11 +106,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     let filter = {
       userId: { eq: this.authuser.attributes.sub }
     };
-    this.messageSubscription = this.apiservice.OnUpdateUserChatroomListener(filter).subscribe((message) => {
-      this.chatlist();
-      this.messagesseen();
-      return message;
-    });
+
   }
 
   ngOnDestroy(): void {
@@ -136,8 +129,6 @@ export class ChatComponent implements OnInit, OnDestroy {
         messagesseen: time
       }
 
-      let updateseen = await this.apiservice.UpdateUser(input)
-      console.log(updateseen)
     }
     catch (e) {
       console.log(e)

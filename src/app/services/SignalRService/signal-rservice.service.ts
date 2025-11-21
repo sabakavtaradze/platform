@@ -1,126 +1,279 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AuthenticationService } from '../user/authentication/authentication.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class SignalRService {
-  private hubConnection!: signalR.HubConnection;
+  private hubConnection?: signalR.HubConnection;
   private connectionReady = false;
-
+  private startingPromise: Promise<void> | null = null;
+  private reconnecting = false;
   private coreListenersRegistered = false;
-  // Message events
+  private messageHandlersAttached = false;
+  private pendingInvokes: Array<{ method: string; args: any[] }> = [];
+
   private messageReceivedSource = new BehaviorSubject<any>(null);
   messageReceived$ = this.messageReceivedSource.asObservable();
 
-  // Unseen count events
   private unseenCountSource = new BehaviorSubject<number>(0);
   unseenCount$ = this.unseenCountSource.asObservable();
 
-  constructor(private authService: AuthenticationService) {}
+  private chatListEventSource = new BehaviorSubject<any>(null);
+  chatListEvent$ = this.chatListEventSource.asObservable();
+
+  constructor(private authService: AuthenticationService, private zone: NgZone) { }
 
   async startConnection(): Promise<void> {
+    if (this.connectionReady) return;
+    if (this.startingPromise) return this.startingPromise;
+    this.startingPromise = this.internalStart();
     try {
-      if (this.connectionReady) {
+      await this.startingPromise;
+    } finally {
+      this.startingPromise = null;
+    }
+  }
+
+  private async internalStart(): Promise<void> {
+    try {
+      if (this.connectionReady) return;
+      const token = this.authService.getAuthToken();
+      if (!token) throw new Error('No authentication token available');
+
+      if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connecting) {
+        await this.waitForState(signalR.HubConnectionState.Connected, 8000);
         return;
       }
 
-      const token = this.authService.getAuthToken();
-      if (!token) {
-        throw new Error('No authentication token available');
+      const isLocal = /localhost/i.test(environment.apiUrl) || location.hostname === 'localhost';
+      const url = `${environment.apiUrl}/chatHub`;
+      const builder = new signalR.HubConnectionBuilder().configureLogging(signalR.LogLevel.Information);
+
+      if (isLocal) {
+        // Allow negotiation & fallback transports locally (self-signed cert / WS handshake issues)
+        this.hubConnection = builder
+          .withUrl(url, {
+            accessTokenFactory: () => token,
+            // Do NOT force WebSockets locally; allow SSE/LongPolling if WS fails
+            skipNegotiation: false
+          })
+          .withAutomaticReconnect([0, 2000, 5000, 10000, 20000])
+          .build();
+        console.log('[SignalR] Local mode: allowing fallback transports');
+      } else {
+        // Production: prefer WebSockets
+        this.hubConnection = builder
+          .withUrl(url, {
+            accessTokenFactory: () => token,
+            transport: signalR.HttpTransportType.WebSockets,
+            skipNegotiation: false
+          })
+          .withAutomaticReconnect([0, 2000, 5000, 10000, 20000])
+          .build();
+        console.log('[SignalR] Prod mode: forcing WebSockets');
       }
 
-      this.hubConnection = new signalR.HubConnectionBuilder()
-        .withUrl(`${environment.apiUrl}/chatHub`, {
-          accessTokenFactory: () => token,
-        })
-        .withAutomaticReconnect()
-        .configureLogging(signalR.LogLevel.Information)
-        .build();
+      // Tighter keep-alive + server timeout tuning for Render idle cycles
+      // (these properties exist on HubConnection but are not in type defs prior to certain versions)
+      try {
+        // @ts-ignore
+        this.hubConnection.keepAliveIntervalInMilliseconds = 15000; // Ping every 15s
+        // @ts-ignore
+        this.hubConnection.serverTimeoutInMilliseconds = 60000; // Consider server dead after 60s no msg
+        console.log('[SignalR] KeepAlive/Timeout configured');
+      } catch (e) {
+        console.warn('[SignalR] keepAlive/serverTimeout set failed', e);
+      }
 
-      // Start the connection
+      this.attachLifecycleHandlers();
       await this.hubConnection.start();
-      console.log('SignalR Connected');
+      console.log('[SignalR] Connected');
+      console.log('[SignalR] Transport:', (this.hubConnection as any).connection?._transport?.name);
+      console.log('[SignalR] State after start:', signalR.HubConnectionState[this.hubConnection.state]);
 
-      // Register listeners AFTER connection
       this.listenForMessages();
       this.registerCoreListeners();
-      // Join user room after connection
-      await this.hubConnection.invoke('JoinUserRoom');
-      console.log('Joined user room');
 
+      if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+        await this.safeInvoke('JoinUserRoom');
+      }
       this.connectionReady = true;
+      this.flushPendingInvokes();
     } catch (err) {
       this.connectionReady = false;
-      console.error('SignalR connection failed:', err);
+      console.error('[SignalR] connection failed:', err);
       throw err;
     }
   }
 
-  async joinChatRoom(chatRoomId: number): Promise<void> {
-    try {
-      if (!this.connectionReady) {
-        await this.startConnection();
-      }
+  private attachLifecycleHandlers(): void {
+    if (!this.hubConnection) return;
+    this.hubConnection.onreconnecting(error => {
+      this.reconnecting = true;
+      console.warn('[SignalR] Reconnecting...', error);
+    });
+    this.hubConnection.onreconnected(id => {
+      this.reconnecting = false;
+      this.connectionReady = true;
+      console.log('[SignalR] Reconnected', id);
+      this.safeInvoke('JoinUserRoom');
+      this.flushPendingInvokes();
+    });
+    this.hubConnection.onclose(error => {
+      this.connectionReady = false;
+      console.warn('[SignalR] Closed', error);
+    });
+  }
 
-      if (this.hubConnection?.state === signalR.HubConnectionState.Connected) {
-        await this.hubConnection.invoke('JoinChatRoom', chatRoomId);
-        console.log('Joined chat room:', chatRoomId);
-      } else {
-        throw new Error('SignalR not connected');
-      }
-    } catch (err) {
-      console.error('Failed to join chat room:', err);
-      throw err;
+  private async waitForState(target: signalR.HubConnectionState, timeoutMs: number): Promise<void> {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      if (this.hubConnection?.state === target) return;
+      await new Promise(r => setTimeout(r, 150));
     }
+    throw new Error(`Timeout waiting for state ${signalR.HubConnectionState[target]}`);
+  }
+
+  async joinChatRoom(chatRoomId: number): Promise<void> {
+    await this.startConnection();
+    if (this.hubConnection?.state !== signalR.HubConnectionState.Connected) {
+      // Defer join until connected
+      this.pendingInvokes.push({ method: 'JoinChatRoom', args: [chatRoomId] });
+      console.warn('[SignalR] JoinChatRoom deferred until connected');
+      return;
+    }
+    await this.safeInvoke('JoinChatRoom', chatRoomId);
+    console.log('[SignalR] Joined chat room', chatRoomId);
+    // Re-ensure listeners after join (idempotent)
+    this.listenForMessages();
+  }
+
+  private async safeInvoke(method: string, ...args: any[]): Promise<void> {
+    if (!this.hubConnection) {
+      console.warn('[SignalR] safeInvoke without hubConnection', method);
+      return;
+    }
+    if (this.hubConnection.state !== signalR.HubConnectionState.Connected) {
+      // Queue invocation
+      this.pendingInvokes.push({ method, args });
+      console.warn('[SignalR] Invocation queued (not connected):', method);
+      return;
+    }
+    try {
+      await this.hubConnection.invoke(method, ...args);
+    } catch (e) {
+      console.warn(`[SignalR] invoke failed for ${method}`, e);
+      // If transient, requeue once
+      if (this.hubConnection.state !== signalR.HubConnectionState.Connected) {
+        this.pendingInvokes.push({ method, args });
+      }
+    }
+  }
+
+  private flushPendingInvokes(): void {
+    if (!this.hubConnection || this.hubConnection.state !== signalR.HubConnectionState.Connected) return;
+    if (!this.pendingInvokes.length) return;
+    const queue = [...this.pendingInvokes];
+    this.pendingInvokes = [];
+    queue.forEach(async (item) => {
+      try {
+        await this.hubConnection!.invoke(item.method, ...item.args);
+        console.log('[SignalR] Flushed invoke:', item.method, item.args);
+      } catch (e) {
+        console.warn('[SignalR] Flush invoke failed, re-queueing', item.method, e);
+        this.pendingInvokes.push(item); // Put back for next reconnect
+      }
+    });
   }
 
   listenForMessages(): void {
     if (!this.hubConnection) return;
-
-    this.hubConnection.on('ReceiveMessage', (msg) => {
-      // Log the raw message to help debug
-      console.log('>>> SignalR raw message:', msg);
-      // If msg is wrapped, unwrap it
-      const payload = msg?.data ? msg.data : msg;
-      console.log('>>> SignalR normalized payload:', payload);
-      this.messageReceivedSource.next(payload);
-      // After every message, refresh unseen count from backend
-      this.refreshUnseenCount();
+    if (this.messageHandlersAttached) return;
+    this.messageHandlersAttached = true;
+    const events = [
+      'ReceiveMessage',
+      'MessageReceived',
+      'ChatMessageCreated',
+      'ReceiveChatMessage',
+      'ReceiveChatroomMessage',
+      'ChatMessage',
+      'MessageCreated'
+    ];
+    const handler = (raw: any) => {
+      this.zone.run(() => {
+        const msg = raw?.data ? raw.data : raw;
+        if (msg?.chatroomID && !msg.chatRoomId) msg.chatRoomId = msg.chatroomID;
+        if (msg?.chatroomId && !msg.chatRoomId) msg.chatRoomId = msg.chatroomId;
+        if (msg?.messageID && !msg.id) msg.id = msg.messageID;
+        this.messageReceivedSource.next(msg);
+        this.refreshUnseenCount();
+      });
+    };
+    events.forEach(ev => {
+      try {
+        this.hubConnection!.on(ev, handler);
+        console.log(`[SignalR] Listening for ${ev}`);
+      } catch (e) {
+        console.warn(`[SignalR] Failed to register ${ev}`, e);
+      }
     });
+    // Generic catch-all diagnostic (if server emits a custom broadcast we didn't list)
+    try {
+      // @ts-ignore optional diagnostic handler name
+      this.hubConnection.on('Receive', (raw: any) => console.log('[SignalR] Generic Receive event', raw));
+    } catch { }
+
+    // Chat list changes: trigger refresh in UI
+    const chatEvents = ['ChatListUpdated', 'ChatUpdated', 'ChatCreated', 'ChatDeleted'];
+    chatEvents.forEach(ev => {
+      try {
+        this.hubConnection!.on(ev, (payload: any) => {
+          this.zone.run(() => {
+            console.log(`[SignalR] Chat list event ${ev}`, payload);
+            this.chatListEventSource.next({ type: ev, payload });
+            this.refreshUnseenCount();
+          });
+        });
+      } catch (e) {
+        console.warn(`[SignalR] Failed to register chat event ${ev}`, e);
+      }
+    });
+
+    // Extra diagnostic: log ANY invocation if debug flag set
+    const debug = (window as any).signalRDebug === true;
+    if (debug) {
+      const original = (this.hubConnection as any).on.bind(this.hubConnection);
+      (this.hubConnection as any).on = (ev: string, cb: any) => {
+        original(ev, (payload: any) => {
+          console.log('[SignalR][Frame]', ev, payload);
+          cb(payload);
+        });
+      };
+      console.log('[SignalR] Debug frame logger active');
+    }
   }
 
   private registerCoreListeners(): void {
     if (!this.hubConnection || this.coreListenersRegistered) return;
-
-    // Server-pushed unseen count (exact casing unknown, register both)
     const unseenHandler = (count: any) => {
-      console.log('>>> SignalR unseen count push:', count);
       const numeric = typeof count === 'number' ? count : count?.data;
-      if (typeof numeric === 'number') {
-        this.unseenCountSource.next(numeric);
-      } else {
-        console.warn('Unseen count push malformed, ignoring:', count);
-      }
+      if (typeof numeric === 'number') this.unseenCountSource.next(numeric);
     };
-
     this.hubConnection.on('unseencountchanged', unseenHandler);
     this.hubConnection.on('UnseenCountChanged', unseenHandler);
     this.coreListenersRegistered = true;
   }
 
-  // Explicit method to refresh unseen count (can be called by components too)
   refreshUnseenCount(): void {
-    this.authService.getUnseenCount().subscribe((res) => {
-      if (res.isSuccess && typeof res.data === 'number') {
-        this.unseenCountSource.next(res.data);
-      } else {
-        // On failure, do not overwrite with bogus value; keep previous
-        console.warn('Unseen count refresh failed:', res.errorMessage);
-      }
+    this.authService.getUnseenCount().subscribe({
+      next: res => {
+        if (res.isSuccess && typeof res.data === 'number') {
+          this.unseenCountSource.next(res.data);
+        }
+      },
+      error: e => console.warn('[SignalR] unseen count error', e)
     });
   }
 }

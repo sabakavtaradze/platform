@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 
-import { APIService } from 'src/app/API.service';
 import { APIServicem } from 'src/app/apiservicem';
 import { PostService } from 'src/app/services/post/post.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
@@ -20,10 +19,10 @@ import { BaseResponse } from 'src/app/interfaces/ResponseInterface/BaseResponse'
 import heic2any from 'heic2any'; // ✅ ADDED
 
 @Component({
-    selector: 'app-profile',
-    templateUrl: './profile.component.html',
-    styleUrls: ['./profile.component.scss'],
-    standalone: false
+  selector: 'app-profile',
+  templateUrl: './profile.component.html',
+  styleUrls: ['./profile.component.scss'],
+  standalone: false
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   currentUser: UserAttributes | null = null;
@@ -48,7 +47,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   constructor(
     public dialog: MatDialog,
     private authService: AuthenticationService,
-    private apiservice: APIService,
     private activeRoute: ActivatedRoute,
     private router: Router,
     private apiservicem: APIServicem,
@@ -56,7 +54,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private postService: PostService,
     private chatroomService: ChatroomService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.subs.add(
@@ -98,7 +96,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   async UnfollowUser(profileUser: any) {
     if (!profileUser?.userID) return;
-
+    this.userIsFollowing = false;
     this.process = true;
     this.subs.add(
       this.friendshipService.unfollowUser(profileUser.userID).subscribe({
@@ -114,7 +112,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   FollowUser(profileUser: any) {
     if (!profileUser?.userID) return;
-
+    this.userIsFollowing = true;
     this.process = true;
     this.subs.add(
       this.friendshipService.followUser(profileUser.userID).subscribe({
@@ -134,7 +132,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       data: { image: post },
     });
 
-    this.subs.add(dialogRef.afterClosed().subscribe(() => {}));
+    this.subs.add(dialogRef.afterClosed().subscribe(() => { }));
   }
 
   async getUser() {
@@ -148,6 +146,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.subs.add(
         this.userService.getUserById(this.profileId).subscribe((res: BaseResponse<any>) => {
           this.profileUser = res?.data ?? null;
+          console.log(this.profileUser)
           if (!this.profileUser) return;
 
           if (this.profileOwner) {
@@ -341,10 +340,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       console.log('[TODO] Remove old cover picture:', this.profileUser.cover);
     }
 
-    this.apiservice.UpdateUser(editProfile).then(() => {
-      const input = { id: this.currentUser!.sub };
-      return this.apiservice.UpdateUser(input);
-    });
   }
 
   messageUser() {

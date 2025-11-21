@@ -48,7 +48,7 @@
             </mat-form-field>
           </div>
           <div class="sendMessage-container">
-            <button type="submit" [disabled]="isSendDisabled()" class="signup-account">
+            <button type="submit" [disabled]="isSendDisabled() || sending" class="signup-account">
               <i class="bi bi-send"></i>
             </button>
           </div>
