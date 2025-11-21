@@ -1,0 +1,35 @@
+<section class="admin-user-shell">
+  <form class="search-form" [formGroup]="searchForm" (ngSubmit)="search()">
+    <mat-form-field appearance="fill" class="search-field">
+      <mat-label>Search users</mat-label>
+      <input
+        type="text"
+        matInput
+        formControlName="q"
+        placeholder="Name, email, or ID"
+      />
+    </mat-form-field>
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+        {{ loading ? 'Searching…' : 'Search' }}
+      </button>
+      <button mat-stroked-button type="button" (click)="refresh()" [disabled]="loading">
+        Refresh
+      </button>
+    </div>
+  </form>
+
+  <div *ngIf="error" class="error-banner">{{ error }}</div>
+
+  <app-admin-user-list
+    [users]="users"
+    [loading]="loading"
+    [activeUserId]="selectedUserId"
+    (deleteUser)="handleDelete($event)"
+    (editUser)="handleEdit($event)"
+  ></app-admin-user-list>
+
+  <div class="spinner" *ngIf="loading">
+    <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+  </div>
+</section>

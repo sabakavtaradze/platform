@@ -1,0 +1,25 @@
+<div *ngIf="users.length === 0 && !loading" class="empty-state">
+  No users found yet.
+</div>
+
+<div *ngFor="let user of users" class="user-card" [class.active]="isActive(user)">
+  <div class="user-main">
+    <div class="user-details">
+      <h3>{{ user.userFirstName }} {{ user.userLastName }}</h3>
+      <p class="meta email">{{ user.userEmail }}</p>
+    </div>
+    <div class="user-meta">
+      <span>{{ user.userRole ?? (user.IsAdmin ? 'Admin' : 'User') }}</span>
+      <span>{{ user.userIsVerified ? 'Verified' : 'Unverified' }}</span>
+    </div>
+  </div>
+  <div class="actions">
+    <button mat-button color="primary" (click)="editUser.emit(user)">
+      Edit
+    </button>
+    <button mat-button color="warn" (click)="deleteUser.emit(user.userID ?? user.id ?? user.userId)">
+      Delete
+    </button>
+  </div>
+  <p class="status" *ngIf="isActive(user)">Currently editing</p>
+</div>

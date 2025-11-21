@@ -1,0 +1,49 @@
+<section class="edit-shell" *ngIf="user">
+  <header>
+    <div>
+      <p class="label">Editing user</p>
+      <h3>{{ user.userFirstName ?? user.userFirstname }} {{ user.userLastName ?? user.userLastname }}</h3>
+    </div>
+    <button mat-icon-button type="button" (click)="cancelled.emit()" aria-label="Close editor">
+      ✕
+    </button>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="edit-form">
+    <mat-form-field appearance="outline">
+      <mat-label>First Name</mat-label>
+      <input matInput formControlName="firstName" />
+      <mat-error *ngIf="form.controls['firstName'].hasError('required')">First name is required</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Last Name</mat-label>
+      <input matInput formControlName="lastName" />
+      <mat-error *ngIf="form.controls['lastName'].hasError('required')">Last name is required</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email" type="email" />
+      <mat-error *ngIf="form.controls['email'].hasError('required')">Email is required</mat-error>
+      <mat-error *ngIf="form.controls['email'].hasError('email')">Invalid email</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>New password</mat-label>
+      <input matInput formControlName="password" type="password" placeholder="Leave empty to keep existing" />
+    </mat-form-field>
+
+    <mat-checkbox formControlName="isAdmin">Grant admin role</mat-checkbox>
+
+    <div class="error" *ngIf="error">{{ error }}</div>
+
+    <div class="actions">
+      <button mat-stroked-button type="button" (click)="cancel()" [disabled]="loading">Cancel</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+        <mat-progress-spinner *ngIf="loading" diameter="20" mode="indeterminate"></mat-progress-spinner>
+        Save changes
+      </button>
+    </div>
+  </form>
+</section>

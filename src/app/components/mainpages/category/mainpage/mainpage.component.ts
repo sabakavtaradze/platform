@@ -29,13 +29,13 @@ export class MainpageComponent implements OnInit, OnDestroy {
   updateUser: any;
   isHeaderVisible = true;
   lastScrollTop = 0;
+  isAdmin: boolean = false;
   hideHeaderScrollThreshold: number = 50;
   private feedRefreshSub?: Subscription;
   constructor(
     private postService: PostService,
     private router: Router,
     private authGuard: AuthenticationService,
-    private authguard: AuthenticationService,
     private headerservice: HeaderService,
     private feedRefresh: FeedRefreshService
   ) { }
@@ -124,6 +124,7 @@ export class MainpageComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.auth();
+    this.isAdmin = this.authGuard.isAdmin();
     // Refresh feed when a new post is created
     this.feedRefreshSub = this.feedRefresh.refresh$.subscribe(() => {
       this.loadPosts();

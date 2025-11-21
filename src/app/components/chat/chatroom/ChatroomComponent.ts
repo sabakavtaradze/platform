@@ -1,8 +1,16 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewChecked,
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import heic2any from 'heic2any';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { SignalRService } from 'src/app/services/SignalRService/signal-rservice.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 import { ChatroomService } from 'src/app/services/user/chatroom/chatroom.service';
@@ -16,7 +24,7 @@ import { ChatroomService } from 'src/app/services/user/chatroom/chatroom.service
   },
   standalone: false
 })
-export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
   chatForm: FormGroup;
 
   chatId!: number;
@@ -49,6 +57,8 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('composer', { static: false }) composer!: ElementRef<HTMLDivElement>;
   private composerHeight: number = 0;
   private composerResizeObs?: ResizeObserver;
+  private pendingInitialScroll = false;
+  private viewInitialized = false;
 
   constructor(
     private fb: FormBuilder,
@@ -86,29 +96,15 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     this.getChatroomById(this.chatId);
 
     try {
-      const res = await firstValueFrom(this.chatroomService.getHistory(this.chatId));
-      if (res?.isSuccess) {
-        const allDesc: any[] = res.data || [];
-        this.messageList = [...allDesc].reverse();
-        this.allLoaded = true;
-        this.skip = allDesc.length;
-
-        setTimeout(() => this.scrollToBottom(), 0);
-
-        this.subs.add(
-          this.chatroomService.markRead(this.chatId).subscribe({
-            error: (error) => console.error('Failed to mark messages as read:', error),
-          })
-        );
-      } else {
-        await this.initialLoad();
-      }
-    } catch (err) {
       await this.initialLoad();
+    } catch (err) {
+      console.error('Failed to load chat history:', err);
     }
   }
 
   ngAfterViewInit(): void {
+    this.viewInitialized = true;
+    this.scrollToBottomIfReady();
     this.measureComposer();
     try {
       if ('ResizeObserver' in window && this.composer?.nativeElement) {
@@ -428,6 +424,19 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  ngAfterViewChecked(): void {
+    this.scrollToBottomIfReady();
+  }
+
+  private scrollToBottomIfReady() {
+    if (!this.pendingInitialScroll || !this.viewInitialized) return;
+    const box = this.scrollMe?.nativeElement;
+    if (!box) return;
+
+    this.pendingInitialScroll = false;
+    this.scrollToBottom();
+  }
+
   private scrollToTop() {
     const box = this.scrollMe?.nativeElement;
     if (!box) return;
@@ -444,7 +453,6 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
 
     await this.fetchPage(true);
 
-    setTimeout(() => this.scrollToBottom(), 0);
 
     this.subs.add(
       this.chatroomService.markRead(this.chatId).subscribe({
@@ -488,8 +496,7 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
             return;
           }
 
-          const pageDesc: any[] = res.data?.messages || [];
-          const totalCount: number | undefined = res.data?.totalCount;
+          const pageDesc: any[] = res.data || [];
 
           if (pageDesc.length === 0) {
             this.allLoaded = true;
@@ -497,9 +504,10 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
             return;
           }
 
-          const page = [...pageDesc].reverse();
+          const page = this.sortMessagesChronologically(pageDesc);
 
           if (isFirstLoad) {
+            this.pendingInitialScroll = true;
             this.messageList = page;
             for (const m of page) {
               const id: number | undefined = (m as any).messageID ?? (m as any).id;
@@ -509,7 +517,7 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
             const box = this.scrollMe?.nativeElement;
             const prevScrollHeight = box?.scrollHeight || 0;
 
-            const unique = page.filter((m) => {
+            const unique = page.filter((m: any) => {
               const id: number | undefined = (m as any).messageID ?? (m as any).id;
               if (!id) return true;
               if (this.seenMessageIds.has(id)) return false;
@@ -527,7 +535,7 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
           }
 
           this.skip += page.length;
-          if (typeof totalCount === 'number' && this.skip >= totalCount) {
+          if (pageDesc.length < this.take) {
             this.allLoaded = true;
           }
 
@@ -538,5 +546,35 @@ export class ChatroomComponent implements OnInit, OnDestroy, AfterViewInit {
         },
       })
     );
+  }
+
+  private sortMessagesChronologically(messages: any[]): any[] {
+    return [...messages].sort((a, b) => this.getMessageTimestamp(a) - this.getMessageTimestamp(b));
+  }
+
+  private getMessageTimestamp(message: any): number {
+    if (!message) return 0;
+
+    const dateFields = [
+      'createdAt',
+      'sentAt',
+      'timestamp',
+      'date',
+      'createdOn',
+      'createdDate',
+      'createdUtc',
+    ];
+
+    for (const field of dateFields) {
+      const value = message[field];
+      if (value === undefined || value === null) continue;
+
+      const parsed = typeof value === 'number' ? value : Date.parse(String(value));
+      if (!Number.isNaN(parsed)) return parsed;
+    }
+
+    const fallbackId = message.messageID ?? message.id ?? message.tempId;
+    const numericFallback = typeof fallbackId === 'number' ? fallbackId : parseInt(String(fallbackId), 10);
+    return Number.isFinite(numericFallback) ? numericFallback : 0;
   }
 }

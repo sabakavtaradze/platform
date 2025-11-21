@@ -3,6 +3,8 @@
 <!-- <button (click)="createpost()">post</button> -->
 <!-- <button (click)="seeposts()">see posts</button> -->
 <button style="margin-top: 5rem;" (click)="signOut()">sign out</button>
+<button *ngIf="isAdmin" routerLink="/admin" style="margin-top: 5rem;" >admin Page</button>
+
 <!-- <button (click)="userAuth()">check user</button> -->
 
 <!-- <button (click)="checkUser()">check user</button> -->

@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BaseResponse } from 'src/app/interfaces/ResponseInterface/BaseResponse';
@@ -12,7 +12,7 @@ export class ChatroomService {
   constructor(
     private http: HttpClient,
     private authService: AuthenticationService
-  ) {}
+  ) { }
 
   // 🔹 Attach JWT token to all requests
   private getAuthHeaders(includeContentType: boolean = true): HttpHeaders {
@@ -89,10 +89,13 @@ export class ChatroomService {
     chatRoomId: number,
     skip: number,
     take: number
-  ): Observable<BaseResponse<{ messages: any[]; totalCount: number }>> {
-    return this.http.get<BaseResponse<{ messages: any[]; totalCount: number }>>(
-      `${environment.apiUrl}/api/chat/history-paged/${chatRoomId}?skip=${skip}&take=${take}`,
-      { headers: this.getAuthHeaders() }
+  ): Observable<BaseResponse<any[]>> {
+    return this.http.get<BaseResponse<any[]>>(
+      `${environment.apiUrl}/api/chat/history/${chatRoomId}`,
+      {
+        headers: this.getAuthHeaders(),
+        params: new HttpParams().set('skip', skip.toString()).set('take', take.toString()),
+      }
     );
   }
 
