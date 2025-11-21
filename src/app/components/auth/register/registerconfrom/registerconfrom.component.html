@@ -38,7 +38,8 @@
             <button (click)="resendCode()" 
                     class="signup-account resend-button" 
                     style="margin-top: 10px;"
-                    *ngIf="UserID || email">
+                    *ngIf="UserID || email"
+                    [disabled]="loading || resendInProgress">
                 Resend Code
             </button>
             

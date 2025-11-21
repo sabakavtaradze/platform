@@ -25,7 +25,8 @@
           <i class="bi bi-pencil-square"></i>
         </button>
       </div>
-      <img *ngIf="cover" class="cover" [src]="cover" alt="" />
+        <img *ngIf="cover" class="cover" [src]="cover" alt="" />
+        <div class="uploading-indicator" *ngIf="uploadingCoverImage">Uploading cover…</div>
     </div>
     <div class="profile-picture-main-container">
       <div class="profile-picture-container">

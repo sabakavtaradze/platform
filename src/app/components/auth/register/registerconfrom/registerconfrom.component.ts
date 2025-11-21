@@ -7,10 +7,10 @@ import { ErrorCheckeService } from 'src/app/services/error-check.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 
 @Component({
-    selector: 'app-registerconfrom',
-    templateUrl: './registerconfrom.component.html',
-    styleUrls: ['./registerconfrom.component.scss'],
-    standalone: false
+  selector: 'app-registerconfrom',
+  templateUrl: './registerconfrom.component.html',
+  styleUrls: ['./registerconfrom.component.scss'],
+  standalone: false
 })
 export class RegisterconfromComponent implements OnInit {
   code = '';
@@ -23,13 +23,15 @@ export class RegisterconfromComponent implements OnInit {
   manualEmail: string = '';
   isUserIDMissing: boolean = false;
   loading: boolean = false;
+  resendInProgress = false;
+  private autoResendTriggered = false;
   private static readonly CODE_RESEND_COOLDOWN_MS = 120000; // 2 minutes
 
   constructor(
     private router: Router,
     private errorService: ErrorCheckeService,
     private authService: AuthenticationService
-  ) {}
+  ) { }
 
   ngOnInit() {
     // Load values from localStorage
@@ -49,10 +51,28 @@ export class RegisterconfromComponent implements OnInit {
       return;
     }
 
-    // Automatically attempt to resend only if cooldown expired
+    this.maybeAutoResend();
+  }
+
+  private maybeAutoResend(): void {
+    if (this.autoResendTriggered) {
+      return;
+    }
+
+    const emailToUse = this.manualEmail || this.email;
+    const hasEmail = !!emailToUse;
+    const userIdNumber = parseInt(this.UserID, 10);
+    const hasValidId = !isNaN(userIdNumber) && userIdNumber > 0;
+
+    if (!hasEmail && !hasValidId) {
+      return;
+    }
+
     const lastSent = parseInt(localStorage.getItem('register_last_code_sent') || '0', 10);
     const now = Date.now();
+
     if (now - lastSent >= RegisterconfromComponent.CODE_RESEND_COOLDOWN_MS) {
+      this.autoResendTriggered = true;
       this.resendCode();
     } else {
       const remainingMs = RegisterconfromComponent.CODE_RESEND_COOLDOWN_MS - (now - lastSent);
@@ -75,7 +95,14 @@ export class RegisterconfromComponent implements OnInit {
       alert(`Please wait ${remainingSec}s before requesting a new code.`);
       return;
     }
+
+    if (this.resendInProgress) {
+      alert('Please wait for the current resend request to complete.');
+      return;
+    }
+
     this.loading = true;
+    this.resendInProgress = true;
     let resend$: Observable<RegistrationResponse> = EMPTY;
 
     const userIdNumber = parseInt(this.UserID, 10);
@@ -99,12 +126,14 @@ export class RegisterconfromComponent implements OnInit {
       console.error('Cannot resend code. Missing User ID and Email data.');
       alert('Cannot resend code. Please enter your email manually.');
       this.showManualEmailInput = true;
+      this.resendInProgress = false;
       return;
     }
 
     resend$.subscribe({
       next: (response: RegistrationResponse) => {
         this.loading = false;
+        this.resendInProgress = false;
         if (response.isSuccess) {
           alert('Verification code sent/resent successfully.');
           this.showManualEmailInput = false;
@@ -116,9 +145,13 @@ export class RegisterconfromComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         this.loading = false;
+        this.resendInProgress = false;
         console.error('HTTP Error sending verification code:', err);
         // Assuming this.errorService is a property on the component
         alert(`A network error occurred: ${this.errorService.extractMessage(err)}`);
+      },
+      complete: () => {
+        this.resendInProgress = false;
       },
     });
   }
@@ -129,7 +162,7 @@ export class RegisterconfromComponent implements OnInit {
     this.loading = true;
     let verify$: Observable<RegistrationResponse> = EMPTY;
 
-    const emailToUse = this.manualEmail || this.email;
+    const emailToUse = (this.manualEmail || this.email || '').toString().trim();
     const userIdNumber = parseInt(this.UserID, 10);
     const codeToUse = this.code;
 
@@ -142,11 +175,17 @@ export class RegisterconfromComponent implements OnInit {
       return;
     }
 
-    const verificationData = {
-      userID: userIdNumber,
-      email: emailToUse,
+    const verificationData: any = {
       code: codeToUse,
     };
+
+    if (hasValidId) {
+      verificationData.userID = userIdNumber;
+    }
+
+    if (hasEmail) {
+      verificationData.email = emailToUse;
+    }
 
     // 1. 🔑 NEW PRIORITY: Check for and prioritize verification by Email
     if (hasEmail) {

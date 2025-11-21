@@ -36,6 +36,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   profileImages: string[] = [];
 
   imageprew: string | null = null;
+  uploadingProfileImage = false;
+  uploadingCoverImage = false;
 
   userIsFollowing = false;
   FollowersCount = 0;
@@ -223,7 +225,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     // Convert → JPEG base64
     const jpegBase64 = await this.convertToJpegBase64(file);
-    this.imageprew = jpegBase64;
+    if (choice === false) {
+      this.profilePicture = jpegBase64;
+      this.uploadingProfileImage = true;
+    } else {
+      this.cover = jpegBase64;
+      this.uploadingCoverImage = true;
+    }
 
     // Convert base64 → real file
     const jpegBlob = await (await fetch(jpegBase64)).blob();
@@ -297,22 +305,30 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private uploadSingleImage(file: File, choice: boolean) {
     if (!file) return;
 
-    if (choice === false) {
-      this.subs.add(
-        this.userService.updateProfilePicture(file).subscribe({
-          next: () => this.getUser(),
-          error: (e) => console.error(e),
-        })
-      );
-      return;
-    }
+    const uploadObservable = choice === false
+      ? this.userService.updateProfilePicture(file)
+      : this.userService.updateCoverPicture(file);
 
     this.subs.add(
-      this.userService.updateCoverPicture(file).subscribe({
+      uploadObservable.subscribe({
         next: () => this.getUser(),
-        error: (e) => console.error(e),
+        error: (e) => {
+          console.error(e);
+          this.clearUploadFlag(choice);
+        },
+        complete: () => {
+          this.clearUploadFlag(choice);
+        },
       })
     );
+  }
+
+  private clearUploadFlag(choice: boolean): void {
+    if (choice === false) {
+      this.uploadingProfileImage = false;
+    } else {
+      this.uploadingCoverImage = false;
+    }
   }
 
   editProfilePicture(imgs: any) {
