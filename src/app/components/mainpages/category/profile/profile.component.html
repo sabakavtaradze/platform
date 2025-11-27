@@ -14,31 +14,20 @@
   <div class="profile-main-contianer">
     <div class="cover-main-container">
       <div class="edit-option" *ngIf="profileOwner">
-        <input
-          type="file"
-          #coverInput
-          accept="image/*"
-          style="display: none"
-          (change)="onFileSelected($event, true)"
-        />
+        <input type="file" #coverInput accept="image/*" style="display: none" (change)="onFileSelected($event, true)" />
         <button (click)="coverInput.click()">
           <i class="bi bi-pencil-square"></i>
         </button>
       </div>
-        <img *ngIf="cover" class="cover" [src]="cover" alt="" />
-        <div class="uploading-indicator" *ngIf="uploadingCoverImage">Uploading cover…</div>
+      <img *ngIf="cover" class="cover" [src]="cover" alt="" />
+      <div class="uploading-indicator" *ngIf="uploadingCoverImage">Uploading cover…</div>
     </div>
     <div class="profile-picture-main-container">
       <div class="profile-picture-container">
         <div class="profile-picture" [style.background-image]="'url(' + profilePicture + ')'"></div>
         <div class="edit-option" *ngIf="profileOwner">
-          <input
-            type="file"
-            #profileInput
-            accept="image/*"
-            style="display: none"
-            (change)="onFileSelected($event, false)"
-          />
+          <input type="file" #profileInput accept="image/*" style="display: none"
+            (change)="onFileSelected($event, false)" />
           <button (click)="profileInput.click()">
             <i class="bi bi-gear-fill"></i>
           </button>
@@ -78,20 +67,10 @@
     <div class="directives-main-container">
       <div *ngIf="!profileOwner" class="directives-container">
         <div class="directives-list">
-          <button
-            class="follow"
-            *ngIf="!userIsFollowing"
-            [disabled]="process"
-            (click)="FollowUser(profileUser)"
-          >
+          <button class="follow" *ngIf="!userIsFollowing" [disabled]="process" (click)="FollowUser(profileUser)">
             Follow
           </button>
-          <button
-            class="following"
-            *ngIf="userIsFollowing"
-            [disabled]="process"
-            (click)="UnfollowUser(profileUser)"
-          >
+          <button class="following" *ngIf="userIsFollowing" [disabled]="process" (click)="UnfollowUser(profileUser)">
             Following
           </button>
         </div>
@@ -103,14 +82,24 @@
 
     <div class="content-main-container container">
       <div class="content-description-main-container">
-        <div class="content-description">Photos</div>
         <div class="content-description">Posts</div>
+        <div class="twitch-login-wrapper" *ngIf="profileOwner">
+          <app-twitch-login></app-twitch-login>
+        </div>
       </div>
-      <div class="content-container row" *ngIf="profileImages">
-        <div class="col-4 image-container" *ngFor="let image of profileImages">
+
+      <div class="content-container row" *ngIf="listPosts && listPosts.length > 0">
+        <div class="content-list-container">
+
+          <div *ngFor="let post of listPosts" class="content-list">
+
+            <app-content [postId]="post.postID" (onDeletePost)="removePostFromList($event)"></app-content>
+
+          </div>
+          <!-- <div class="col-4 image-container" *ngFor="let image of profileImages">
           <img (click)="openImageDialog(image)" [src]="image" alt="" />
+        </div> -->
         </div>
       </div>
     </div>
   </div>
-</div>

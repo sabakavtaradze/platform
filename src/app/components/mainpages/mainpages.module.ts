@@ -16,6 +16,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 import { SharedmoduleModule } from '../sharedmodule/sharedmodule.module';
+import { TwitchLoginComponent } from '../social/twitch-login/twitch-login.component';
 import { LibraryComponent } from './category/library/library.component';
 import { MainpageComponent } from './category/mainpage/mainpage.component';
 import { NotificationsComponent } from './category/notifications/notifications.component';
@@ -108,6 +109,7 @@ const routes: Routes = [
     ReactiveFormsModule,
     MatFormFieldModule,
     SharedmoduleModule,
+    TwitchLoginComponent,
 
     RouterModule.forChild(routes)
 

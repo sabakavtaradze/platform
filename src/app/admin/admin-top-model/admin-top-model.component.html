@@ -1,0 +1,31 @@
+<div class="admin-top-model">
+    <h2>Top Model Professions</h2>
+    <p class="charge">Add or remove professions that appear on the filter dialog.</p>
+    <form class="inline-form" [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" class="input-field">
+            <mat-label>Profession name</mat-label>
+            <input matInput formControlName="name" placeholder="e.g. influencer" autocomplete="off" />
+            <mat-error *ngIf="form.controls['name'].hasError('required')">Name is required</mat-error>
+            <mat-error *ngIf="form.controls['name'].hasError('maxlength')">Maximum 60 characters</mat-error>
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!canSubmit">
+            <span *ngIf="!saving">Send</span>
+            <span *ngIf="saving">Sending…</span>
+        </button>
+    </form>
+
+    <div *ngIf="error" class="error">{{ error }}</div>
+
+    <div class="chip-grid" *ngIf="professions.length">
+        <div class="chip" *ngFor="let profession of professions">
+            <span>{{ profession.name }}</span>
+            <button mat-icon-button color="warn" type="button" (click)="confirmDelete(profession)"
+                [disabled]="deletingIds.has(profession.professionId)" aria-label="Remove profession">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <div *ngIf="!professions.length && !loading" class="empty">No professions configured yet.</div>
+    <div *ngIf="loading" class="loading">Loading professions…</div>
+</div>

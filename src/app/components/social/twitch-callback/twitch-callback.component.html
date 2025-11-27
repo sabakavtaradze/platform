@@ -1,0 +1,14 @@
+<div class="twitch-callback">
+    <div *ngIf="loading">Loading Twitch data…</div>
+    <div *ngIf="error" class="twitch-error">{{ error }}</div>
+    <div *ngIf="!loading && profile">
+        <div class="twitch-profile">
+            <img class="twitch-avatar" [src]="profile.profile_image_url" alt="{{ profile.display_name }}" />
+            <div class="twitch-profile-info">
+                <h2>{{ profile.display_name }} ({{ profile.login }})</h2>
+                <p>{{ profile.description }}</p>
+                <p>Followers: {{ followers | number }}</p>
+            </div>
+        </div>
+    </div>
+</div>

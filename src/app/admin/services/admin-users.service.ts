@@ -48,6 +48,22 @@ export class AdminUsersService {
         });
     }
 
+    uploadProfilePicture(userId: number, file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('File', file);
+        return this.http.put<any>(`${this.baseUrl}/update-profile-picture/${userId}`, formData, {
+            headers: this.getAuthHeaders(),
+        });
+    }
+
+    uploadCoverPicture(userId: number, file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('File', file);
+        return this.http.put<any>(`${this.baseUrl}/update-cover-picture/${userId}`, formData, {
+            headers: this.getAuthHeaders(),
+        });
+    }
+
     private getAuthHeaders(): HttpHeaders {
         const token = this.authService.getAuthToken();
         return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();

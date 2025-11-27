@@ -21,7 +21,8 @@ import { FooterComponent } from './components/mainpages/footer/footer.component'
 import { SharedmoduleModule } from './components/sharedmodule/sharedmodule.module';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 
-@NgModule({ declarations: [AppComponent, HeaderComponent, FooterComponent, AboutpageComponent],
+@NgModule({
+    declarations: [AppComponent, HeaderComponent, FooterComponent, AboutpageComponent],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
         BrowserAnimationsModule,
@@ -38,12 +39,13 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
         MatDialogModule,
         MatButtonModule,
         SharedmoduleModule], providers: [
-        HttpClient,
-        {
-            provide: HTTP_INTERCEPTORS,
-            useClass: AuthInterceptor,
-            multi: true,
-        },
-        provideHttpClient(withInterceptorsFromDi()),
-    ] })
-export class AppModule {}
+            HttpClient,
+            {
+                provide: HTTP_INTERCEPTORS,
+                useClass: AuthInterceptor,
+                multi: true,
+            },
+            provideHttpClient(withInterceptorsFromDi()),
+        ]
+})
+export class AppModule { }

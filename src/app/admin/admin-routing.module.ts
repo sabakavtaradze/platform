@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { adminGuard } from '../guards/admin.guard';
 import { AdminPostListComponent } from './admin-post-list/admin-post-list.component';
+import { AdminTopModelComponent } from './admin-top-model/admin-top-model.component';
 import { AdminComponent } from './admin.component';
 import { AdminUserComponent } from './adminUser/admin-user.component';
 
@@ -18,6 +19,7 @@ const routes: Routes = [
         path: 'users',
         component: AdminUserComponent,
       },
+      { path: 'topmodels', component: AdminTopModelComponent }
     ],
   },
 ];

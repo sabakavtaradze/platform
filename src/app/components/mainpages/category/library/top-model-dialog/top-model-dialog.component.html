@@ -1,0 +1,38 @@
+<div class="top-model-dialog">
+    <h2>Upload Top Model Photo</h2>
+    <p>Select one image to request top-model recognition.</p>
+    <div class="profession-section">
+        <div class="profession-section-header">Choose professions</div>
+        <div class="profession-grid">
+            <button *ngFor="let profession of availableProfessions" class="profession-chip" type="button"
+                mat-stroked-button color="primary" [class.active]="selectedProfessions.includes(profession)"
+                (click)="toggleProfession(profession)">
+                {{ profession }}
+            </button>
+        </div>
+    </div>
+    <div class="input-row">
+        <label class="file-label" for="photo-input">
+            <span>{{ selectedFile ? selectedFile.name : 'Choose a picture' }}</span>
+            <input #photoInput id="photo-input" type="file" accept="image/*" (change)="onFileSelected($event)" />
+        </label>
+    </div>
+
+    <div class="preview-card" *ngIf="previewUrl">
+        <div class="preview-heading">Preview</div>
+        <img [src]="previewUrl" alt="Selected preview" />
+        <div class="preview-actions">
+            <button mat-stroked-button color="warn" type="button" (click)="clearSelection()" [disabled]="loading">
+                Remove
+            </button>
+        </div>
+    </div>
+    <div class="error" *ngIf="error">{{ error }}</div>
+    <div class="actions">
+        <button mat-button (click)="cancel()" [disabled]="loading">Cancel</button>
+        <button mat-raised-button color="primary" (click)="submit()" [disabled]="loading">
+            <span *ngIf="!loading">Submit</span>
+            <span *ngIf="loading">Uploading…</span>
+        </button>
+    </div>
+</div>

@@ -93,7 +93,7 @@ export class AuthenticationService implements CanActivate {
   constructor(
     private router: Router,
     private http: HttpClient
-  ) {}
+  ) { }
 
   private hasValidToken(): boolean {
     const token = this.getAuthToken();
@@ -190,8 +190,13 @@ export class AuthenticationService implements CanActivate {
     const url = `${this.apiUrlBase}refresh-token`;
     return this.http.post<LoginResponse>(url, {}).pipe(
       tap((res) => {
-        if (res?.isSuccess && res.data) {
-          this.setAuthToken(res.data);
+        if (this.isSuccessResponse(res)) {
+          const token = this.extractToken(res);
+          if (token) {
+            this.setAuthToken(token);
+          } else {
+            console.warn('Refresh response missing token.');
+          }
         }
       }),
       catchError((error: HttpErrorResponse) => {
@@ -288,6 +293,19 @@ export class AuthenticationService implements CanActivate {
     } catch {
       return false;
     }
+  }
+
+  private extractToken(response: LoginResponse): string | null {
+    return response?.data ?? (response as any)?.Data ?? null;
+  }
+
+  private isSuccessResponse(response: LoginResponse): boolean {
+    if (response?.isSuccess !== undefined) {
+      return response.isSuccess;
+    }
+
+    const successCandidate = (response as any)?.IsSuccess;
+    return typeof successCandidate === 'boolean' ? successCandidate : false;
   }
   /* ---------------------------------------------
      Decode & Validate User

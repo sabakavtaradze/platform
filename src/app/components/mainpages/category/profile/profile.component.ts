@@ -26,7 +26,6 @@ import heic2any from 'heic2any'; // ✅ ADDED
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   currentUser: UserAttributes | null = null;
-
   profileId!: number;
   profileUser: any = null;
   profileOwner = false;
@@ -41,6 +40,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   userIsFollowing = false;
   FollowersCount = 0;
+  listPosts: any[] = [];
 
   process = false;
 
@@ -64,6 +64,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         const pid = params.get('profileId');
         this.profileId = Number(pid ?? 0);
         this.auth();
+        this.getPostsByUserId();
       })
     );
   }
@@ -154,12 +155,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
           if (this.profileOwner) {
             this.subs.add(
               this.userService.getOwnProfilePicture().subscribe((r: BaseResponse<string>) => {
-                if (r?.isSuccess) this.profilePicture = r.data;
+                if (r?.isSuccess) this.profilePicture = this.cacheBustImage(r.data);
               })
             );
             this.subs.add(
               this.userService.getCoverPicture().subscribe((r: BaseResponse<string>) => {
-                if (r?.isSuccess) this.cover = r.data;
+                if (r?.isSuccess) this.cover = this.cacheBustImage(r.data);
               })
             );
           } else {
@@ -167,14 +168,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
               this.userService
                 .getProfilePicture(this.profileId)
                 .subscribe((r: BaseResponse<string>) => {
-                  if (r?.isSuccess) this.profilePicture = r.data;
+                  if (r?.isSuccess) this.profilePicture = this.cacheBustImage(r.data);
                 })
             );
             this.subs.add(
               this.userService
                 .getCoverPictureById(this.profileId)
                 .subscribe((r: BaseResponse<string>) => {
-                  if (r?.isSuccess) this.cover = r.data;
+                  if (r?.isSuccess) this.cover = this.cacheBustImage(r.data);
                 })
             );
           }
@@ -331,6 +332,24 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   }
 
+  private cacheBustImage(url?: string | null): string {
+    if (!url) {
+      return '';
+    }
+
+    const timestamp = Date.now().toString();
+    try {
+      const parsed = new URL(url);
+      parsed.searchParams.set('t', timestamp);
+      return parsed.toString();
+    } catch (error) {
+      const [base, query] = url.split('?');
+      const params = new URLSearchParams(query ?? '');
+      params.set('t', timestamp);
+      return `${base}?${params.toString()}`;
+    }
+  }
+
   editProfilePicture(imgs: any) {
     if (!this.currentUser?.sub) return;
 
@@ -375,5 +394,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   async updateUserFunction() {
     if (!this.currentUser?.sub) return;
+  }
+  getPostsByUserId() {
+    this.postService.getPostsByUserId(this.profileId).subscribe((res: BaseResponse<any[]>) => {
+      console.log('Posts by user:', res.data);
+
+      this.listPosts = res.data;
+    });
+  }
+  removePostFromList(postId: number) {
+    this.listPosts = this.listPosts.filter((p: any) => p.postID !== postId);
   }
 }

@@ -139,6 +139,8 @@
     }
 
     .profile-body-main-container {
+        background-color: #f0f2f58a !important;
+
         .stats-main-container {
             display: flex;
             justify-content: center;
@@ -298,6 +300,8 @@
             .content-description-main-container {
                 display: flex;
                 flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
 
                 .content-description {
                     color: #25396f;
@@ -305,7 +309,22 @@
                     padding-left: 0.4rem;
                     padding-right: 0.4rem;
                 }
+
+                .twitch-login-wrapper {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 48px;
+                    padding: 0 0.8rem;
+                    border-radius: 999px;
+                    background: linear-gradient(135deg, #efd0ff 0%, #9146ff 100%);
+                    box-shadow: 0 12px 30px rgba(145, 70, 255, 0.25);
+                }
             }
         }
     }
+}
+
+.content-list {
+    padding: 0.7rem;
 }

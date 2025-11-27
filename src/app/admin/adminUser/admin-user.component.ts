@@ -75,9 +75,17 @@ export class AdminUserComponent implements OnInit {
     }
 
     handleDelete(userId: number): void {
+        const confirmed = window.confirm('Are you sure you want to delete this user?');
+        if (!confirmed) {
+            return;
+        }
+
         this.setLoading(true);
         this.adminUsers.deleteUser(userId).subscribe({
-            next: () => this.loadUsers(),
+            next: () => {
+                this.users = this.users.filter((user) => this.extractUserId(user) !== userId);
+                this.setLoading(false);
+            },
             error: (err) => {
                 this.error = err?.message || 'Failed to delete user';
                 this.setLoading(false);
@@ -115,11 +123,14 @@ export class AdminUserComponent implements OnInit {
         if (res?.isSuccess === false) {
             this.error = res.errorMessage || 'No users found';
             this.users = [];
+
             return;
         }
         const payload = res?.data ?? res ?? [];
         const list = Array.isArray(payload) ? payload : payload?.users ?? [];
         this.users = list;
+        console.log(this.users)
+
     }
 
     private getSearchQuery(): string {

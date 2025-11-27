@@ -3,6 +3,16 @@ import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
+    path: 'auth/twitch',
+    loadComponent: () =>
+      import('./components/social/twitch-login/twitch-login.component').then((m) => m.TwitchLoginComponent),
+  },
+  {
+    path: 'auth/twitch/callback',
+    loadComponent: () =>
+      import('./components/social/twitch-callback/twitch-callback.component').then((m) => m.TwitchCallbackComponent),
+  },
+  {
     path: 'auth',
     loadChildren: () => import('../app/components/auth/auth.module').then((m) => m.AuthModule),
   },
@@ -34,4 +44,4 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

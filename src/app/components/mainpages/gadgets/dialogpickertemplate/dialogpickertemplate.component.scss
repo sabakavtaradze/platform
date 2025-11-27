@@ -19,6 +19,7 @@
             flex-wrap: wrap;
             margin-left: -0.5rem;
             margin-right: -0.5rem;
+
             ::ng-deep {
                 .mat-mdc-raised-button {
                     border-radius: 1.5rem;
@@ -26,7 +27,19 @@
 
                 .mat-mdc-outlined-button {
                     border-radius: 1.5rem;
-                    
+
+                }
+
+                .profession-button.picked.mat-mdc-raised-button {
+                    background-color: #1b4ec4;
+                    border-color: #1b4ec4;
+                    color: white;
+                    box-shadow: 0 0.35rem 0.75rem rgba(27, 78, 196, 0.45);
+                }
+
+                .profession-button.picked.mat-mdc-raised-button:hover {
+                    background-color: #152f9c;
+                    border-color: #152f9c;
                 }
             }
 
@@ -37,14 +50,17 @@
 
 
         }
+
         .age-size-main-container {
             width: 100%;
-            .example-name-title{
-            text-align-last: center;
-            color: gray;
 
-        }
-            .example-label-container{
+            .example-name-title {
+                text-align-last: center;
+                color: gray;
+
+            }
+
+            .example-label-container {
                 display: flex;
                 font-weight: bold;
             }
@@ -52,12 +68,14 @@
 
         .followers-size-main-container {
             width: 100%;
-            .example-name-title{
-            text-align-last: center;
-            color: gray;
 
-        }
-            .example-label-container{
+            .example-name-title {
+                text-align-last: center;
+                color: gray;
+
+            }
+
+            .example-label-container {
                 display: flex;
                 font-weight: bold;
             }

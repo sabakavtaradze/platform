@@ -15,10 +15,10 @@ import {
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 
 @Component({
-    selector: 'app-register',
-    templateUrl: './register.component.html',
-    styleUrls: ['./register.component.scss'],
-    standalone: false
+  selector: 'app-register',
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.scss'],
+  standalone: false
 })
 export class RegisterComponent implements OnInit {
   form!: FormGroup;
@@ -31,19 +31,20 @@ export class RegisterComponent implements OnInit {
     private router: Router,
     private fb: FormBuilder,
     private authService: AuthenticationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const currentYear = new Date().getFullYear();
-    this.maxDate = new Date(currentYear - 12, 0, 1);
-    this.minDate = new Date(currentYear - 120, 0, 1);
+    const today = new Date();
+    this.maxDate = this.subtractYears(today, 18);
+    this.minDate = this.subtractYears(today, 120);
 
     this.form = this.fb.group(
       {
         firstName: ['', [Validators.required, Validators.minLength(3)]],
         lastName: ['', [Validators.required, Validators.minLength(3)]],
         email: ['', [Validators.required, Validators.email, Validators.minLength(6)]],
-        date: ['', Validators.required],
+        date: ['', [Validators.required, this.dateRangeValidator.bind(this)]],
 
         password: [
           '',
@@ -88,6 +89,7 @@ export class RegisterComponent implements OnInit {
       lastName: form.value.lastName,
       email: form.value.email,
       password: form.value.password,
+      BirthDate: this.formatBirthDate(form.value.date),
     };
 
     this.authService.register(data).subscribe({
@@ -112,6 +114,8 @@ export class RegisterComponent implements OnInit {
             localStorage.setItem('UserID', userID);
             localStorage.setItem('verifId', form.value.email);
             localStorage.setItem('verifpsw', form.value.password);
+
+            localStorage.setItem('register_last_code_sent', Date.now().toString());
 
             this.router.navigate(['/auth/registerconfrom']);
           } else {
@@ -171,5 +175,38 @@ export class RegisterComponent implements OnInit {
         this.markFormGroupTouched(control);
       }
     });
+  }
+
+  private subtractYears(date: Date, years: number): Date {
+    const result = new Date(date);
+    result.setFullYear(result.getFullYear() - years);
+    return result;
+  }
+
+  private dateRangeValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value) {
+      return null;
+    }
+
+    const selectedDate = new Date(value);
+    if (selectedDate < this.minDate || selectedDate > this.maxDate) {
+      return { dateOutOfRange: true };
+    }
+
+    return null;
+  }
+
+  private formatBirthDate(value: string | Date | null): string | null {
+    if (!value) {
+      return null;
+    }
+
+    const date = new Date(value);
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+
+    return date.toISOString();
   }
 }

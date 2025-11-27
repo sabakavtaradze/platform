@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -9,7 +9,7 @@ import { environment } from 'src/environments/environment';
 export class PostService {
   private baseUrl = `${environment.apiUrl}/api/Posts`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /** 🔑 Helper — automatically attach JWT header */
   private getAuthHeaders(): HttpHeaders {
@@ -35,26 +35,26 @@ export class PostService {
 
   updatePost(postId: number, postText: string, existingImageUrls: string[] = [], newFiles?: FileList): Observable<any> {
     const formData = new FormData();
-  
+
     formData.append('PostID', String(postId));
     formData.append('PostText', postText ?? "");
-  
+
     // only append existing if > 0
     if (existingImageUrls.length > 0) {
       existingImageUrls.forEach(url => formData.append('ExistingImageUrls', url));
     }
-  
+
     // only append newFiles if exist
     if (newFiles && newFiles.length > 0) {
       Array.from(newFiles).forEach(file => formData.append('NewFiles', file, file.name));
     }
-  
+
     return this.http.put(`${this.baseUrl}/update`, formData, {
       headers: this.getAuthHeaders()
     });
   }
-  
-  
+
+
 
   /** 🔴 Delete post — backend extracts user from token */
   deletePost(postId: number): Observable<any> {
@@ -71,5 +71,9 @@ export class PostService {
   /** 👁️ Get single post by ID */
   getPostById(postId: number): Observable<any> {
     return this.http.get(`${this.baseUrl}/${postId}/`);
+  }
+
+  getPostsByUserId(userId: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/user/${userId}`);
   }
 }

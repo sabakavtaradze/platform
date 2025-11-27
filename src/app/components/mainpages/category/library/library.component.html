@@ -1,12 +1,24 @@
 <div class="scrollable-content" style="height: 100vh; overflow-y: auto;" (scroll)="onScroll($event.target)">
+    <div class="container">
+        <div class="menu-container">
 
-<div class="container">
-<app-dialogpicker [filterModels]="filterModels"></app-dialogpicker>
+            <app-dialogpicker [filterModels]="filterModels"
+                (filterApplied)="onFilterApplied($event)"></app-dialogpicker>
+            <button *ngIf="!ExistTopModels" (click)="AddTopModel()" matButton="elevated"> Add Yourself <i
+                    class="bi bi-person-add"></i>
+            </button>
+            <!-- <button *ngIf="ExistTopModels" (click)="EditTopModel()" matButton="elevated"> Edit <i
+                    class="bi bi-person-add"></i>
+            </button> -->
+            <button *ngIf="ExistTopModels" (click)="DeleteTopModel()" matButton="elevated"> Delete <i
+                    class="bi bi-person-add"></i>
+            </button>
+        </div>
 
-    <div class="row models-list ">
-        <div class="col-6  model-container " *ngFor="let model of models">
-            <app-models [item]="model"></app-models>
+        <div class="row models-list ">
+            <div class="col-6  model-container " *ngFor="let model of models">
+                <app-models [item]="model"></app-models>
+            </div>
         </div>
     </div>
-</div>
 </div>

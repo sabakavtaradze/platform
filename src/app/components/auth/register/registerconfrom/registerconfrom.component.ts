@@ -238,6 +238,7 @@ export class RegisterconfromComponent implements OnInit {
     localStorage.removeItem('register_email');
     localStorage.removeItem('register_psw');
     localStorage.removeItem('register_uid');
+    localStorage.removeItem('register_last_code_sent');
 
     if (forceLogin || !this.authService.getAuthToken()) {
       this.router.navigate(['/auth/login']);

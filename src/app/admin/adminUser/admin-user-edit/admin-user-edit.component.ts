@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Inject, Input, OnChanges, OnInit, Optional, Output, SimpleChanges } from '@angular/core';
+import { CommonModule, NgIf } from '@angular/common';
+import { Component, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Optional, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -14,6 +14,7 @@ import { AdminUsersService } from '../../services/admin-users.service';
     standalone: true,
     imports: [
         CommonModule,
+        NgIf,
         ReactiveFormsModule,
         MatFormFieldModule,
         MatInputModule,
@@ -24,13 +25,19 @@ import { AdminUsersService } from '../../services/admin-users.service';
     templateUrl: './admin-user-edit.component.html',
     styleUrls: ['./admin-user-edit.component.scss'],
 })
-export class AdminUserEditComponent implements OnChanges, OnInit {
+export class AdminUserEditComponent implements OnChanges, OnInit, OnDestroy {
     @Input() user: any | null = null;
     @Output() saved = new EventEmitter<void>();
     @Output() cancelled = new EventEmitter<void>();
 
     loading = false;
     error: string | null = null;
+    uploadingProfilePicture = false;
+    uploadingCoverPicture = false;
+    profilePreviewUrl: string | null = null;
+    coverPreviewUrl: string | null = null;
+    private profilePreviewObjectUrl: string | null = null;
+    private coverPreviewObjectUrl: string | null = null;
 
     form = this.fb.group({
         firstName: ['', Validators.required],
@@ -59,6 +66,11 @@ export class AdminUserEditComponent implements OnChanges, OnInit {
             return;
         }
         this.applyUser(userChange.currentValue);
+    }
+
+    ngOnDestroy(): void {
+        this.revokePreview('profile');
+        this.revokePreview('cover');
     }
 
     submit(): void {
@@ -122,6 +134,108 @@ export class AdminUserEditComponent implements OnChanges, OnInit {
             password: '',
         });
         this.form.markAsPristine();
+        this.revokePreview('profile');
+        this.revokePreview('cover');
+        this.profilePreviewUrl = user.userProfilePictureUrl ?? null;
+        this.coverPreviewUrl = user.userCoverPictureUrl ?? null;
+    }
+
+    onImageChange(event: Event, target: 'profile' | 'cover'): void {
+        const file = this.extractFileFromEvent(event);
+        if (!file) {
+            return;
+        }
+
+        if (target === 'profile') {
+            this.uploadingProfilePicture = true;
+            this.setPreview('profile', URL.createObjectURL(file));
+        } else {
+            this.uploadingCoverPicture = true;
+            this.setPreview('cover', URL.createObjectURL(file));
+        }
+
+        this.uploadImage(file, target);
+    }
+
+    private uploadImage(file: File, target: 'profile' | 'cover'): void {
+        const userId = this.getUserId();
+        if (!userId) {
+            this.assignImageError(target, 'Unable to identify the user.');
+            this.clearUploadFlag(target);
+            return;
+        }
+
+        const upload$ = target === 'profile'
+            ? this.adminUsers.uploadProfilePicture(userId, file)
+            : this.adminUsers.uploadCoverPicture(userId, file);
+
+        upload$.subscribe({
+            next: (response) => {
+                const updatedUser = response?.data ?? response;
+                if (target === 'profile' && updatedUser?.userProfilePictureUrl) {
+                    this.revokePreview('profile');
+                    this.profilePreviewUrl = updatedUser.userProfilePictureUrl;
+                    this.user = { ...this.user, userProfilePictureUrl: updatedUser.userProfilePictureUrl };
+                }
+                if (target === 'cover' && updatedUser?.userCoverPictureUrl) {
+                    this.revokePreview('cover');
+                    this.coverPreviewUrl = updatedUser.userCoverPictureUrl;
+                    this.user = { ...this.user, userCoverPictureUrl: updatedUser.userCoverPictureUrl };
+                }
+            },
+            error: (err) => {
+                this.assignImageError(target, err?.message || 'Unable to upload image.');
+                this.clearUploadFlag(target);
+            },
+            complete: () => this.clearUploadFlag(target),
+        });
+    }
+
+    private setPreview(target: 'profile' | 'cover', url: string): void {
+        this.revokePreview(target);
+        if (target === 'profile') {
+            this.profilePreviewObjectUrl = url;
+            this.profilePreviewUrl = url;
+        } else {
+            this.coverPreviewObjectUrl = url;
+            this.coverPreviewUrl = url;
+        }
+    }
+
+    private revokePreview(target: 'profile' | 'cover'): void {
+        if (target === 'profile' && this.profilePreviewObjectUrl) {
+            URL.revokeObjectURL(this.profilePreviewObjectUrl);
+            this.profilePreviewObjectUrl = null;
+        }
+        if (target === 'cover' && this.coverPreviewObjectUrl) {
+            URL.revokeObjectURL(this.coverPreviewObjectUrl);
+            this.coverPreviewObjectUrl = null;
+        }
+    }
+
+    private extractFileFromEvent(event: Event): File | null {
+        const input = event.target as HTMLInputElement | null;
+        const file = input?.files?.[0] ?? null;
+        if (input) {
+            input.value = '';
+        }
+        return file;
+    }
+
+    private getUserId(): number | null {
+        return (this.user?.userID ?? this.user?.id ?? this.user?.userId ?? null) as number | null;
+    }
+
+    private assignImageError(target: 'profile' | 'cover', message: string): void {
+        this.error = `Failed to upload ${target} image: ${message}`;
+    }
+
+    private clearUploadFlag(target: 'profile' | 'cover'): void {
+        if (target === 'profile') {
+            this.uploadingProfilePicture = false;
+        } else {
+            this.uploadingCoverPicture = false;
+        }
     }
 }
 

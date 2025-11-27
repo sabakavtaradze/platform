@@ -1,4 +1,4 @@
-<div class="body">
+﻿<div class="body">
 
   <div class="main-container">
 
@@ -8,8 +8,14 @@
       <h4>Profession</h4>
       <div class="profession-category-container">
         <div *ngFor="let profession of filterModels.professions" class="profession-category-list">
-          <button (click)="profPick(profession)" *ngIf="!profession.active" mat-stroked-button color="primary">{{profession.category}}</button>
-          <button (click)="profPick(profession)" *ngIf="profession.active" mat-raised-button color="primary">{{profession.category}}</button>
+          <button (click)="profPick(profession)" *ngIf="!profession.active" class="profession-button" mat-stroked-button
+            color="primary">
+            {{profession.category}}
+          </button>
+          <button (click)="profPick(profession)" *ngIf="profession.active" class="profession-button picked"
+            mat-raised-button color="primary">
+            {{profession.category}}
+          </button>
         </div>
       </div>
     </div>
@@ -24,9 +30,11 @@
           <label class="example-value-label">-</label>
           <label class="example-value-label">{{filterModels.properties.maxAge}}</label>
         </div>
-        <mat-slider [min]="filterModels.properties.minAge" [max]="filterModels.properties.maxAge" showTickMarks discrete>
-          <input [value]="pickedMinAge" matSliderStartThumb>
-          <input [value]="pickedMaxAge" matSliderEndThumb>
+        <mat-slider [min]="filterModels.properties.minAge" [max]="filterModels.properties.maxAge" showTickMarks
+          discrete>
+          <input #ageMinInput [value]="pickedMinAge" matSliderStartThumb
+            (input)="updatePickedAgeMin(ageMinInput.value)">
+          <input #ageMaxInput [value]="pickedMaxAge" matSliderEndThumb (input)="updatePickedAgeMax(ageMaxInput.value)">
         </mat-slider>
       </div>
     </div>
@@ -40,9 +48,12 @@
       </div>
 
       <div class="followers-size-container">
-        <mat-slider [min]="filterModels.properties.minFollowers" step="1000" [max]="filterModels.properties.maxFollowers" [displayWith]="formatLabel" showTickMarks discrete>
-          <input [value]="pickedMinFollowers" matSliderStartThumb>
-          <input [value]="pickedMaxFollowers" matSliderEndThumb>
+        <mat-slider [min]="filterModels.properties.minFollowers" step="1000"
+          [max]="filterModels.properties.maxFollowers" [displayWith]="formatLabel" showTickMarks discrete>
+          <input #followersMinInput [value]="pickedMinFollowers" matSliderStartThumb
+            (input)="updatePickedFollowersMin(followersMinInput.value)">
+          <input #followersMaxInput [value]="pickedMaxFollowers" matSliderEndThumb
+            (input)="updatePickedFollowersMax(followersMaxInput.value)">
         </mat-slider>
       </div>
     </div>
@@ -54,7 +65,7 @@
 
 
   <div class="action" mat-dialog-actions>
-    <button mat-raised-button mat-dialog-close color="warn">cancel</button>
-    <button mat-raised-button mat-dialog-close cdkFocusInitial color="primary" [mat-dialog-close]="filterModels">search</button>
+    <button mat-button mat-dialog-close mat-raised-button color="warn">cancel</button>
+    <button mat-button cdkFocusInitial mat-raised-button color="primary" (click)="applyAndClose()">search</button>
   </div>
 </div>

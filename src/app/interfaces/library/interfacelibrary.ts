@@ -6,6 +6,8 @@ export interface Models {
     followers: number;
     stars: number;
     profession: string;
+    userID?: number;
+    userProfilePic?: string;
 }
 export interface Category {
     category: string;

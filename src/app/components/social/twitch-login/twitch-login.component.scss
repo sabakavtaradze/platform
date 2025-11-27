@@ -1,0 +1,24 @@
+.twitch-login-button {
+    font-family: 'Roboto', 'Segoe UI', system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.01rem;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #9146ff, #5c32c7);
+    padding: 0.55rem 1.5rem;
+    box-shadow: 0 12px 25px rgba(145, 70, 255, 0.3);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.twitch-login-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 30px rgba(145, 70, 255, 0.45);
+}
+
+.twitch-login-button:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.7);
+    outline-offset: 2px;
+}
