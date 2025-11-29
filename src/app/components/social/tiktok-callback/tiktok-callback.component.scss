@@ -1,0 +1,16 @@
+.tiktok-callback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+}
+
+.tiktok-error {
+    color: #c53030;
+    font-weight: 600;
+}
+
+.tiktok-success p:first-child {
+    font-weight: 700;
+}

@@ -1,0 +1,8 @@
+<div class="tiktok-callback">
+    <div *ngIf="loading">Linking TikTok account…</div>
+    <div *ngIf="error" class="tiktok-error">{{ error }}</div>
+    <div *ngIf="!loading && followers !== null" class="tiktok-success">
+        <p>TikTok connected</p>
+        <p>TikTok Followers: {{ followers | number }}</p>
+    </div>
+</div>

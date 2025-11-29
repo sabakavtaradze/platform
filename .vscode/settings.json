@@ -25,5 +25,5 @@
   "[html]": { "editor.defaultFormatter": "vscode.html-language-features" },
   "[scss]": { "editor.defaultFormatter": "vscode.css-language-features" },
   "[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" }
+  "[json]": { "editor.defaultFormatter": "vscode.json-language-features" }
 }

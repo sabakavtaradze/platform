@@ -83,8 +83,18 @@
     <div class="content-main-container container">
       <div class="content-description-main-container">
         <div class="content-description">Posts</div>
-        <div class="twitch-login-wrapper" *ngIf="profileOwner">
-          <app-twitch-login></app-twitch-login>
+        <div class="social-connectors" *ngIf="profileOwner">
+          <div class="twitch-login-wrapper">
+            <app-twitch-login></app-twitch-login>
+          </div>
+          <div class="tiktok-wrapper">
+            <app-tiktok-connect></app-tiktok-connect>
+            <div *ngIf="tiktokLoadingFollowers" class="tiktok-status">Loading TikTok info…</div>
+            <div *ngIf="tiktokFollowers !== null" class="tiktok-followers">
+              TikTok Followers: {{ tiktokFollowers | number }}
+            </div>
+            <div *ngIf="tiktokError" class="tiktok-error">{{ tiktokError }}</div>
+          </div>
         </div>
       </div>
 

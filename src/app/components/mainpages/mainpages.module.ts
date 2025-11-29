@@ -16,6 +16,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 import { SharedmoduleModule } from '../sharedmodule/sharedmodule.module';
+import { TikTokConnectComponent } from '../social/tiktok-connect/tiktok-connect.component';
 import { TwitchLoginComponent } from '../social/twitch-login/twitch-login.component';
 import { LibraryComponent } from './category/library/library.component';
 import { MainpageComponent } from './category/mainpage/mainpage.component';
@@ -109,6 +110,7 @@ const routes: Routes = [
     ReactiveFormsModule,
     MatFormFieldModule,
     SharedmoduleModule,
+    TikTokConnectComponent,
     TwitchLoginComponent,
 
     RouterModule.forChild(routes)

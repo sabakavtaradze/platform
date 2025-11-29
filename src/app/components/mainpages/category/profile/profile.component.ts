@@ -4,6 +4,7 @@ import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 
 import { APIServicem } from 'src/app/apiservicem';
 import { PostService } from 'src/app/services/post/post.service';
+import { TikTokService, TikTokServiceResponse } from 'src/app/services/tiktok.service';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 import { ChatroomService } from 'src/app/services/user/chatroom/chatroom.service';
 import { FriendshipService } from 'src/app/services/user/friendship/friendship.service';
@@ -41,6 +42,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
   userIsFollowing = false;
   FollowersCount = 0;
   listPosts: any[] = [];
+  tiktokFollowers: number | null = null;
+  tiktokLoadingFollowers = false;
+  tiktokError: string | null = null;
 
   process = false;
 
@@ -53,6 +57,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private router: Router,
     private apiservicem: APIServicem,
     private friendshipService: FriendshipService,
+    private readonly tiktokService: TikTokService,
     private userService: UserService,
     private postService: PostService,
     private chatroomService: ChatroomService
@@ -94,6 +99,34 @@ export class ProfileComponent implements OnInit, OnDestroy {
         .subscribe((res: BaseResponse<boolean>) => {
           if (res?.isSuccess) this.userIsFollowing = !!res.data;
         })
+    );
+  }
+
+  loadTikTokFollowers() {
+    if (!this.profileOwner) return;
+
+    this.tiktokLoadingFollowers = true;
+    this.tiktokError = null;
+
+    this.subs.add(
+      this.tiktokService.getFollowers().subscribe({
+        next: (res: TikTokServiceResponse<number>) => {
+          if (res?.isSuccess && typeof res?.data === 'number') {
+            this.tiktokFollowers = res.data;
+            this.tiktokError = null;
+          } else {
+            this.tiktokFollowers = null;
+            this.tiktokError = res?.errorMessage ?? 'Unable to load TikTok followers.';
+          }
+          this.tiktokLoadingFollowers = false;
+        },
+        error: (err) => {
+          console.error('TikTok followers fetch failed', err);
+          this.tiktokFollowers = null;
+          this.tiktokError = 'Unable to load TikTok followers.';
+          this.tiktokLoadingFollowers = false;
+        },
+      })
     );
   }
 
@@ -145,6 +178,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
       this.loadFollowersCount();
       if (this.currentUser) this.GetIsFollowing();
+      this.loadTikTokFollowers();
 
       this.subs.add(
         this.userService.getUserById(this.profileId).subscribe((res: BaseResponse<any>) => {

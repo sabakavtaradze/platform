@@ -25,3 +25,9 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+## TikTok OAuth flow
+
+- TikTok Login Kit only accepts the registered redirect URI `https://wbless.org/api/tiktok/callback` (the public backend).
+- After your backend finishes the OAuth exchange it should redirect to the Angular app. During local work it must redirect to `http://localhost:4200/tiktok/connected?success=true`; in production it should redirect to `https://wbless.org/tiktok/connected?success=true`.
+- The Angular route `/tiktok/connected` reuses the TikTok callback component so the user sees follower data after the server redirect.

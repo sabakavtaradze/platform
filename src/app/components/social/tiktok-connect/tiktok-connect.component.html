@@ -1,0 +1,6 @@
+<div class="tiktok-connect">
+    <button class="tiktok-button" type="button" (click)="connect()" [disabled]="loading">
+        {{ loading ? 'Connecting…' : 'Connect TikTok' }}
+    </button>
+    <div *ngIf="error" class="tiktok-error">{{ error }}</div>
+</div>

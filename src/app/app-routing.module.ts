@@ -13,6 +13,16 @@ const routes: Routes = [
       import('./components/social/twitch-callback/twitch-callback.component').then((m) => m.TwitchCallbackComponent),
   },
   {
+    path: 'tiktok/callback',
+    loadComponent: () =>
+      import('./components/social/tiktok-callback/tiktok-callback.component').then((m) => m.TikTokCallbackComponent),
+  },
+  {
+    path: 'tiktok/connected',
+    loadComponent: () =>
+      import('./pages/tiktok-connected/tiktok-connected.component').then((m) => m.TikTokConnectedComponent),
+  },
+  {
     path: 'auth',
     loadChildren: () => import('../app/components/auth/auth.module').then((m) => m.AuthModule),
   },
