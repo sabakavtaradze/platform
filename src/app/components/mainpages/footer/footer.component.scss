@@ -1,15 +1,23 @@
 .footer-main-container {
-  // Keep desktop behavior default; we'll enhance mobile below
   position: relative;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem; // fallback padding
-  // background-color: rgb(255 247 247 / 66%);
+  padding: 0.5rem 0;
   background-color: white;
-
-  // Improve rendering stability on mobile (avoids slight jank)
+  width: 100%;
+  display: block;
   will-change: transform;
-  -webkit-transform: translateZ(0);
   transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+
+  &.header-instance {
+    position: static;
+    padding: 0.8rem 0;
+    width: 100%;
+    box-shadow: none;
+    background-color: transparent;
+    transform: none;
+    -webkit-transform: none;
+  }
+
   .add-content-main-container {
     display: flex;
     width: 100%;
@@ -17,101 +25,35 @@
     position: absolute;
     top: -3rem;
     left: 0;
+
     .add-content-container {
       display: flex;
       flex-direction: row;
-      // background-color: black;
-      // padding: 0.4rem;
       justify-content: space-around;
       border-radius: 2rem;
       background-color: #00000099;
       color: white;
+
       .add-content-list-container {
         padding: 0.6rem;
       }
     }
   }
-  // box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px,
-  //     rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
-
-  // .footer-container {
-  // display: flex;
-  // align-items: center;
-  // flex-direction: row;
-  // justify-content: space-between;
-
-  // .logo-container {
-  //     img {
-  //         width: 3rem;
-  //     }
-  // }
-
-  // .searchbar-main-container {
-  //     display: flex;
-  //     place-content: center;
-  //     width: 11rem;
-  //     height: 3rem;
-
-  //     ::ng-deep {
-  //         .mat-mdc-form-field {}
-
-  //         .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-  //             border-top: 0.05rem solid gray;
-  //             border-left: 0.05rem solid gray;
-  //             border-right: 0.05rem solid gray;
-  //             background-color: transparent;
-  //             border-radius: 0.5rem;
-  //         }
-
-  //         .mat-mdc-text-field-wrapper:not(.mdc-text-field--outlined) .mat-mdc-form-field-infix {
-  //             // padding-top: 0;
-  //             // padding-bottom: 0;
-  //         }
-
-  //         .mat-mdc-form-field-subscript-wrapper {
-  //             display: none;
-  //         }
-
-  //         .mat-mdc-form-field-flex {
-  //             height: 100%;
-  //         }
-  //     }
-  // }
-
-  // .messages-main-container {
-  //     font-size: 2rem;
-  //     display: flex;
-
-  //     i {
-  //         color: #0866ff;
-  //     }
-
-  //     i:active {
-  //         color: #8eb2ed;
-  //     }
-  // }
-
-  // .menu-main-container {}
-  // }
 
   .footer-library-main-container {
     .footer-library-container {
       display: flex;
       flex-direction: row;
       justify-content: space-evenly;
-      // padding-top: 1rem;
       align-items: center;
 
-      // padding-left: 0.5rem;
-      // padding-right: 0.5rem;
       .footer-library-list {
         position: relative;
-
         place-self: center;
         display: flex;
-        // Remove default link underline/blue color from anchors
         text-decoration: none;
         color: inherit;
+
         &:link,
         &:visited,
         &:hover,
@@ -121,30 +63,33 @@
           color: inherit;
           outline: none;
         }
+
         i {
           font-size: 1.5rem;
           width: 1.5rem;
           height: 1.5rem;
-          // color: #25396f;
           color: #878787;
           display: flex;
         }
+
         mat-icon {
           font-size: 2rem;
           width: 2rem;
           height: 2rem;
-          // color: #25396f;
           color: #6089f5;
         }
+
         .exclamation-container {
           display: flex;
           position: absolute;
           top: -0.4rem;
           right: -0.6rem;
+
           i {
             color: red !important;
           }
         }
+
         .pactive {
           color: #282828;
         }
@@ -153,18 +98,17 @@
       .menu-main-container {
         .footer-library-list.profileLink.profileActive {
           img {
-            // border: 0.3rem solid  #5d6069;
             border-radius: 30rem;
           }
 
           .mat-icon {
-            // border: 0.1rem solid  #5d6069;
             border-radius: 30rem;
             height: 0.9rem;
             width: 0.9rem;
             font-size: 0.6rem;
           }
         }
+
         .footer-library-list.profileLink {
           display: flex;
           position: relative;
@@ -172,12 +116,12 @@
           img {
             width: 2rem;
             height: 2rem;
-            display: block; // avoid inline-image baseline gaps that can cause blurriness
+            display: block;
             border-radius: 20rem;
             border: 0.18rem solid transparent;
-            object-fit: cover; // keep face centered and sharp
-            aspect-ratio: 1 / 1; // ensure perfect square to prevent subpixel scaling
-            image-rendering: auto; // let browser choose best interpolation for photos
+            object-fit: cover;
+            aspect-ratio: 1 / 1;
+            image-rendering: auto;
           }
 
           mat-icon {
@@ -205,20 +149,40 @@
       display: inline-table;
     }
   }
+
+  &.header-instance {
+    .footer-library-main-container {
+      .footer-library-container {
+        justify-content: center;
+        gap: 1.5rem;
+      }
+
+      .footer-library-list i {
+        color: #4a4a4a;
+      }
+
+      .footer-library-list mat-icon {
+        color: #3a4cc8;
+      }
+
+      .menu-main-container {
+        .footer-library-list.profileLink mat-icon {
+          background: #f1f3f5;
+        }
+      }
+    }
+  }
 }
 
-// Mobile-specific fixes: keep footer visually pinned at bottom and account for safe areas
 @media (max-width: 768px) {
-  .footer-main-container {
-    position: sticky; // stick within scroll container to viewport bottom
+  .footer-main-container:not(.header-instance) {
+    position: sticky;
     bottom: 0;
     left: 0;
     right: 0;
     width: 100%;
     z-index: 1000;
-
-    // Safe area support (iOS): layered fallbacks
-    padding-bottom: 0.5rem; // base
+    padding-bottom: 0.5rem;
     padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
     padding-bottom: calc(0.5rem + constant(safe-area-inset-bottom));
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);

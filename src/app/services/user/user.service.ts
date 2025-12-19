@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 interface ServiceResponse<T> {
@@ -28,7 +28,27 @@ export class UserService {
   private profilePictureSubject = new BehaviorSubject<string | null>(null);
   profilePicture$ = this.profilePictureSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
+
+  private cacheBustUrl(url?: string | null): string {
+    if (!url) return '';
+    const timestamp = Date.now();
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}t=${timestamp}`;
+  }
+
+  private cacheBustData<T extends { data?: string | null }>(response: T): T {
+    if (
+      response &&
+      typeof response === 'object' &&
+      'data' in response &&
+      typeof response.data === 'string' &&
+      response.data.length > 0
+    ) {
+      return { ...response, data: this.cacheBustUrl(response.data) } as T;
+    }
+    return response;
+  }
 
   // 🔒 Attach JWT to all calls
   private getAuthHeaders(): HttpHeaders {
@@ -75,30 +95,38 @@ export class UserService {
 
   // 🟢 Get current user's profile picture (from backend)
   getOwnProfilePicture(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/profile-picture`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http
+      .get(`${this.baseUrl}/profile-picture`, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(map((res) => this.cacheBustData(res)));
   }
 
   // 🔵 Get profile picture by userId
   getProfilePicture(userId: number): Observable<any> {
-    return this.http.get(`${this.baseUrl}/${userId}/profile-picture`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http
+      .get(`${this.baseUrl}/${userId}/profile-picture`, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(map((res) => this.cacheBustData(res)));
   }
 
   // 🟣 Get current user's cover picture
   getCoverPicture(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/cover-picture`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http
+      .get(`${this.baseUrl}/cover-picture`, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(map((res) => this.cacheBustData(res)));
   }
 
   // 🔵 Get cover picture by userId
   getCoverPictureById(userId: number): Observable<any> {
-    return this.http.get(`${this.baseUrl}/${userId}/cover-picture`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http
+      .get(`${this.baseUrl}/${userId}/cover-picture`, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(map((res) => this.cacheBustData(res)));
   }
   // 🧩 get user profile by id
   getUserById(id: number): Observable<any> {

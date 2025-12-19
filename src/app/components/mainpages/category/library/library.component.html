@@ -1,4 +1,4 @@
-<div class="scrollable-content" style="height: 100vh; overflow-y: auto;" (scroll)="onScroll($event.target)">
+<div class="scrollable-content" style="height: 100vh; overflow-y: auto;" (scroll)="onScroll($event)">
     <div class="container">
         <div class="menu-container">
 
@@ -16,7 +16,8 @@
         </div>
 
         <div class="row models-list ">
-            <div class="col-6  model-container " *ngFor="let model of models">
+            <div [routerLink]="['/profile', model.userID]" class="col-6 col-md-3 model-container "
+                *ngFor="let model of models">
                 <app-models [item]="model"></app-models>
             </div>
         </div>

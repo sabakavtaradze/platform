@@ -8,6 +8,7 @@ export interface Models {
     profession: string;
     userID?: number;
     userProfilePic?: string;
+    professions?: string[];
 }
 export interface Category {
     category: string;

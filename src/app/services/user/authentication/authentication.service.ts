@@ -355,6 +355,6 @@ export class AuthenticationService implements CanActivate {
 --------------------------------------------- */
   logout(): void {
     this.removeAuthToken();
-    this.router.navigate(['/welcome']);
+    this.router.navigate(['/auth', 'welcome']);
   }
 }

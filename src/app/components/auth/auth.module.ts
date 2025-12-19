@@ -1,21 +1,18 @@
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LoginComponent } from './login/login.component';
-import { WelcomepageComponent } from './welcomepage/welcomepage.component';
-import { RegisterComponent } from './register/register.component';
-import { RegisterconfromComponent } from './register/registerconfrom/registerconfrom.component';
+import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule, Routes } from '@angular/router';
-import { AppRoutingModule } from 'src/app/app-routing.module';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SharedmoduleModule } from '../sharedmodule/sharedmodule.module';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
+import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
+import { RegisterconfromComponent } from './register/registerconfrom/registerconfrom.component';
+import { WelcomepageComponent } from './welcomepage/welcomepage.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent, pathMatch: 'full', },
@@ -30,7 +27,7 @@ const routes: Routes = [
     WelcomepageComponent,
     RegisterComponent,
     RegisterconfromComponent,
-    
+
   ],
   imports: [
     CommonModule,

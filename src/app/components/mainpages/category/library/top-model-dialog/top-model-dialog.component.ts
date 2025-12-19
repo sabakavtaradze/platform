@@ -19,8 +19,7 @@ export class TopModelDialogComponent implements OnInit {
     loading = false;
     error: string | null = null;
     previewUrl: string | ArrayBuffer | null = null;
-    private readonly defaultProfessions = ['acter', 'reporter', 'Tv', 'gamer'];
-    availableProfessions: string[] = [...this.defaultProfessions];
+    availableProfessions: string[] = [];
     selectedProfessions: string[] = [];
 
     @ViewChild('photoInput') photoInput?: ElementRef<HTMLInputElement>;
@@ -37,10 +36,10 @@ export class TopModelDialogComponent implements OnInit {
     private loadProfessions(): void {
         this.topModelService.getProfessions().subscribe({
             next: (professions) => {
-                this.availableProfessions = professions.length ? professions : this.defaultProfessions;
+                this.availableProfessions = professions;
             },
             error: () => {
-                this.availableProfessions = [...this.defaultProfessions];
+                this.availableProfessions = [];
             },
         });
     }
@@ -68,8 +67,7 @@ export class TopModelDialogComponent implements OnInit {
         try {
             const jpegBase64 = await this.convertToJpegBase64(file);
             this.previewUrl = jpegBase64;
-            const jpegBlob = await (await fetch(jpegBase64)).blob();
-            this.convertedFile = new File([jpegBlob], `${file.name}.jpg`, { type: 'image/jpeg' });
+            this.convertedFile = this.base64ToFile(jpegBase64, file.name);
         } catch (error) {
             console.error('Image preprocessing failed', error);
             this.error = 'Unable to prepare the image. Try another photo.';
@@ -159,6 +157,17 @@ export class TopModelDialogComponent implements OnInit {
                 reader.readAsDataURL(file);
             });
         }
+    }
+
+    private base64ToFile(dataUrl: string, fileName: string): File {
+        const base64Data = dataUrl.split(',')[1];
+        const byteString = atob(base64Data);
+        const byteNumbers = new Array(byteString.length);
+        for (let i = 0; i < byteString.length; i += 1) {
+            byteNumbers[i] = byteString.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        return new File([byteArray], `${fileName}.jpg`, { type: 'image/jpeg' });
     }
 
     private isHeicFile(file: File): boolean {

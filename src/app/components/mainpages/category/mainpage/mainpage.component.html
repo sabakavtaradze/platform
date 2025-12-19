@@ -1,22 +1,24 @@
-<div class="scrollable-content" style="height: 100vh; overflow-y: auto;" (scroll)="onScroll()">
+<div class="scrollable-content" (scroll)="onScroll($event)">
     <!-- height: 15rem; overflow-y: auto; -->
-<!-- <button (click)="createpost()">post</button> -->
-<!-- <button (click)="seeposts()">see posts</button> -->
-<button style="margin-top: 5rem;" (click)="signOut()">sign out</button>
-<button *ngIf="isAdmin" routerLink="/admin" style="margin-top: 5rem;" >admin Page</button>
+    <!-- <button (click)="createpost()">post</button> -->
+    <!-- <button (click)="seeposts()">see posts</button> -->
+    <div class="actions-bar">
+        <button mat-raised-button color="primary" (click)="signOut()">sign out</button>
+        <button mat-raised-button color="primary" *ngIf="isAdmin" routerLink="/admin">admin Page</button>
+    </div>
 
-<!-- <button (click)="userAuth()">check user</button> -->
+    <!-- <button (click)="userAuth()">check user</button> -->
 
-<!-- <button (click)="checkUser()">check user</button> -->
-<!-- <app-dialogpicker></app-dialogpicker> -->
+    <!-- <button (click)="checkUser()">check user</button> -->
+    <!-- <app-dialogpicker></app-dialogpicker> -->
 
-<!-- <app-createcontent></app-createcontent> -->
-<div class="content-list-container">
+    <!-- <app-createcontent></app-createcontent> -->
+    <div class="content-list-container">
 
-<div *ngFor="let post of listPosts" class="content-list">
+        <div *ngFor="let post of listPosts" class="content-list">
 
-<app-content [postId]="post.postID" (onDeletePost)="removePostFromList($event)"></app-content>
+            <app-content [postId]="post.postID" (onDeletePost)="removePostFromList($event)"></app-content>
 
-</div>
-</div>
+        </div>
+    </div>
 </div>

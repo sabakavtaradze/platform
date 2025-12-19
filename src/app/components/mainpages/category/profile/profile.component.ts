@@ -183,18 +183,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.subs.add(
         this.userService.getUserById(this.profileId).subscribe((res: BaseResponse<any>) => {
           this.profileUser = res?.data ?? null;
+          this.FollowersCount = this.profileUser?.totalFollowers ?? 0;
           console.log(this.profileUser)
           if (!this.profileUser) return;
 
           if (this.profileOwner) {
             this.subs.add(
               this.userService.getOwnProfilePicture().subscribe((r: BaseResponse<string>) => {
-                if (r?.isSuccess) this.profilePicture = this.cacheBustImage(r.data);
+                if (r?.isSuccess) this.profilePicture = r.data ?? '';
               })
             );
             this.subs.add(
               this.userService.getCoverPicture().subscribe((r: BaseResponse<string>) => {
-                if (r?.isSuccess) this.cover = this.cacheBustImage(r.data);
+                if (r?.isSuccess) this.cover = r.data ?? '';
               })
             );
           } else {
@@ -202,14 +203,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
               this.userService
                 .getProfilePicture(this.profileId)
                 .subscribe((r: BaseResponse<string>) => {
-                  if (r?.isSuccess) this.profilePicture = this.cacheBustImage(r.data);
+                  if (r?.isSuccess) this.profilePicture = r.data ?? '';
                 })
             );
             this.subs.add(
               this.userService
                 .getCoverPictureById(this.profileId)
                 .subscribe((r: BaseResponse<string>) => {
-                  if (r?.isSuccess) this.cover = this.cacheBustImage(r.data);
+                  if (r?.isSuccess) this.cover = r.data ?? '';
                 })
             );
           }
@@ -366,23 +367,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   }
 
-  private cacheBustImage(url?: string | null): string {
-    if (!url) {
-      return '';
-    }
-
-    const timestamp = Date.now().toString();
-    try {
-      const parsed = new URL(url);
-      parsed.searchParams.set('t', timestamp);
-      return parsed.toString();
-    } catch (error) {
-      const [base, query] = url.split('?');
-      const params = new URLSearchParams(query ?? '');
-      params.set('t', timestamp);
-      return `${base}?${params.toString()}`;
-    }
-  }
 
   editProfilePicture(imgs: any) {
     if (!this.currentUser?.sub) return;

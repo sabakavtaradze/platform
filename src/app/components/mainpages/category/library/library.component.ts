@@ -24,6 +24,7 @@ export class LibraryComponent implements OnInit {
   categoryprofessions: string[] = []
   isHeaderVisible: boolean = true
   hideHeaderScrollThreshold: number = 50
+  lastScrollTop = 0
   models: Models[] = []
   loading = false
   error: string | null = null
@@ -101,18 +102,29 @@ export class LibraryComponent implements OnInit {
   //   this.categoryprofessions = Array.from(professionsSet);
   // }
   // professions = this.models.map(item => item.profession);
-  @HostListener('window:scroll', ['$event'])
-  onScroll(scrollElement: any) {
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    this.updateHeaderVisibility();
+  }
+
+  onScroll(event?: Event) {
+    const target = event?.currentTarget as HTMLElement | null;
+    this.updateHeaderVisibility(target);
+  }
+
+  private updateHeaderVisibility(target?: HTMLElement | null) {
     try {
-      const scrollY = scrollElement.scrollTop;
+      const scrollTop =
+        target?.scrollTop ??
+        window.scrollY ??
+        window.pageYOffset ??
+        document.documentElement.scrollTop ??
+        document.body.scrollTop ??
+        0;
 
-      if (scrollY > this.hideHeaderScrollThreshold) {
-        this.isHeaderVisible = false;
-      } else {
-        this.isHeaderVisible = true;
-      }
-      this.hideHeaderScrollThreshold = scrollY
-
+      const isScrollingDown = scrollTop > this.lastScrollTop;
+      this.isHeaderVisible = !isScrollingDown || scrollTop <= this.hideHeaderScrollThreshold;
+      this.lastScrollTop = Math.max(scrollTop, 0);
 
       this.headerservice.setScrollPosition(this.isHeaderVisible);
     } catch (error) {
@@ -144,6 +156,7 @@ export class LibraryComponent implements OnInit {
 
   private handleModelResponse(data: TopModelListItem[]): void {
     this.models = data.map((item) => this.toCardModel(item));
+    console.log(this.models)
     data.forEach((item) => this.loadProfilePicture(item.userID));
     this.error = null;
     this.loading = false;
@@ -157,6 +170,9 @@ export class LibraryComponent implements OnInit {
   }
 
   private toCardModel(item: TopModelListItem): Models {
+    const professions = (item.professions ?? []).map((profession) => profession?.trim()).filter(Boolean);
+    const professionLabel = professions.length ? professions.join(', ') : 'Top Model';
+
     return {
       name: item.userFirstName || item.fullName,
       profileImg: item.photoUrl,
@@ -164,7 +180,8 @@ export class LibraryComponent implements OnInit {
       age: item.age,
       followers: item.totalFollowers,
       stars: Number(item.reviewScore) || 0,
-      profession: 'Top Model',
+      profession: professionLabel,
+      professions,
       userID: item.userID,
     };
   }
@@ -242,8 +259,6 @@ export class LibraryComponent implements OnInit {
     this.loadTopModels(result.payload);
   }
 
-  private readonly defaultProfessions = ['acter', 'reporter', 'Tv', 'gamer'];
-
   private toProfessionsFromRange(range: TopModelFilterRangeResponse): Professions {
     const properties = {
       minAge: range?.minAge ?? 18,
@@ -251,9 +266,7 @@ export class LibraryComponent implements OnInit {
       minFollowers: range?.minFollowers ?? 0,
       maxFollowers: range?.maxFollowers ?? 50000,
     };
-    const professionSources = (range?.professions && range?.professions.length)
-      ? range.professions
-      : this.defaultProfessions;
+    const professionSources = range?.professions ?? [];
 
     return {
       professions: professionSources.map((category) => ({ category, active: false })),

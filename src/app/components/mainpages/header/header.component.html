@@ -5,37 +5,40 @@
         </div>
         <div class="searchbar-main-container">
             <div class="input-wrapper">
-                <input type="text" class="animated-input" placeholder="Search people" (ngModelChange)="search($event)" [(ngModel)]="input">
-              </div>
+                <input type="text" class="animated-input" placeholder="Search people" (ngModelChange)="search($event)"
+                    [(ngModel)]="input">
+            </div>
             <!-- <mat-form-field class="example-full-width">
                 <mat-label>SEARCH</mat-label>
                 <input (ngModelChange)="search($event)" [(ngModel)]="input" matInput>
             </mat-form-field> -->
         </div>
-      
-      
-        <div *ngIf="!searchBoolean" class="messages-main-container">
-            <a [routerLink]="['/chat']">
+
+
+        <div [routerLink]="['/chat']" *ngIf="!searchBoolean" class="messages-main-container">
+            <a>
                 <i class="bi bi-envelope"></i>
             </a>
             <div *ngIf="messagesAlert" class="exclamation-container">
                 <i class="bi bi-exclamation-lg"></i>
             </div>
         </div>
-        <div *ngIf="searchBoolean"  class="messages-main-container">
+        <div *ngIf="searchBoolean" class="messages-main-container">
             <i (click)="cancelSearch()" class="bi bi-x-lg close"></i>
         </div>
-    
+
     </div>
 
 
     <div *ngIf="users && users.length > 0 && users.length < 20 && searchBoolean" class="search-users-main-container">
         <div class="search-users-container container">
-            <div  class="users-main-container">
-                <div  *ngFor="let user of users" class="users-container">
+            <div class="users-main-container">
+                <div *ngFor="let user of users" class="users-container">
                     <!-- <a></a> -->
                     <a [routerLink]="['/profile/'+ user.userID]" (click)="searchClick()" class="user">
-                        <img (error)="handleImageError()" *ngIf="user.userProfilePictureUrl && user.userProfilePictureUrl.length > 0" [src]="user.userProfilePictureUrl" alt="">
+                        <img (error)="handleImageError()"
+                            *ngIf="user.userProfilePictureUrl && user.userProfilePictureUrl.length > 0"
+                            [src]="user.userProfilePictureUrl" alt="">
                         <div class="user-name">{{user.userFirstName}} {{user.userLastName}}</div>
                     </a>
                 </div>
@@ -56,4 +59,9 @@
             </div>
         </div>
     </div> -->
+    <div class="desktop-nav-wrapper" aria-hidden="true">
+        <div class="desktop-nav-inner">
+            <app-footer [activePage]="activePage" placement="header" class="header-footer"></app-footer>
+        </div>
+    </div>
 </div>

@@ -27,6 +27,34 @@ export class RegisterComponent implements OnInit {
   errorEmail: boolean = false;
   loading: boolean = false;
 
+  get firstName() {
+    return this.form.get('firstName');
+  }
+
+  get lastName() {
+    return this.form.get('lastName');
+  }
+
+  get email() {
+    return this.form.get('email');
+  }
+
+  get dateControl() {
+    return this.form.get('date');
+  }
+
+  get password() {
+    return this.form.get('password');
+  }
+
+  get repeatPassword() {
+    return this.form.get('repeatPassword');
+  }
+
+  get acceptTerms() {
+    return this.form.get('acceptTerms');
+  }
+
   constructor(
     private router: Router,
     private fb: FormBuilder,

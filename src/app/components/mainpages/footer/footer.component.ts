@@ -30,6 +30,7 @@ export class FooterComponent implements OnInit, OnDestroy {
   private profilePicSub?: Subscription;
   s3BucketUrl = 'https://platform-storage-ea64737a135009-staging.s3.amazonaws.com/public/';
   @Input() activePage: string = '';
+  @Input() placement: 'main' | 'header' = 'main';
 
   constructor(
     private headerservice: HeaderService,

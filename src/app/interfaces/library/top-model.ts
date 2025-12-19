@@ -7,6 +7,7 @@ export interface TopModelListItem {
     reviewScore: number;
     photoUrl: string;
     createdAt: string;
+    professions?: string[];
     // ... include other fields if needed
 }
 

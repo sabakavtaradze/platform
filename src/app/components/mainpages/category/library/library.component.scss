@@ -11,12 +11,27 @@
     }
 }
 
+@media (min-width: 1024px) {
+    .container {
+        padding-top: calc(4rem + var(--app-header-height, 4.5rem));
+    }
+}
+
 .menu-container {
     display: flex;
     justify-content: center;
     justify-content: space-around;
     align-items: center;
     margin-top: 1rem;
+
+    @media (min-width: 1024px) {
+        max-width: 960px;
+        margin-left: auto;
+        margin-right: auto;
+        justify-content: flex-start;
+        padding: 0 1rem;
+        gap: 1.5rem;
+    }
 
     .menu-list {
         display: flex;

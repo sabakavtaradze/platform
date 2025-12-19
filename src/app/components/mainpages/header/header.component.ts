@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { APIServicem } from 'src/app/apiservicem';
 import { AuthenticationService } from 'src/app/services/user/authentication/authentication.service';
 // 🔑 Import AuthenticatedUser, UserAttributes, and UnseenCountResponse
@@ -29,6 +29,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   profileUser: any; // Use Subscription for correct type
   updateUser: Subscription | undefined;
   private unseenSub?: Subscription;
+  @Input() activePage: string = '';
   constructor(
     private authService: AuthenticationService,
     private apiservicem: APIServicem,

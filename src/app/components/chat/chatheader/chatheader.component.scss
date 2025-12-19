@@ -1,4 +1,13 @@
+:host {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
 .header-main-container {
+    width: 100%;
+    // max-width: 960px;
+    margin: 0 auto;
     box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
     height: 4rem;
     background-color: white;
@@ -65,13 +74,12 @@
         .chatroom-menu-container {
             display: flex;
             align-items: center;
-            button{
 
-            i {
-                padding-right: 0.3rem;
+            button {
+                i {
+                    padding-right: 0.3rem;
+                }
             }
-        }
-
         }
     }
 }

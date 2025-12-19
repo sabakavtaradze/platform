@@ -6,6 +6,8 @@
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
 }
 
+
+
 .inline-form {
     display: flex;
     align-items: flex-end;
@@ -53,4 +55,25 @@
 .charge {
     margin-top: 0;
     color: rgba(0, 0, 0, 0.65);
+}
+
+@media (min-width: 1024px) {
+    .admin-top-model {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .inline-form {
+        gap: 1rem;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .charge {
+        font-size: 1rem;
+    }
 }

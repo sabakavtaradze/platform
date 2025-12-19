@@ -42,8 +42,7 @@ export class MainpageComponent implements OnInit, OnDestroy {
 
   async signOut() {
     try {
-      this.authGuard.canActivate();
-      this.router.navigateByUrl('/auth/welcome');
+      this.authGuard.logout();
     } catch (error) {
       console.error(error);
     }
@@ -73,22 +72,28 @@ export class MainpageComponent implements OnInit, OnDestroy {
   // }@HostListener('scroll', ['$event.target'])
 
   @HostListener('window:scroll', [])
-  onScroll() {
+  onWindowScroll() {
+    this.updateHeaderVisibility();
+  }
+
+  onScroll(event?: Event) {
+    const target = event?.currentTarget as HTMLElement | null;
+    this.updateHeaderVisibility(target);
+  }
+
+  private updateHeaderVisibility(target?: HTMLElement | null) {
     try {
-      const scrollY =
-        window.scrollY ||
-        window.pageYOffset ||
-        document.documentElement.scrollTop ||
-        document.body.scrollTop ||
+      const scrollTop =
+        target?.scrollTop ??
+        window.scrollY ??
+        window.pageYOffset ??
+        document.documentElement.scrollTop ??
+        document.body.scrollTop ??
         0;
 
-      // Determine direction and toggle header visibility
-      const isScrollingDown = scrollY > this.lastScrollTop;
-      this.isHeaderVisible = !isScrollingDown;
-
-      // Clamp and store last scroll position
-      this.lastScrollTop = scrollY <= 0 ? 0 : scrollY;
-
+      const isScrollingDown = scrollTop > this.lastScrollTop;
+      this.isHeaderVisible = !isScrollingDown || scrollTop <= this.hideHeaderScrollThreshold;
+      this.lastScrollTop = Math.max(scrollTop, 0);
       this.headerservice.setScrollPosition(this.isHeaderVisible);
     } catch (error) {
       console.error('Error in scroll event:', error);

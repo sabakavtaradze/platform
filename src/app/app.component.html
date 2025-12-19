@@ -1,13 +1,13 @@
-<div  class="main-container">
+<div class="main-container">
 
     <div [class.hide]="!components" [class.hidee]="!isHeaderVisible" [class.hide]="profilePage" class="header">
 
-        <app-header  *ngIf="components"></app-header>
+        <app-header *ngIf="components" [activePage]="activePage"></app-header>
     </div>
     <div class="router-container">
         <router-outlet></router-outlet>
     </div>
-    <div [class.hide]="!components" class="footer-container">
+    <div [class.hide]="!components" [class.hidee]="!isHeaderVisible" class="footer-container">
 
         <app-footer [activePage]="activePage"></app-footer>
     </div>
