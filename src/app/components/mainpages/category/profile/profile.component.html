@@ -41,12 +41,12 @@
     <div class="stats-main-container">
       <div class="stats-container">
         <div class="followers-container">
-          <div class="followers-number">{{ FollowersCount }}</div>
+          <div class="followers-number">{{ FollowersCount | number}}</div>
           <div class="followers-text">followers</div>
         </div>
         <div class="following-container">
-          <div class="following-number">15.5k</div>
-          <div class="following-text">followers</div>
+          <div class="following-number">{{ FollowingCount | number }}</div>
+          <div class="following-text">following</div>
         </div>
       </div>
     </div>

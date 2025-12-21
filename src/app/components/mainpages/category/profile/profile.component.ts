@@ -41,6 +41,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   userIsFollowing = false;
   FollowersCount = 0;
+  FollowingCount = 0;
   listPosts: any[] = [];
   tiktokFollowers: number | null = null;
   tiktokLoadingFollowers = false;
@@ -86,6 +87,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
         .getFollowersCount(this.profileId)
         .subscribe((res: BaseResponse<number>) => {
           if (res?.isSuccess) this.FollowersCount = res.data;
+        })
+    );
+  }
+
+  loadFollowingCount() {
+    if (!this.profileId) return;
+
+    this.subs.add(
+      this.friendshipService
+        .getFollowingCount(this.profileId)
+        .subscribe((res: BaseResponse<number>) => {
+          if (res?.isSuccess) this.FollowingCount = res.data;
         })
     );
   }
@@ -177,6 +190,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         !!this.currentUser && Number(this.currentUser.sub) === Number(this.profileId);
 
       this.loadFollowersCount();
+      this.loadFollowingCount();
       if (this.currentUser) this.GetIsFollowing();
       this.loadTikTokFollowers();
 
