@@ -32,12 +32,12 @@ export class AdminUserEditComponent implements OnChanges, OnInit, OnDestroy {
 
     loading = false;
     error: string | null = null;
-    uploadingProfilePicture = false;
-    uploadingCoverPicture = false;
     profilePreviewUrl: string | null = null;
     coverPreviewUrl: string | null = null;
     private profilePreviewObjectUrl: string | null = null;
     private coverPreviewObjectUrl: string | null = null;
+    private pendingProfileImage: File | null = null;
+    private pendingCoverImage: File | null = null;
 
     form = this.fb.group({
         firstName: ['', Validators.required],
@@ -83,14 +83,18 @@ export class AdminUserEditComponent implements OnChanges, OnInit, OnDestroy {
         this.loading = true;
         this.error = null;
 
-        const payload: any = {
-            UserFirstname: (this.form.value.firstName ?? '').toString().trim(),
-            UserLastname: (this.form.value.lastName ?? '').toString().trim(),
-            UserEmail: (this.form.value.email ?? '').toString().trim(),
-            IsAdmin: !!this.form.value.isAdmin,
-        };
-
-        payload.UserPassword = (this.form.value.password ?? '').toString().trim();
+        const formData = new FormData();
+        formData.append('UserFirstname', (this.form.value.firstName ?? '').toString().trim());
+        formData.append('UserLastname', (this.form.value.lastName ?? '').toString().trim());
+        formData.append('UserEmail', (this.form.value.email ?? '').toString().trim());
+        formData.append('UserPassword', (this.form.value.password ?? '').toString().trim());
+        formData.append('IsAdmin', this.form.value.isAdmin ? 'true' : 'false');
+        if (this.pendingProfileImage) {
+            formData.append('ProfileImage', this.pendingProfileImage);
+        }
+        if (this.pendingCoverImage) {
+            formData.append('CoverImage', this.pendingCoverImage);
+        }
 
         const userId = this.user.userID ?? this.user.id ?? this.user.userId;
         if (!userId) {
@@ -99,10 +103,12 @@ export class AdminUserEditComponent implements OnChanges, OnInit, OnDestroy {
             return;
         }
 
-        this.adminUsers.updateUser(userId, payload).subscribe({
+        this.adminUsers.updateUser(userId, formData).subscribe({
             next: (response) => {
                 if (response?.isSuccess) {
                     this.form.reset();
+                    this.pendingProfileImage = null;
+                    this.pendingCoverImage = null;
                     this.saved.emit();
                     this.dialogRef?.close(true);
                 } else {
@@ -140,6 +146,8 @@ export class AdminUserEditComponent implements OnChanges, OnInit, OnDestroy {
         this.revokePreview('cover');
         this.profilePreviewUrl = user.userProfilePictureUrl ?? null;
         this.coverPreviewUrl = user.userCoverPictureUrl ?? null;
+        this.pendingProfileImage = null;
+        this.pendingCoverImage = null;
     }
 
     onImageChange(event: Event, target: 'profile' | 'cover'): void {
@@ -149,48 +157,12 @@ export class AdminUserEditComponent implements OnChanges, OnInit, OnDestroy {
         }
 
         if (target === 'profile') {
-            this.uploadingProfilePicture = true;
+            this.pendingProfileImage = file;
             this.setPreview('profile', URL.createObjectURL(file));
         } else {
-            this.uploadingCoverPicture = true;
+            this.pendingCoverImage = file;
             this.setPreview('cover', URL.createObjectURL(file));
         }
-
-        this.uploadImage(file, target);
-    }
-
-    private uploadImage(file: File, target: 'profile' | 'cover'): void {
-        const userId = this.getUserId();
-        if (!userId) {
-            this.assignImageError(target, 'Unable to identify the user.');
-            this.clearUploadFlag(target);
-            return;
-        }
-
-        const upload$ = target === 'profile'
-            ? this.adminUsers.uploadProfilePicture(userId, file)
-            : this.adminUsers.uploadCoverPicture(userId, file);
-
-        upload$.subscribe({
-            next: (response) => {
-                const updatedUser = response?.data ?? response;
-                if (target === 'profile' && updatedUser?.userProfilePictureUrl) {
-                    this.revokePreview('profile');
-                    this.profilePreviewUrl = updatedUser.userProfilePictureUrl;
-                    this.user = { ...this.user, userProfilePictureUrl: updatedUser.userProfilePictureUrl };
-                }
-                if (target === 'cover' && updatedUser?.userCoverPictureUrl) {
-                    this.revokePreview('cover');
-                    this.coverPreviewUrl = updatedUser.userCoverPictureUrl;
-                    this.user = { ...this.user, userCoverPictureUrl: updatedUser.userCoverPictureUrl };
-                }
-            },
-            error: (err) => {
-                this.assignImageError(target, err?.message || 'Unable to upload image.');
-                this.clearUploadFlag(target);
-            },
-            complete: () => this.clearUploadFlag(target),
-        });
     }
 
     private setPreview(target: 'profile' | 'cover', url: string): void {
@@ -228,16 +200,5 @@ export class AdminUserEditComponent implements OnChanges, OnInit, OnDestroy {
         return (this.user?.userID ?? this.user?.id ?? this.user?.userId ?? null) as number | null;
     }
 
-    private assignImageError(target: 'profile' | 'cover', message: string): void {
-        this.error = `Failed to upload ${target} image: ${message}`;
-    }
-
-    private clearUploadFlag(target: 'profile' | 'cover'): void {
-        if (target === 'profile') {
-            this.uploadingProfilePicture = false;
-        } else {
-            this.uploadingCoverPicture = false;
-        }
-    }
 }
 

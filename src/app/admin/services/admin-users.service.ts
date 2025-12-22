@@ -28,8 +28,8 @@ export class AdminUsersService {
         });
     }
 
-    updateUser(userId: number, payload: any): Observable<any> {
-        return this.http.put<any>(`${this.baseUrl}/update-user/${userId}`, payload, {
+    updateUser(userId: number, formData: FormData): Observable<any> {
+        return this.http.put<any>(`${this.baseUrl}/update-user/${userId}`, formData, {
             headers: this.getAuthHeaders(),
         });
     }
@@ -45,22 +45,6 @@ export class AdminUsersService {
         return this.http.get<any>(`${this.baseUrl}/search`, {
             headers: this.getAuthHeaders(),
             params,
-        });
-    }
-
-    uploadProfilePicture(userId: number, file: File): Observable<any> {
-        const formData = new FormData();
-        formData.append('File', file);
-        return this.http.put<any>(`${this.baseUrl}/update-profile-picture/${userId}`, formData, {
-            headers: this.getAuthHeaders(),
-        });
-    }
-
-    uploadCoverPicture(userId: number, file: File): Observable<any> {
-        const formData = new FormData();
-        formData.append('File', file);
-        return this.http.put<any>(`${this.baseUrl}/update-cover-picture/${userId}`, formData, {
-            headers: this.getAuthHeaders(),
         });
     }
 
