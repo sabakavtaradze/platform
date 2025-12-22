@@ -84,16 +84,13 @@ export class AdminUserEditComponent implements OnChanges, OnInit, OnDestroy {
         this.error = null;
 
         const payload: any = {
-            UserFirstname: this.form.value.firstName?.trim(),
-            UserLastname: this.form.value.lastName?.trim(),
-            UserEmail: this.form.value.email?.trim(),
+            UserFirstname: (this.form.value.firstName ?? '').toString().trim(),
+            UserLastname: (this.form.value.lastName ?? '').toString().trim(),
+            UserEmail: (this.form.value.email ?? '').toString().trim(),
             IsAdmin: !!this.form.value.isAdmin,
         };
 
-        const passwordValue = (this.form.value.password ?? '').toString().trim();
-        if (passwordValue) {
-            payload.UserPassword = passwordValue;
-        }
+        payload.UserPassword = (this.form.value.password ?? '').toString().trim();
 
         const userId = this.user.userID ?? this.user.id ?? this.user.userId;
         if (!userId) {
@@ -113,7 +110,12 @@ export class AdminUserEditComponent implements OnChanges, OnInit, OnDestroy {
                 }
             },
             error: (err) => {
-                this.error = err?.message || 'Failed to update user';
+                console.error('Admin user update failed', err);
+                this.error =
+                    err?.error?.errorMessage ||
+                    err?.error?.message ||
+                    err?.message ||
+                    'Failed to update user';
             },
             complete: () => (this.loading = false),
         });
