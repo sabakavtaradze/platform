@@ -14,25 +14,17 @@
       <span>Profile Picture</span>
       <div class="image-frame">
         <ng-container *ngIf="profilePreviewUrl ?? user.userProfilePictureUrl; else profileMissing">
-          <img
-            [src]="profilePreviewUrl ?? user.userProfilePictureUrl"
-            [alt]="`Profile picture for ${user.userFirstName ?? 'user'}`"
-          />
+          <img [src]="profilePreviewUrl ?? user.userProfilePictureUrl"
+            [alt]="`Profile picture for ${user.userFirstName ?? 'user'}`" />
         </ng-container>
         <ng-template #profileMissing>
           <span class="placeholder">No profile picture available</span>
         </ng-template>
       </div>
       <div class="upload-actions">
-        <button
-          mat-stroked-button
-          type="button"
-          (click)="profileInput.click()"
-          [disabled]="uploadingProfilePicture"
-        >
-          {{ uploadingProfilePicture ? 'Uploading…' : 'Change profile' }}
+        <button mat-stroked-button type="button" (click)="profileInput.click()">
+          Change profile
         </button>
-        <span class="upload-status" *ngIf="uploadingProfilePicture">Uploading profile image…</span>
         <input #profileInput type="file" accept="image/*" (change)="onImageChange($event, 'profile')" />
       </div>
     </div>
@@ -40,25 +32,17 @@
       <span>Cover Photo</span>
       <div class="image-frame">
         <ng-container *ngIf="coverPreviewUrl ?? user.userCoverPictureUrl; else coverMissing">
-          <img
-            [src]="coverPreviewUrl ?? user.userCoverPictureUrl"
-            [alt]="`Cover photo for ${user.userFirstName ?? 'user'}`"
-          />
+          <img [src]="coverPreviewUrl ?? user.userCoverPictureUrl"
+            [alt]="`Cover photo for ${user.userFirstName ?? 'user'}`" />
         </ng-container>
         <ng-template #coverMissing>
           <span class="placeholder">No cover photo available</span>
         </ng-template>
       </div>
       <div class="upload-actions">
-        <button
-          mat-stroked-button
-          type="button"
-          (click)="coverInput.click()"
-          [disabled]="uploadingCoverPicture"
-        >
-          {{ uploadingCoverPicture ? 'Uploading…' : 'Change cover' }}
+        <button mat-stroked-button type="button" (click)="coverInput.click()">
+          Change cover
         </button>
-        <span class="upload-status" *ngIf="uploadingCoverPicture">Uploading cover image…</span>
         <input #coverInput type="file" accept="image/*" (change)="onImageChange($event, 'cover')" />
       </div>
     </div>
